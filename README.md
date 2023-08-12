@@ -10,3 +10,7 @@ TODO:
 -long  term:
 
     support all group help fuunctions
+
+
+
+config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/update-0.0.1/CONFIG_DOCUMENTATION.md
