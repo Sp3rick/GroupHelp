@@ -1,5 +1,7 @@
 {
 
-    "botToken" : "put-here-your-token"
+    "botToken" : "token-here",
+    "deleteChatDataAfterBotRemove" : false,
+    "overwriteChatDataIfReAddedToGroup" : false
     
 }
