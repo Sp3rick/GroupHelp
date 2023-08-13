@@ -5,12 +5,12 @@ async function main() {
     const util = require('util')
     const TelegramBot = require('node-telegram-bot-api');
     const {randomInt, isNumber} = require( __dirname + "/api/utils.js" );
-    global.directory = __dirname;
+    global.directory = __dirname; //used from /api/database.js
     var db = require( __dirname + "/api/database.js" );
     console.log("log db path");
     console.log(db.dir)
 
-    //generating folder tree
+    console.log( "Generating folder tree..." )
     var dbInnerDirFiles = fs.readdirSync( db.innerDir );
     if ( !dbInnerDirFiles.includes( "database" ) ){
 
@@ -27,6 +27,24 @@ async function main() {
         console.log( "Generated \"database/chats\" folder" );
 
     }
+    if( !dbDirFiles.includes( "users" ) )
+    {
+
+        fs.mkdirSync( db.usersDir);
+        console.log( "Generated \"database/users\" folder" );
+
+    }
+
+    console.log( "Loading languages..." )
+    var l = {}//Object that store all languages
+    fs.readdirSync( __dirname + "/langs" ).forEach( (langFile) => {
+
+        var fileName = langFile.replaceAll( ".json", "" );
+        l[fileName] = JSON.parse( fs.readFileSync( __dirname + "/langs/" + langFile ) );
+        console.log("-loaded language: \"" + l[fileName].LANG_NAME + "\" " + fileName);
+        //TODO: detect and fill phrases from incompleted languages with en_en
+        
+    } );
 
 
     var config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) )
@@ -69,15 +87,17 @@ async function main() {
 
         var chat = msg.chat;
         var form = msg.from;
+        console.log(msg)
 
         
-
+        //TODO: check if from.id is already exhisting ( db.users.exhist() ), if not save, so use him for set group language
         var newMember = msg.new_chat_member;
         if ( newMember.id == bot.id ){
             
             console.log( "Adding new group to database" );
             
-            db.addChat(chat)
+            TGbot.sendMessage(chat.id, "d")
+            db.chats.add(chat)
             console.log( "Added" );
 
         }
@@ -95,7 +115,7 @@ async function main() {
         if ( leftMember.id == bot.id && config.deleteChatDataAfterBotRemove == true){
 
             console.log("Deleting chat data of a group");
-            db.deleteChat( chat );
+            db.chats.delete( chat );
 
         }
 

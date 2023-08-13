@@ -18,6 +18,17 @@ function isValidChat(chat){
 
 }
 
+function isValidUser(){
+
+    if ( !chat.hasOwnProperty("id") || !chat.hasOwnProperty("first_name") || !chat.hasOwnProperty("last_name") || chat.hasOwnProperty("type") ){
+
+        return false;
+
+    }
+    return true
+
+}
+
 module.exports = 
 {
 
