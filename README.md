@@ -13,4 +13,6 @@ TODO:
 
 
 
-config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/update-0.0.1/CONFIG_DOCUMENTATION.md
+config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/update-0.0.2/CONFIG_DOCUMENTATION.md
+
+look also at code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/update-0.0.2/documentation.md
