@@ -14,7 +14,9 @@ TODO:
 
 -long  term:
 
-    support all group help functions
+    allow bot clone bot when user give a token
+    support all group help fuunctions and more
+
 
 
 
