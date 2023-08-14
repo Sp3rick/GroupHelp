@@ -1,7 +1,7 @@
 {
 
     "LANG_NAME" : "International English",
-    "NEW_GROUP" : "<b>Thanks</b> for adding me to your group!\n• Don't forget to <b>make me Admin of the group</b> (see how), or i cant work correctly\n• Use /reload to verify that's all ok"
-
+    "NEW_GROUP" : "<b>Thanks</b> for adding me to your group!\n• Don't forget to <b>make me Admin of the group</b> (see how), or i cant work correctly\n• Use /reload to verify that's all ok",
+    "ADV_JOIN_CHANNEL" : "📢 Join LibreGroupHelp Channel"
 
 }
