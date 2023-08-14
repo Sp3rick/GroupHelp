@@ -5,6 +5,8 @@ const {randomInt, isNumber, isValidChat, isValidUser} = require( global.director
 //config database directory here
 var dbInnerDir = global.directory;
 
+
+//TODO: IF POSSIBLE fuse database.chats and database.users functions
 var database = 
 {
 
@@ -27,8 +29,9 @@ var database =
                 return false;
 
             }
+            
             var chatFile = database.chatsDir + "/" + chat.id + ".json";
-            console.log( "adding chat to database" );
+            console.log( "adding chat to database lang: " + chat.lang );
             fs.writeFileSync( chatFile, JSON.stringify(chat) )
             return true;
             
@@ -52,6 +55,21 @@ var database =
             return true;
 
 
+        },
+
+        /**
+         * @param {TelegramBot.ChatId} ChatId The user id of the user.
+         */
+        exhist : function(chatId){
+
+            var chatsFile = database.chatsDir + "/" + chatId + ".json";
+            if( fs.existsSync(chatsFile) ){
+
+                return true;
+
+            };
+            return false;
+
         }
 
     },
@@ -64,14 +82,28 @@ var database =
          */
         add : function(user){
 
-            if( isValidUser(user) ){
+            if( !isValidUser(user) ){
 
                 console.log( "breaking users.add function, maybe you entered wrong user object" );
                 return false;
 
             }
+
+            //TODO (maybe) : create dedicated function to initialize the custom user object (so db.user.add will oly use that to write to disk)
+            //prepare object with all bot needed info// TODO: add to documentation all additional infos of users
+
+            user.lang = "en_en";
+            if( user.language_code == "en" ){
+
+               user.lang = "en_en"
+
+            }//for other langs extend with if else
+
+            //preparing object finish here//
+
+
             var userFile = database.usersDir + "/" + user.id + ".json";
-            console.log( "adding chat to database" );
+            console.log( "adding user to database lang:" + user.lang );
             fs.writeFileSync( userFile, JSON.stringify(user) );
             return true;
 
@@ -97,13 +129,35 @@ var database =
 
         },
 
-        /*todo this (return true or false)
+        /**
+         * @param {Number|String} userId The user id of the user.
+         */
         exhist : function(userId){
 
-            var userFile = database.chatsDir + "/" + userId + ".json";
-            if( fs.existsSync() )
+            var userFile = database.usersDir + "/" + userId + ".json";
+            if( fs.existsSync(userFile) ){
 
-        }*/
+                return true;
+
+            };
+            return false;
+
+        },
+
+        /**
+         * @param {Number|String} userId The user id of the user.
+         */
+        get : function(userId){
+
+            var userFile = database.usersDir + "/" + userId + ".json";
+            if( !database.users.exhist( userId ) ){
+
+                console.log( "breaking user.get, failed to get user data from id " + userId )
+                return false;
+
+            }
+            return JSON.parse( fs.readFileSync( userFile, "utf-8" ) );
+        }
 
     }
     
