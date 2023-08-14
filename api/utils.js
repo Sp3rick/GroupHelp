@@ -18,9 +18,9 @@ function isValidChat(chat){
 
 }
 
-function isValidUser(){
+function isValidUser(user){
 
-    if ( !chat.hasOwnProperty("id") || !chat.hasOwnProperty("first_name") || !chat.hasOwnProperty("last_name") || chat.hasOwnProperty("type") ){
+    if ( !user.hasOwnProperty("id") || !user.hasOwnProperty("first_name") || !user.hasOwnProperty("last_name") || user.hasOwnProperty("type") ){
 
         return false;
 
@@ -35,5 +35,6 @@ module.exports =
     isNumber : isNumber,
     randomInt : randomInt,
     isValidChat : isValidChat,
+    isValidUser : isValidUser,
 
 }
