@@ -86,19 +86,42 @@ async function main() {
     TGbot.on( "new_chat_members", (msg) => {
 
         var chat = msg.chat;
-        var form = msg.from;
+        var from = msg.from;
         console.log(msg)
 
-        
-        //TODO: check if from.id is already exhisting ( db.users.exhist() ), if not save, so use him for set group language
+
         var newMember = msg.new_chat_member;
         if ( newMember.id == bot.id ){
+
+            if ( !db.chats.exhist( chat.id ) && !db.users.exhist( from.id ) ){
+
+                db.users.add( from );
+
+            }
+            if ( !db.chats.exhist( chat.id ) ){//if there arent already the chat add it
+
+                console.log( "Adding new group to database" );
+                chat.lang = db.users.get( from.id ).lang
+                console.log( "Group lang: " + chat.lang )
+                db.chats.add(chat)
+
+            }
+
+            console.log( "Added bot to a group" );
+            TGbot.sendMessage(chat.id, l[chat.lang].NEW_GROUP,
+            { 
+                parse_mode : "HTML",
+                reply_markup :
+                {
+                    inline_keyboard :
+                    [
+                        [ {text: l[chat.lang].ADV_JOIN_CHANNEL, url: "tg://LibreGroupHelp"} ]
+                    ] 
+                } 
+            }
+            )
+ 
             
-            console.log( "Adding new group to database" );
-            
-            TGbot.sendMessage(chat.id, "d")
-            db.chats.add(chat)
-            console.log( "Added" );
 
         }
 
@@ -109,13 +132,13 @@ async function main() {
     TGbot.on( "left_chat_member", (msg) => {
 
         var chat = msg.chat;
-        var form = msg.from;
+        var from = msg.from;
 
         var leftMember = msg.left_chat_member;
         if ( leftMember.id == bot.id && config.deleteChatDataAfterBotRemove == true){
 
             console.log("Deleting chat data of a group");
-            db.chats.delete( chat );
+            db.chats.delete( chat.id );
 
         }
 
