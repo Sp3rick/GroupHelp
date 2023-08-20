@@ -6,7 +6,14 @@ async function main() {
     const TelegramBot = require('node-telegram-bot-api');
     const {randomInt, isNumber} = require( __dirname + "/api/utils.js" );
     global.directory = __dirname; //used from /api/database.js
-    var db = require( __dirname + "/api/database.js" );
+    
+    var config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) )
+    // Create a bot that uses 'polling' to fetch new updates
+    const TGbot = new TelegramBot(config.botToken, {polling: true});
+    const bot = await TGbot.getMe()
+
+    var generateDatabase = require( __dirname + "/api/database.js" );
+    var db = await generateDatabase(TGbot);
     console.log("log db path");
     console.log(db.dir)
 
@@ -35,6 +42,26 @@ async function main() {
 
     }
 
+    /*
+    *dead code, maybe is better to optimize db.chat.get() to store in temporary array most used chats, see hint in api/database.js
+    *
+
+    console.log( "Loading database..." )
+
+    fs.readdirSync( db.dir + "/chats/" ).forEach( (file) => {
+
+        var id = file.replace( "-", "_" ).replace( ".json", "" );
+        db.chats[id] = fs.readFileSync( db.dir + "/chats/" + file );
+
+    } )
+    fs.readdirSync( db.dir + "/users/" ).forEach( (file) => {
+
+        var id = file.replace( ".json", "" );
+        db.users[id] = fs.readFileSync( db.dir + "/users/" + file );
+
+    } )
+    */
+
     console.log( "Loading languages..." )
     var l = {}//Object that store all languages
     fs.readdirSync( __dirname + "/langs" ).forEach( (langFile) => {
@@ -46,17 +73,12 @@ async function main() {
         
     } );
 
-
-    var config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) )
-
-    // Create a bot that uses 'polling' to fetch new updates
-    const TGbot = new TelegramBot(config.botToken, {polling: true});
-    const bot = await TGbot.getMe()
-
     TGbot.on( "message", (msg, metadata) => {
 
+        //TODO: make a command parser (variables set like https://github.com/telegraf/telegraf-command-parts should be good to do)
+
         var chat = msg.chat;
-        var form = msg.from;
+        var from = msg.from;
 
         if ( msg.chat.type == "group" ){
 
@@ -70,7 +92,29 @@ async function main() {
         }
         if ( msg.chat.type == "private" ){
 
-            
+            if ( !db.users.exhist( from.id ) ){
+
+                db.users.add( from );
+
+            };
+
+            var user = db.users.get( from.id );
+
+            TGbot.sendMessage(user.id, l[user.lang].PRESENTATION,
+                { 
+                    parse_mode : "HTML",
+                    reply_markup :
+                    {
+                        inline_keyboard :
+                        [
+                            [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
+                            [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
+                            [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "NOT_IMPLEMENTED"}, {text: l[user.lang].INFO_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                            [{text: l[user.lang].LANGS_BUTTON, callback_data: "NOT_IMPLEMENTED"}]
+                        ] 
+                    } 
+                }
+            )
 
         }
 
@@ -86,6 +130,7 @@ async function main() {
     TGbot.on( "new_chat_members", (msg) => {
 
         var chat = msg.chat;
+        var fixChatId = String(msg.chat.id).replace( "-", "_");
         var from = msg.from;
         console.log(msg)
 
@@ -107,6 +152,10 @@ async function main() {
 
             }
 
+            console.log("\n\n\n\nupdate")
+            db.chats.update( chat );
+
+
             console.log( "Added bot to a group" );
             TGbot.sendMessage(chat.id, l[chat.lang].NEW_GROUP,
             { 
@@ -115,7 +164,7 @@ async function main() {
                 {
                     inline_keyboard :
                     [
-                        [ {text: l[chat.lang].ADV_JOIN_CHANNEL, url: "tg://LibreGroupHelp"} ]
+                        [ {text: l[chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"} ]
                     ] 
                 } 
             }
@@ -149,6 +198,8 @@ async function main() {
     TGbot.on( "polling_error", (err) => {
         console.log(err)
     } )
+
+    module.exports = TGbot;
 
 }
 main()

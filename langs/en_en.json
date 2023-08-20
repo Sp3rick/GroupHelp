@@ -2,6 +2,13 @@
 
     "LANG_NAME" : "International English",
     "NEW_GROUP" : "<b>Thanks</b> for adding me to your group!\n• Don't forget to <b>make me Admin of the group</b> (see how), or i cant work correctly\n• Use /reload to verify that's all ok",
-    "ADV_JOIN_CHANNEL" : "📢 Join LibreGroupHelp Channel"
+    "ADV_JOIN_CHANNEL" : "📢 Join LibreGroupHelp Channel",
+    "PRESENTATION" : "👋🏻 Hello {name}!\n@LibreGroupHelpBot is the <b>free, open source and privacy respecting</b> Bot alternative to Group Help to better manage your <b>groups</b>!\n\n👉🏻<b>Add me in a supergroup</b> and set me as an <b>Administrator</b> to get me right into the action!\n\n❓ <b>What are the commands?</b>\nPress /help to see <b>all commands</b> and how they work! ",
+    "ADD_ME_TO_A_GROUP_BUTTON": "➕ Add me to a Group ➕",
+    "GROUP_BUTTON": "👥Group",
+    "SUPPORT_BUTTON" : "🔧Support",
+    "INFO_BUTTON" : "Informations💬",
+    "CHANNEL_BUTTON" : "Channel📢",
+    "LANGS_BUTTON" : "🇬🇧 Languages 🇬🇧"
 
 }

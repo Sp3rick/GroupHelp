@@ -7,6 +7,7 @@ TODO:
     create solid and relaiable bot base
     implement time zone setting
     create a command parser
+    detect and fill phrases from incompleted languages with en_en
 
 
 -medium term:
@@ -15,7 +16,7 @@ TODO:
 -long  term:
 
     allow bot clone bot when user give a token
-    support all group help fuunctions and more
+    support all group help functions and more
 
 
 
