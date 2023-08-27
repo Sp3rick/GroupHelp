@@ -85,7 +85,7 @@ async function main() {
 
 
         }
-        if ( msg.chat.type == "supergroup" ){
+        if ( msg.chat.type == "supergroup" || msg.chat.type == "group"){
 
             
 
@@ -186,7 +186,7 @@ async function main() {
         var leftMember = msg.left_chat_member;
         if ( leftMember.id == bot.id && config.deleteChatDataAfterBotRemove == true){
 
-            console.log("Deleting chat data of a group");
+            console.log("Bot kicked from chat and config.deleteChatDataAfterBotRemove == true, deleting chat data of group");
             db.chats.delete( chat.id );
 
         }
