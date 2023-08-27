@@ -138,18 +138,45 @@ async function generateDatabase(TGbot) {
                 user.lang = "en_en";
                 if( user.language_code == "en" ){
 
-                user.lang = "en_en"
+                    user.lang = "en_en"
 
                 }//for other langs extend with if else
 
                 //preparing object finish here//
-
 
                 var userFile = database.usersDir + "/" + user.id + ".json";
                 console.log( "adding user to database lang:" + user.lang );
                 fs.writeFileSync( userFile, JSON.stringify(user) );
                 return true;
 
+
+            },
+            /**
+             * @param {TelegramBot.User} user
+             */
+            update : function(user){
+
+                if( !isValidUser(user) ){
+
+                    console.log( "breaking users.update function, maybe you entered wrong user object" );
+                    return false;
+
+                }
+
+                oldUser = database.users.get( user.id );
+                newUser = oldUser;
+
+                newUser.lang = user.lang;
+                newUser.first_name = user.first_name;
+                if( user.hasOwnProperty("last_name") ) newUser.last_name = user.last_name;
+                if( user.hasOwnProperty("username") ) newUser.username = user.username;
+                if( user.hasOwnProperty("premium") ) newUser.premium = user.premium;
+
+
+                var userFile = database.usersDir + "/" + user.id + ".json";
+                console.log( "updating user to database lang:" + user.lang );
+                fs.writeFileSync( userFile, JSON.stringify(user) );
+                return true;
 
             },
 
