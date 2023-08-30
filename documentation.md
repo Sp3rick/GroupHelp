@@ -13,4 +13,11 @@ when LibreGroupHelp is added to a group(and add it to the database) the default 
 
 
 <b>What is done</b>
-Add/Removing bot from group handling (with NEW_GROUP "thanks" when added)
+
+Add/Removing bot from group handling (not implemented the latter options after thanksgiving message)
+
+"Hello" message when user write in private chat at bot with:
+    - Add me to a group, Group link and Channel link options fully implemented
+    - Informations option partially implemented
+    - Support and Languages options NOT implemented
+
