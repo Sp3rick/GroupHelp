@@ -12,6 +12,7 @@ TODO:
 
 -medium term:
     (once bot will be declared ready to use) add code versioning system to update database when user update it
+    optimite database.get, .update and .save to store in temporal array most used chats/users
 
 -long  term:
 
@@ -21,6 +22,6 @@ TODO:
 
 
 
-config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/update-0.0.2/CONFIG_DOCUMENTATION.md
+config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
 
-look also at code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/update-0.0.2/documentation.md
+look also at code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md

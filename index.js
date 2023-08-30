@@ -1,5 +1,8 @@
 async function main() {
 
+    global.LGHVersion = "0.0.6";
+    console.log( "Libre group help current version: " )
+
     console.log("Starting...")
     const fs = require("fs");
     const util = require('util')
@@ -41,26 +44,6 @@ async function main() {
         console.log( "Generated \"database/users\" folder" );
 
     }
-
-    /*
-    *dead code, maybe is better to optimize db.chat.get() to store in temporary array most used chats, see hint in api/database.js
-    *
-
-    console.log( "Loading database..." )
-
-    fs.readdirSync( db.dir + "/chats/" ).forEach( (file) => {
-
-        var id = file.replace( "-", "_" ).replace( ".json", "" );
-        db.chats[id] = fs.readFileSync( db.dir + "/chats/" + file );
-
-    } )
-    fs.readdirSync( db.dir + "/users/" ).forEach( (file) => {
-
-        var id = file.replace( ".json", "" );
-        db.users[id] = fs.readFileSync( db.dir + "/users/" + file );
-
-    } )
-    */
 
     console.log( "Loading languages..." )
     var l = {}//Object that store all languages
@@ -109,7 +92,7 @@ async function main() {
                         [
                             [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
                             [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
-                            [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "NOT_IMPLEMENTED"}, {text: l[user.lang].INFO_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                            [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "NOT_IMPLEMENTED"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
                             [{text: l[user.lang].LANGS_BUTTON, callback_data: "NOT_IMPLEMENTED"}]
                         ] 
                     } 
@@ -124,6 +107,40 @@ async function main() {
 
 
     } );
+
+    TGbot.on( "callback_query", (cb) => {
+
+        //
+        var msg = cb.message;
+        var from = cb.from;
+        var chat = msg.chat;
+
+        var user = db.users.get( from.id );
+
+        if( cb.data == "INFO_BUTTON" )
+        {
+
+            TGbot.editMessageText( l[user.lang].INFO, 
+                {
+                    message_id : msg.message_id,
+                    chat_id : chat.id,
+                    parse_mode : "HTML",
+                    reply_markup : 
+                    {
+                        inline_keyboard :
+                        [
+                            [{text: l[user.lang].SUPPORT_ABOUT_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                            [{text: l[user.lang].COMMANDS_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                            [{text: l[user.lang].BACK_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                        ] 
+                    } 
+                }
+            )
+
+        }
+        
+
+    } )
 
 
     
