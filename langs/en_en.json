@@ -7,7 +7,11 @@
     "ADD_ME_TO_A_GROUP_BUTTON": "➕ Add me to a Group ➕",
     "GROUP_BUTTON": "👥Group",
     "SUPPORT_BUTTON" : "🔧Support",
+    "SUPPORT_ABOUT_BUTTON" : "🔧Support about the bot",
     "INFO_BUTTON" : "Informations💬",
+    "INFO" : "<b>Libre Group Help</b> runs under Nodejs and is an <b>Open Source</b> project that aims to offer a relaiable bot to manage your groups and be <b>privacy respecting</b> to it's users\n\n<b>Bot version:</b> <i>{LGHVersion}</i>\n\n<b>Bot staff</b>\n•@Sp3rick_hj, creator and first developer",
+    "COMMANDS_BUTTON" :  "📖 Bot commands",
+    "BACK_BUTTON" : "🔙Back",
     "CHANNEL_BUTTON" : "Channel📢",
     "LANGS_BUTTON" : "🇬🇧 Languages 🇬🇧"
 
