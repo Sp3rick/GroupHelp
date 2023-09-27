@@ -1,0 +1,17 @@
+{
+
+    "LANG_NAME" : "Italiano",
+    "NEW_GROUP" : "<b>Grazie</b> per avermi aggiunto nel gruppo!\n• Non dimenticare di <b>farmi Admin nel gruppo</b> (vedi come), o non potrò funzionare correttamente\n• Usa /reload per verificare che è tutto ok",
+    "ADV_JOIN_CHANNEL" : "📢 Canale di LibreGroupHelp",
+    "PRESENTATION" : "👋🏻 Ciao {name}!\n@LibreGroupHelpBot è un bot <b>gratis, open source e rispettoso della privacy</b> alternativo a Group Help per gestire meglio i tuoi <b>gruppi</b>!\n\n👉🏻<b>Aggiungimi in un supergrouppo</b> e impostami come <b>Amministratore</b> in modo che posso entrare in azione!\n\n❓ <b>Quali sono i comandi?</b>\nUsa /help per vedere <b>tutti i comandi</b> e come funzionano! ",
+    "ADD_ME_TO_A_GROUP_BUTTON": "➕ Aggiungimi in un Gruppo ➕",
+    "GROUP_BUTTON": "👥Gruppo",
+    "SUPPORT_BUTTON" : "🔧Supporto",
+    "SUPPORT_ABOUT_BUTTON" : "🔧Supporto Bot",
+    "INFO_BUTTON" : "Informazioni💬",
+    "INFO" : "<b>Libre Group Help</b> esegue su Nodejs ed è un progetto <b>Open Source</b> che mira ad offrire un bot affidabile per gestire i tuoi gruppi restando allo stesso tempo <b>rispettoso della privacy</b>\n\n<b>Versione Bot:</b> <i>{LGHVersion}</i>\n\n<b>Staff bot</b>\n•@Sp3rick_hj, creatore e sviluppatore principale",
+    "COMMANDS_BUTTON" :  "📖 Comandi Bot",
+    "BACK_BUTTON" : "🔙Indietro",
+    "CHANNEL_BUTTON" : "Canale📢"
+
+}
