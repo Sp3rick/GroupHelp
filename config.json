@@ -2,6 +2,7 @@
 
     "botToken" : "token-here",
     "deleteChatDataAfterBotRemove" : false,
-    "overwriteChatDataIfReAddedToGroup" : false
+    "overwriteChatDataIfReAddedToGroup" : false,
+    "reserveLang" : "en_en"
     
 }

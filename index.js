@@ -45,16 +45,39 @@ async function main() {
 
     }
 
+
+
     console.log( "Loading languages..." )
     var l = {}//Object that store all languages
-    fs.readdirSync( __dirname + "/langs" ).forEach( (langFile) => {
+    var rLang = config.reserveLang;
+    l[rLang] = JSON.parse( fs.readFileSync( __dirname + "/langs/" + rLang + ".json") ); //default language to fix others uncompleted langs
+    console.log( "-loaded principal language: \"" + l[rLang].LANG_NAME + "\" " + rLang )
+
+    var langs = fs.readdirSync( __dirname + "/langs" );
+    langs = langs.splice( langs.indexOf(rLang), 1 );
+
+    var defaultLangObjects = Object.keys(l[rLang])
+    langs.forEach( (langFile) => {
 
         var fileName = langFile.replaceAll( ".json", "" );
         l[fileName] = JSON.parse( fs.readFileSync( __dirname + "/langs/" + langFile ) );
         console.log("-loaded language: \"" + l[fileName].LANG_NAME + "\" " + fileName);
-        //TODO: detect and fill phrases from incompleted languages with en_en
+
+        defaultLangObjects.forEach( (object) => { //detect and fill phrases from incompleted languages with default language (config.reserveLang)
+
+            if( !l[fileName].hasOwnProperty( object ) )
+            {
+
+                console.log( "  identified missing paramenter " + object + ", replacing from " + rLang );
+                l[fileName][object] = l[rLang][object];
+
+            };
+
+        } )
         
     } );
+
+    
 
     TGbot.on( "message", (msg, metadata) => {
 
@@ -117,6 +140,29 @@ async function main() {
 
         var user = db.users.get( from.id );
 
+        if( cb.data == "MENU" )
+        {
+
+            TGbot.editMessageText( l[user.lang].PRESENTATION, 
+                {
+                    message_id : msg.message_id,
+                    chat_id : chat.id,
+                    parse_mode : "HTML",
+                    reply_markup :
+                    {
+                        inline_keyboard :
+                        [
+                            [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
+                            [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
+                            [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "NOT_IMPLEMENTED"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
+                            [{text: l[user.lang].LANGS_BUTTON, callback_data: "NOT_IMPLEMENTED"}]
+                        ] 
+                    } 
+                }
+            )
+
+        }
+
         if( cb.data == "INFO_BUTTON" )
         {
 
@@ -131,7 +177,7 @@ async function main() {
                         [
                             [{text: l[user.lang].SUPPORT_ABOUT_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
                             [{text: l[user.lang].COMMANDS_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
-                            [{text: l[user.lang].BACK_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                            [{text: l[user.lang].BACK_BUTTON, callback_data: "MENU"}],
                         ] 
                     } 
                 }
@@ -139,6 +185,7 @@ async function main() {
 
         }
         
+        //TODO languages and Support
 
     } )
 
