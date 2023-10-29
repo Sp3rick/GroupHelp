@@ -1,6 +1,6 @@
 async function main() {
 
-    global.LGHVersion = "0.0.6";
+    global.LGHVersion = "0.0.7";
     console.log( "Libre group help current version: " )
 
     console.log("Starting...")
