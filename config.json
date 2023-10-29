@@ -1,6 +1,7 @@
 {
 
     "botToken" : "token-here",
+    "botStaff" : [ "361908469" ],
     "deleteChatDataAfterBotRemove" : false,
     "overwriteChatDataIfReAddedToGroup" : false,
     "reserveLang" : "en_en"
