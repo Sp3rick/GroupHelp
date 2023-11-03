@@ -18,11 +18,16 @@ var loadedLangs = Object.keys(l).length; Total number of loaded languages
 
 <b>What is done</b>
 
-Add/Removing bot from group handling (not implemented the latter options after thanksgiving message)
+Add/Removing bot from group handling (not implemented the latter options after  message)
+    -Thanksgiving with some hint
+    -Settings and lang configuration hint
 
 "Hello" message when user write in private chat at bot with:
     - Add me to a group, Group link and Channel link options fully implemented
     - Informations option partially implemented
     - Support partially implemented (to add the broadcast of staffer messages to each other)
     - Language selector fully implemented
+
+Group settings with open here or in private chat option with:
+    -Group lang selector
 
