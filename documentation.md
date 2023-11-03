@@ -25,7 +25,7 @@ Add/Removing bot from group handling (not implemented the latter options after  
 "Hello" message when user write in private chat at bot with:
     - Add me to a group, Group link and Channel link options fully implemented
     - Informations option partially implemented
-    - Support partially implemented (to add the broadcast of staffer messages to each other)
+    - Support partially implemented
     - Language selector fully implemented
 
 Group settings with open here or in private chat option with:
