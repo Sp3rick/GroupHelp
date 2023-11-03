@@ -1,13 +1,15 @@
+const { parseCommand, isAdmin } = require("./api/utils");
+
 async function main() {
 
-    global.LGHVersion = "0.0.8";
+    global.LGHVersion = "0.0.9";
     console.log( "Libre group help current version: " )
 
     console.log("Starting...")
     const fs = require("fs");
     const util = require('util')
     const TelegramBot = require('node-telegram-bot-api');
-    const {randomInt, isNumber} = require( __dirname + "/api/utils.js" );
+    const {randomInt, isNumber, genSettingsKeyboard, isAdminOfChat} = require( __dirname + "/api/utils.js" );
     global.directory = __dirname; //used from /api/database.js
     
     var config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) )
@@ -78,13 +80,15 @@ async function main() {
         
     } );
 
+    global.LGHLangs = l; //add global reference
+
     var langKeys = Object.keys(l);
     var loadedLangs = Object.keys(l).length;
     
 
     TGbot.on( "message", async (msg, metadata) => {
 
-        //TODO: make a command parser (variables set like https://github.com/telegraf/telegraf-command-parts should be good to do)
+        var command = parseCommand(msg.text || "");
 
         var chat = msg.chat;
         var from = msg.from;
@@ -151,7 +155,7 @@ async function main() {
             else if( msg.hasOwnProperty("reply_to_message") && String(msg.reply_to_message.text).startsWith("#id") && config.botStaff.includes(String(from.id)) )
             {
 
-                //get id from replyed message
+                //get id from replied message
                 var firstLine = msg.reply_to_message.text.split(/\r?\n/)[0];
                 var toReplyUserId = firstLine.split(" ")[0].replace("#id", "");
                 var toReplyMessageId = firstLine.split(" ")[1];
@@ -167,9 +171,22 @@ async function main() {
                 //confirmation message back to staffer 
                 TGbot.sendMessage( from.id, "Reply successfully sent." );
 
+                //let know all other staffers that a staffer replyed the user
+                config.botStaff.forEach( (stafferId) => { if( stafferId != from.id ){
+
+                    var text = from.first_name + " " + (from.last_name || "") + " [<code>" + from.id + "</code>] has answered to\n" +
+                    toReplyUser.first_name + " " + (toReplyUser.last_name || "") + " [<code>" + toReplyUserId + "</code>] with:\n\n" +
+                    "<i>" + msg.text + "</i>";
+
+                    TGbot.sendMessage(stafferId, text,
+                        { 
+                            parse_mode : "HTML",
+                        }
+                    )
+
+                } } )
+
             }
-
-
 
             else
             {
@@ -209,8 +226,18 @@ async function main() {
         var msg = cb.message;
         var from = cb.from;
         var chat = msg.chat;
+        var isGroup = (chat.type == "group" || chat.type == "supergroup")
 
         var user = db.users.get( from.id );
+
+        var lang = user.lang;
+
+        console.log("Callback data: " + cb.data)
+
+        if( isGroup ){
+            chat = db.chats.get( chat.id );
+            lang = chat.lang;
+        };
 
         //take it for granted that if user clicks a button he's not going to send another message as input
         if( user.waitingReply == true )
@@ -219,10 +246,12 @@ async function main() {
             db.users.update(user);
         }
 
+        var isAdmin = isAdminOfChat(chat, from.id)
+
         if( cb.data == "MENU" )
         {
 
-            TGbot.editMessageText( l[user.lang].PRESENTATION, 
+            TGbot.editMessageText( l[lang].PRESENTATION, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -231,10 +260,10 @@ async function main() {
                     {
                         inline_keyboard :
                         [
-                            [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
-                            [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
-                            [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
-                            [{text: l[user.lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
+                            [{text: l[lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
+                            [{text: l[lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
+                            [{text: l[lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
+                            [{text: l[lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
                         ] 
                     } 
                 }
@@ -242,7 +271,6 @@ async function main() {
 
         }
 
-        //TO IMPLEMENT
         if( cb.data == "SUPPORT_BUTTON" )
         {
 
@@ -250,7 +278,7 @@ async function main() {
             user.waitingReplyType = "SUPPORT";
             db.users.update(user);
 
-            TGbot.editMessageText( l[user.lang].SUPPORT_MESSAGE, 
+            TGbot.editMessageText( l[lang].SUPPORT_MESSAGE, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -259,7 +287,7 @@ async function main() {
                     {
                         inline_keyboard :
                         [
-                            [{text: l[user.lang].CANCEL_BUTTON, callback_data: "MENU"}],
+                            [{text: l[lang].CANCEL_BUTTON, callback_data: "MENU"}],
                         ] 
                     } 
                 }
@@ -270,7 +298,7 @@ async function main() {
         if( cb.data == "INFO_BUTTON" )
         {
 
-            TGbot.editMessageText( l[user.lang].INFO, 
+            TGbot.editMessageText( l[lang].INFO, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -279,9 +307,9 @@ async function main() {
                     {
                         inline_keyboard :
                         [
-                            [{text: l[user.lang].SUPPORT_ABOUT_BUTTON, callback_data: "SUPPORT_BUTTON"}],
-                            [{text: l[user.lang].COMMANDS_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
-                            [{text: l[user.lang].BACK_BUTTON, callback_data: "MENU"}],
+                            [{text: l[lang].SUPPORT_ABOUT_BUTTON, callback_data: "SUPPORT_BUTTON"}],
+                            [{text: l[lang].COMMANDS_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                            [{text: l[lang].BACK_BUTTON, callback_data: "MENU"}],
                         ] 
                     } 
                 }
@@ -289,8 +317,17 @@ async function main() {
 
         }
 
-        if( cb.data == "LANGS_BUTTON" )
+        if( cb.data == "LANGS_BUTTON" || cb.data.startsWith("LANGS_BUTTON:") )
         {
+
+            var managedChatId = chat.id;
+            if( cb.data.startsWith("LANGS_BUTTON:") )
+            {
+
+                isGroup = true;
+                managedChatId = cb.data.replace("LANGS_BUTTON:", "");
+
+            }
 
             var options = {
                 message_id : msg.message_id,
@@ -306,60 +343,146 @@ async function main() {
             }
 
             //loading langs buttons panel
+            //Note: here in this for loop we dont give a specify chatId as LANGSET for groups, its done inside if( isGroup )
             var isEven = (loadedLangs % 2 == 0) ? true : false;
-
             if( !isEven )
             {
 
                 options.reply_markup.inline_keyboard.push(
-                    [{text: l[langKeys[0]].LANG_SELECTOR, callback_data: "LANGSET:" + langKeys[0]}]
+                    [{text: l[langKeys[0]].LANG_SELECTOR, callback_data: "LANGSET=" + langKeys[0]}]
                 );
 
             }
-
             for( var i = (isEven) ? 0 : 1; i < loadedLangs; i=i+2 )
             {
 
                 options.reply_markup.inline_keyboard.push(
                     [
-                        {text: l[langKeys[i]].LANG_SELECTOR, callback_data: "LANGSET:" + langKeys[i]},
-                        {text: l[langKeys[i+1]].LANG_SELECTOR, callback_data: "LANGSET:" + langKeys[i+1]}
+                        {text: l[langKeys[i]].LANG_SELECTOR, callback_data: "LANGSET="+langKeys[i]},
+                        {text: l[langKeys[i+1]].LANG_SELECTOR, callback_data: "LANGSET="+langKeys[i+1]}
                     ]
                 );
 
             }
 
-            options.reply_markup.inline_keyboard.push(
-                [{text: l[user.lang].BACK_BUTTON, callback_data: "MENU"}]
-            );
+            if( isGroup )
+            {
+
+                options.reply_markup.inline_keyboard.push(
+                    [{text: l[lang].SETTINGS_BUTTON, callback_data: "SETTINGS_HERE:"+managedChatId }]
+                );
+
+
+                //specify chat id on every LANGSET button
+                options.reply_markup.inline_keyboard.forEach( (line,lineIndex) => { line.forEach( (button,buttonIndex) => {
+                    if(button.callback_data.includes("LANGSET"))
+                        options.reply_markup.inline_keyboard[lineIndex][buttonIndex].callback_data += (":"+managedChatId);
+                } ) } )
+
+            }
+            else if( chat.type == "private" )
+            {
+
+                options.reply_markup.inline_keyboard.push(
+                    [{text: l[lang].BACK_BUTTON, callback_data: "MENU"}]
+                );
+
+            }
+
+            
 
             
             var text = l[config.reserveLang].LANG_CHOOSE;
-            if( config.reserveLang != user.lang ) text += "\n" + l[user.lang].LANG_CHOOSE;
+            if( config.reserveLang != user.lang ) text += "\n" + l[lang].LANG_CHOOSE;
 
             TGbot.editMessageText( text, options )
 
         }
 
-        
-        
-        if( cb.data.startsWith( "LANGSET:" ) ) //ex. "LANGSET:en_en"
+        //be sure that a non-admin user can't modify with some bug the language
+        if( cb.data.startsWith( "LANGSET=" ) ) //expected "LANGSET=en_en:managedChatId" or "LANGSET=en_en" 
         {
 
-            var newLang = cb.data.replace("LANGSET:", "");
-            user.lang = newLang;
-            db.users.update(user);
+            var newLang = cb.data.split("=")[1].split(":")[0];
 
-            TGbot.editMessageText( l[user.lang].LANG_CHANGED, 
+            options = {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup :
+                {
+                    inline_keyboard :
+                    [
+                        
+                    ] 
+                } 
+            }
+
+            var hasSpecificChatId = (cb.data.split(":").length == 2 );
+            var specificChatId = "";
+            if( hasSpecificChatId ){
+
+                isGroup = true;
+                specificChatId = cb.data.split(":")[1];
+                chat = db.chats.get(specificChatId);
+
+            };
+
+            if( isGroup )
+            {
+
+                chat.lang = newLang;
+                db.chats.update(chat);
+
+                options.reply_markup.inline_keyboard.push( [{text: l[lang].SETTINGS_BUTTON, callback_data: "SETTINGS_HERE:"+specificChatId}] )
+
+            }
+
+            if( !hasSpecificChatId && chat.type == "private" )
+            {
+
+                user.lang = newLang;
+                db.users.update(user);
+
+                options.reply_markup.inline_keyboard.push( [{text: l[lang].BACK_BUTTON, callback_data: "MENU"}] )
+
+            }
+
+            TGbot.editMessageText( l[newLang].LANG_CHANGED, options)
+
+        }
+       
+
+        var isSettingsAdmin = false;
+        var settingsChatId = "";
+        var settingsChat = {};
+        if( cb.data.startsWith("SETTINGS") ) //handle settings and prevent non-admin user from using it
+        {
+
+            settingsChatId = cb.data.split(":")[1];
+            settingsChat = db.chats.get(settingsChatId) //overwrite chat
+            lang = settingsChat.lang;
+            isSettingsAdmin = isAdminOfChat(settingsChat, from.id);
+            console.log("Is admin for settings? " + isSettingsAdmin);
+
+            if(!isSettingsAdmin) return; //if is settings, but user is not chat admin, stop here
+
+        }
+
+        if( cb.data.startsWith("SETTINGS_SELECT:") )
+        {
+
+            TGbot.editMessageText( l[lang].SETTINGS_WHERE_OPEN, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
                     parse_mode : "HTML",
-                    reply_markup :
+                    reply_markup : 
                     {
                         inline_keyboard :
                         [
-                            [{text: l[user.lang].BACK_BUTTON, callback_data: "MENU"}]
+                            [{text: l[lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+settingsChatId}],
+                            [{text: l[lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+settingsChatId}],
                         ] 
                     } 
                 }
@@ -367,13 +490,59 @@ async function main() {
 
         }
 
-        //todo: Support option and commands help panel
+        //SETTINGS_HERE and SETTINGS_PRIVATE only purpuose is to generete first the panel
+        if( cb.data.startsWith("SETTINGS_HERE:") )
+        {
+            console.log("inside SETTINGS_HERE")
+
+            var options = {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : { inline_keyboard : genSettingsKeyboard(lang, settingsChatId) }
+            }
+
+            var text =
+            "<b>"+l[lang].SETTINGS.toUpperCase()+"</b>\n"+
+            "<b>"+l[lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n\n"+
+            l[lang].SETTINGS_SELECT;
+
+            TGbot.editMessageText(text, options)
+
+        }
+        if( cb.data.startsWith("SETTINGS_PRIVATE:") )
+        {
+
+            var options = {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : { inline_keyboard : genSettingsKeyboard(lang, settingsChatId) }
+            }
+
+            var text =
+            "<b>"+l[lang].SETTINGS.toUpperCase()+"</b>\n"+
+            "<b>"+l[lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n\n"+
+            l[lang].SETTINGS_SELECT;
+
+            TGbot.sendMessage(from.id, text, options)
+
+            //TODO: when bot tryes to send private message check if its arrives, if not ask the user to start bot in private chat
+
+        }
+
+        //if( cb.data.startsWith("SETTINGS_PANEL") )
+
+        
+        
+
+        //todo: commands help panel
 
     } )
 
 
     
-    TGbot.on( "new_chat_members", (msg) => {
+    TGbot.on( "new_chat_members", async (msg) => {
 
         var chat = msg.chat;
         var fixChatId = String(msg.chat.id).replace( "-", "_");
@@ -397,13 +566,16 @@ async function main() {
                 db.chats.add(chat)
 
             }
+            else{
 
-            console.log("\n\n\n\nupdate")
+                chat = db.chats.get(chat.id);
+
+            }
+
             db.chats.update( chat );
 
-
-            console.log( "Added bot to a group" );
-            TGbot.sendMessage(chat.id, l[chat.lang].NEW_GROUP,
+            console.log( "Added bot to a group, lang: " + chat.lang );
+            await TGbot.sendMessage(chat.id, l[chat.lang].NEW_GROUP,
             { 
                 parse_mode : "HTML",
                 reply_markup :
@@ -414,6 +586,22 @@ async function main() {
                     ] 
                 } 
             }
+            )
+
+            TGbot.sendMessage(chat.id, l[chat.lang].SETUP_GUIDE,
+                { 
+                    parse_mode : "HTML",
+                    reply_markup :
+                    {
+                        inline_keyboard :
+                        [
+                            [
+                                {text: l[chat.lang].LANGS_BUTTON2, callback_data: "LANGS_BUTTON:"+chat.id},
+                                {text: l[chat.lang].SETTINGS_BUTTON, callback_data: "SETTINGS_SELECT:"+chat.id},
+                            ]
+                        ] 
+                    } 
+                }
             )
  
             

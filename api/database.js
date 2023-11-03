@@ -41,6 +41,7 @@ async function generateDatabase(TGbot) {
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
                 fs.writeFileSync( chatFile, JSON.stringify(chat) )
+
                 return true;
                 
             },
@@ -106,12 +107,18 @@ async function generateDatabase(TGbot) {
 
                 newChat.title = chat.title;
                 newChat.type = chat.type;
+                newChat.lang = chat.lang;
                 newChat.admins = await ( async () => {
                     
                     return await TGbot.getChatAdministrators( chat.id )
 
                 } )()
-                console.log( "admins added: " + JSON.stringify(newChat.admins));                
+                console.log( "admins added: " + JSON.stringify(newChat.admins));
+
+                var chatFile = database.chatsDir + "/" + chat.id + ".json";
+                console.log( "updating chat to database lang:" + chat.lang );
+                fs.writeFileSync( chatFile, JSON.stringify(newChat) )
+                return true;
 
             }
 
