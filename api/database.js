@@ -108,9 +108,21 @@ async function generateDatabase(TGbot) {
                 newChat.title = chat.title;
                 newChat.type = chat.type;
                 newChat.lang = chat.lang;
-                newChat.admins = await ( async () => {
+                newChat.admins = await ( async () => {//store anonymized admins data
                     
-                    return await TGbot.getChatAdministrators( chat.id )
+                    var adminList = await TGbot.getChatAdministrators( chat.id );
+                    
+
+                    for(var i=0; i < adminList.length; ++i)
+                    {
+
+                        adminList[i].id = adminList[i].user.id;
+                        delete adminList[i].user;
+                        adminList[i].user = {id : adminList[i].id} //re-enabling id only for compatibility
+
+                    }
+
+                    return adminList;
 
                 } )()
                 console.log( "admins added: " + JSON.stringify(newChat.admins));
@@ -139,7 +151,7 @@ async function generateDatabase(TGbot) {
 
                 }
 
-                //TODO (maybe) : create dedicated function to initialize the custom user object (so db.user.add will oly use that to write to disk)
+                //TODO (maybe) : create dedicated function to initialize the custom user object (so db.user.add will only use that to write to disk)
                 //prepare object with all bot needed info// TODO: add to documentation all additional infos of users
 
                 user.lang = "en_en";
@@ -148,6 +160,11 @@ async function generateDatabase(TGbot) {
                     user.lang = "en_en"
 
                 }//for other langs extend with if else
+
+                //removing some data to anonymize
+                delete user.first_name;
+                if(user.hasOwnProperty("last_name")) delete user.last_name;
+                delete user.username;
 
                 //preparing object finish here//
 
@@ -174,9 +191,6 @@ async function generateDatabase(TGbot) {
                 newUser = oldUser;
 
                 newUser.lang = user.lang;
-                newUser.first_name = user.first_name;
-                if( user.hasOwnProperty("last_name") ) newUser.last_name = user.last_name;
-                if( user.hasOwnProperty("username") ) newUser.username = user.username;
                 if( user.hasOwnProperty("premium") ) newUser.premium = user.premium;
 
 
