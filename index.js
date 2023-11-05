@@ -2,7 +2,7 @@ const { parseCommand, isAdmin } = require("./api/utils");
 
 async function main() {
 
-    global.LGHVersion = "0.0.9";
+    global.LGHVersion = "0.0.10";
     console.log( "Libre group help current version: " )
 
     console.log("Starting...")
@@ -111,7 +111,7 @@ async function main() {
 
             };
 
-            var user = db.users.get( from.id );
+            var user = Object.assign( {},  db.users.get( from.id ), user );
 
             //if is a message directed to support
             if( (user.waitingReply == true && user.waitingReplyType == "SUPPORT") ||
@@ -122,8 +122,15 @@ async function main() {
                 config.botStaff.forEach( async (stafferId) => {
 
                     var sentMsg = await TGbot.forwardMessage(stafferId, chat.id, msg.message_id );
+
+                    /*note: this make a little privacy problem because the first name and last name will be left on telegram message so, we
+                    may store this message id and set a timer for delete/edit (removing first and last name) from message after 6 months? or more? or less?
+                    */
+                    var text = "#id" + from.id + " " + msg.message_id + "\n" +
+                    "<b><i>From: </i></b>" + from.first_name + (from.last_name ? " "+from.last_name : "") + "\n" +
+                    "👤Support request message\nReply to this message to reply the user.";
                     
-                    TGbot.sendMessage(stafferId, ("#id" + from.id + " " + msg.message_id + "\n👤Support request message\nReply to this message to reply the user."),
+                    TGbot.sendMessage(stafferId, text,
                         { 
                             parse_mode : "HTML",
                             reply_to_message_id: sentMsg.message_id
@@ -155,10 +162,10 @@ async function main() {
             else if( msg.hasOwnProperty("reply_to_message") && String(msg.reply_to_message.text).startsWith("#id") && config.botStaff.includes(String(from.id)) )
             {
 
-                //get id from replied message
-                var firstLine = msg.reply_to_message.text.split(/\r?\n/)[0];
-                var toReplyUserId = firstLine.split(" ")[0].replace("#id", "");
-                var toReplyMessageId = firstLine.split(" ")[1];
+                var lines = msg.reply_to_message.text.split(/\r?\n/);
+                var toReplyUserId = lines[0].split(" ")[0].replace("#id", "");
+                var toReplyMessageId = lines[0].split(" ")[1];
+                var fullNameUser = lines[1].replace("From: ","");
 
                 var toReplyUser = db.users.get( toReplyUserId );
 
@@ -175,7 +182,7 @@ async function main() {
                 config.botStaff.forEach( (stafferId) => { if( stafferId != from.id ){
 
                     var text = from.first_name + " " + (from.last_name || "") + " [<code>" + from.id + "</code>] has answered to\n" +
-                    toReplyUser.first_name + " " + (toReplyUser.last_name || "") + " [<code>" + toReplyUserId + "</code>] with:\n\n" +
+                    fullNameUser + " [<code>" + toReplyUserId + "</code>] with:\n\n" +
                     "<i>" + msg.text + "</i>";
 
                     TGbot.sendMessage(stafferId, text,
@@ -228,7 +235,7 @@ async function main() {
         var chat = msg.chat;
         var isGroup = (chat.type == "group" || chat.type == "supergroup")
 
-        var user = db.users.get( from.id );
+        var user = Object.assign( {},  db.users.get( from.id ), from );
 
         var lang = user.lang;
 
@@ -245,8 +252,6 @@ async function main() {
             user.waitingReply = false;
             db.users.update(user);
         }
-
-        var isAdmin = isAdminOfChat(chat, from.id)
 
         if( cb.data == "MENU" )
         {
@@ -390,9 +395,10 @@ async function main() {
             }
 
             
-
-            
             var text = l[config.reserveLang].LANG_CHOOSE;
+            
+            if( isGroup ) text = l[config.reserveLang].LANG_CHOOSE_GROUP_ADVICE + "\n\n" + text;;
+            
             if( config.reserveLang != user.lang ) text += "\n" + l[lang].LANG_CHOOSE;
 
             TGbot.editMessageText( text, options )
@@ -405,7 +411,7 @@ async function main() {
 
             var newLang = cb.data.split("=")[1].split(":")[0];
 
-            options = {
+            var options = {
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
@@ -428,7 +434,7 @@ async function main() {
 
             };
 
-            if( isGroup )
+            if( isGroup && isAdminOfChat(chat, from.id))
             {
 
                 chat.lang = newLang;
@@ -490,7 +496,7 @@ async function main() {
 
         }
 
-        //SETTINGS_HERE and SETTINGS_PRIVATE only purpuose is to generete first the panel
+        //SETTINGS_HERE for edit, SETTINGS_PRIVATE to send new in private
         if( cb.data.startsWith("SETTINGS_HERE:") )
         {
             console.log("inside SETTINGS_HERE")
@@ -530,8 +536,6 @@ async function main() {
             //TODO: when bot tryes to send private message check if its arrives, if not ask the user to start bot in private chat
 
         }
-
-        //if( cb.data.startsWith("SETTINGS_PANEL") )
 
         
         
