@@ -4,7 +4,11 @@ TODO:
 
 -short term:
     
+    jsdoc GHbot emit events in main.js (urgent to have advices while creating modules/plugins)
     implement time zone setting
+    jsdoc "db"/"database" object
+    jsdoc GHbot object in GHbot.js
+    add configuration to allow/disallow adding bot from non-admin users
 
 -medium term:
     (once bot will be declared ready to use) add code versioning system to update database when user update it
