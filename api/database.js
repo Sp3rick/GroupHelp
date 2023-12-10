@@ -9,10 +9,37 @@ const {randomInt, isNumber, isValidChat, isValidUser} = require( global.director
  *
  * @param {TelegramBot} TGbot - Instance o TelegramBot
  */
-async function generateDatabase(TGbot) {
+function getDatabase(TGbot) {
 
     //config database directory here
     var dbInnerDir = global.directory;
+    var dir = dbInnerDir + "/database";
+    var chatsDir = dbInnerDir + "/database/chats";
+    var usersDir = dbInnerDir + "/database/users";
+
+    console.log( "Generating folder tree (if not already)..." )
+    var dbInnerDirFiles = fs.readdirSync( dbInnerDir );
+    if ( !dbInnerDirFiles.includes( "database" ) ){
+
+        fs.mkdirSync( dir );
+        console.log( "Generated \"database\" folder" );
+
+    }
+    var dbDirFiles = fs.readdirSync( dir )
+    if( !dbDirFiles.includes( "chats" ) )
+    {
+
+        fs.mkdirSync( chatsDir);
+        console.log( "Generated \"database/chats\" folder" );
+
+    }
+    if( !dbDirFiles.includes( "users" ) )
+    {
+
+        fs.mkdirSync( usersDir);
+        console.log( "Generated \"database/users\" folder" );
+
+    }
 
 
     //TODO: IF POSSIBLE fuse database.chats and database.users functions
@@ -108,11 +135,11 @@ async function generateDatabase(TGbot) {
                 newChat.title = chat.title;
                 newChat.type = chat.type;
                 newChat.lang = chat.lang;
-                newChat.admins = await ( async () => {//store anonymized admins data
+                newChat.admins = await ( async () => {
                     
                     var adminList = await TGbot.getChatAdministrators( chat.id );
                     
-
+                    //anonymize admins data
                     for(var i=0; i < adminList.length; ++i)
                     {
 
@@ -258,4 +285,4 @@ async function generateDatabase(TGbot) {
 
 
 }
-module.exports = generateDatabase;
+module.exports = getDatabase;
