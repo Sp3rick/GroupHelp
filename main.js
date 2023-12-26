@@ -1,4 +1,4 @@
-const { parseCommand, isAdmin } = require("./api/utils");
+const {randomInt, parseCommand, isNumber, genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( __dirname + "/api/database.js" );
   
@@ -16,7 +16,6 @@ async function main(config) {
 
     console.log("Starting a bot...")
     const TelegramBot = require('node-telegram-bot-api');
-    const {randomInt, isNumber, genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage} = require( __dirname + "/api/utils.js" );
     
     // Create a bot that uses 'polling' to fetch new updates
     const TGbot = new TelegramBot(config.botToken, {polling: true});
@@ -37,19 +36,68 @@ async function main(config) {
     TGbot.on( "message", async (msg, metadata) => {
 
         var from = msg.from;
-        var user = Object.assign( {},  db.users.get( from.id ), msg.user );
         msg.chat.isGroup =  (msg.chat.type == "supergroup" || msg.chat.type == "group")
-        var chat = Object.assign( {}, ((msg.chat.isGroup ? db.chats.get( msg.chat.id ) : {})), msg.chat );
-        
-
-        var command = parseCommand(msg.text || "");
-        msg.command = command;
+        var isGroup = msg.chat.isGroup;
 
         if ( !db.users.exhist( from.id ) ){
 
             db.users.add( from );
 
         };
+
+        if(isGroup)
+        {
+            if ( !db.chats.exhist( msg.chat.id ) ){//this code should run only if bot was added to a group while was offline
+    
+                console.log( "Adding new group to database" );
+                msg.chat.lang = config.reserveLang;
+                console.log( "Group lang: " + msg.chat.lang )
+                db.chats.add(msg.chat)
+
+                db.chats.update( msg.chat );
+
+                await TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].NEW_GROUP,
+                { 
+                    parse_mode : "HTML",
+                    reply_markup :
+                    {
+                        inline_keyboard :
+                        [
+                            [ {text: l[msg.chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"} ]
+                        ] 
+                    } 
+                }
+                )
+    
+                TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].SETUP_GUIDE,
+                    { 
+                        parse_mode : "HTML",
+                        reply_markup :
+                        {
+                            inline_keyboard :
+                            [
+                                [
+                                    {text: l[msg.chat.lang].LANGS_BUTTON2, callback_data: "LANGS_BUTTON:"+msg.chat.id},
+                                    {text: l[msg.chat.lang].SETTINGS_BUTTON, callback_data: "SETTINGS_SELECT:"+msg.chat.id},
+                                ]
+                            ] 
+                        } 
+                    }
+                )
+    
+            }    
+        }
+
+        
+        var user = Object.assign( {},  db.users.get( from.id ), msg.from );
+
+        var chat = Object.assign( {}, ((msg.chat.isGroup ? db.chats.get( msg.chat.id ) : {})), msg.chat );
+        
+
+        var command = parseCommand(msg.text || "");
+        msg.command = command;
+
+        
 
         
         if ( msg.chat.type == "private" ){
@@ -295,7 +343,6 @@ async function main(config) {
     TGbot.on( "new_chat_members", async (msg) => {
 
         var chat = msg.chat;
-        var fixChatId = String(msg.chat.id).replace( "-", "_");
         var from = msg.from;
         console.log(msg)
 
