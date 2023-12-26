@@ -1,16 +1,16 @@
 General code info
 
-A new user is added to database when does write in private chat to the bot or when add him to a groups (other users may be stored in other groups configurations)
+A new user is added to database when does write in private chat to the bot or when add him to a groups (other users id may be stored in other groups configurations)
 
-"TGbot" variable is for using the bot with all its methods, "bot" is equal to access to bot data (bot = await TGbot.getMe())
+"TGbot" variable is for using the bot with all its methods, "bot" is equal to access to bot data (bot = await TGbot.getMe()), docs on https://github.com/yagop/node-telegram-bot-api
 
-while coding keep in mind that user should be able to delete his data in any moment, this for respecting the privacy philosophy of LibreGroupHelp (exception can be when user is banned from a group or is a staff where will be stored ONLY the userId)
+While coding keep in mind that user should be able to delete his data in any moment, this for respecting the privacy philosophy of LibreGroupHelp (exception can be when user is banned from a group or is a staff where will be stored ONLY the userId)
 
 
 <b>Plugins folder info</b>
 
 The code has been modularized so now you can add indipendent module files in "plugins" folder, as you can see in example.js you should require from <i>var LGHelpTemplate = require("../GHbot.js")</i>, create (and assign it to module.exports) a function with 1 argument, use this argument to extract all needed from template <i>var {GHbot, TGbot, db} = new LGHelpTemplate(args);</i>
-By that way you will be able to write plugins with all needed jsdocs
+By that way you will be able to write plugins with all needed jsdocs (Idk how to jsdoc events, currently it's missing)
 If you need access text of varius languages it's stored at global.LGHLangs (I advise set it like this "l = global.LGHLangs;")
 
 
@@ -18,12 +18,49 @@ If you need access text of varius languages it's stored at global.LGHLangs (I ad
 <b>Language info</b>
 
 The bot has a different language configuration both for users and group
-when LibreGroupHelp is added to a group(and add it to the database) the default group language will be inherited from the user who added the bot, the bot assumes that the user has already been added to the database before for inher the lang from (ps. find how to use telegram function to set this a bot can be added only from an admin)
+when LibreGroupHelp is added to a group(and add it to the database) the default group language will be inherited from the user who added the bot, the bot assumes that the user has already been added to the database before for inher the lang from (ps. find how to use telegram function to set that a bot can be added only from an admin)
 
-Global variables language-related:
+
+main.js Global variables language-related:
 
 var langKeys = Object.keys(l); 
 var loadedLangs = Object.keys(l).length; Total number of loaded languages
+
+
+<b>Custom Chat Object</b>
+
+Additional data of custom <i>chat</i> object:
+lang : current setted chat lang
+isGroup : result of (chat.type == "supergroup" || chat.type == "group")
+rules : rules plugin related data
+-When you modify any of this data don't forget to update it with db.chats.update(chats)
+
+
+<b>Custom User Object</b>
+
+Additional data of custom <i>user</i> object:
+lang : current user lang
+waitingReply : set to true if the bot is expecting a message from the user
+waitingReplyType : additional data related to waitingReply
+-When you modify any of this data don't forget to update it with db.users.update(user)
+
+
+<b>Custom Message Object</b>
+
+Additional data of custom <i>msg</i> object:
+command : result of message text parsed with parseCommand()
+
+
+<b>Command Object</b>
+
+You can get this object trough parseCommand(text)
+ * @property {String} text - Full raw command text
+ * @property {String} prefix - Prefix, example: / ! . , ;
+ * @property {String} botCommand - Command and bot specifier (ex. "start@usernamebot")
+ * @property {String} name - Command name (ex. "start")
+ * @property {String} bot - Specified bot name (ex. "usernamebot")
+ * @property {String} args - Raw arguments text after the command
+ * @property {Array} splitArgs - Array of arguments split by space
 
 <b>What is done</b>
 
@@ -31,12 +68,17 @@ Add/Removing bot from group handling (not implemented the latter options after  
     -Thanksgiving with some hint
     -Settings and lang configuration hint
 
-"Hello" message when user write in private chat at bot with:
-    - Add me to a group, Group link and Channel link options fully implemented
-    - Informations option partially implemented
-    - Support partially implemented (to add the broadcast of staffer messages to each other)
-    - Language selector fully implemented
+Default "Hello" message when user write in private chat at bot
 
-Group settings with open here or in private chat option with:
-    -Group lang selector
+Group settings (/settings) with main panel (Todo page 2)
+
+Rules (/rules)
+
+Bot support (does not allow media, currently users should use https://telegra.ph/)
+
+Separate language selection and management for groups and users fully implemented
+
+
+
+
 
