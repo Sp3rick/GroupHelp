@@ -1,4 +1,4 @@
-Open-Source re-creation of telegram group manager Group Help in nodejs, project at very initial stage
+Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
 
 TODO:
 
@@ -10,6 +10,9 @@ TODO:
     jsdoc GHbot object in GHbot.js
     add configuration to allow/disallow adding bot from non-admin users
     commands help panel
+    notify founder and admins when bot get added in the group in thanksgiving message
+    handle "chat_member" event adding/removing automatically from admin list
+    implement media and link buttons in rules.js
 
 -medium term:
     (once bot will be declared ready to use) add code versioning system to update database when user update it
@@ -18,12 +21,14 @@ TODO:
 
 -long  term:
 
-    allow bot clone bot when user give a token
     support all group help functions and more
+    allow bot clone bot when user give a token
 
 
 
 
 config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
 
-look also at code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
+Look also at some code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
+
+When you create a plugin you can document it on https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md
