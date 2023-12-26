@@ -1,4 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js")
+const {IsEqualInsideAnyLanguage} = require( "../api/utils.js" );
 
 function main(args)
 {
