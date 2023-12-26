@@ -64,6 +64,8 @@ function getDatabase(TGbot) {
                     return false;
 
                 }
+
+                chat.rules = {};
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -117,7 +119,7 @@ function getDatabase(TGbot) {
                 var chatFile = database.chatsDir + "/" + chatId + ".json";
                 if( !database.chats.exhist( chatId ) ){
 
-                    console.log( "breaking user.get, failed to get user data from id " + chatId )
+                    console.log( "breaking chats.get, failed to get chat data from id " + chatId )
                     return false;
 
                 }
@@ -134,7 +136,6 @@ function getDatabase(TGbot) {
 
                 newChat.title = chat.title;
                 newChat.type = chat.type;
-                newChat.lang = chat.lang;
                 newChat.admins = await ( async () => {
                     
                     var adminList = await TGbot.getChatAdministrators( chat.id );
@@ -153,6 +154,8 @@ function getDatabase(TGbot) {
 
                 } )()
                 console.log( "admins added: " + JSON.stringify(newChat.admins));
+                if(chat.hasOwnProperty("lang")) newChat.lang = chat.lang;
+                if(chat.hasOwnProperty("rules")) newChat.rules = chat.rules;
 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "updating chat to database lang:" + chat.lang );
@@ -220,10 +223,13 @@ function getDatabase(TGbot) {
                 newUser.lang = user.lang;
                 if( user.hasOwnProperty("premium") ) newUser.premium = user.premium;
 
+                if( user.hasOwnProperty("waitingReply") ) newUser.waitingReply = user.waitingReply
+                if( user.hasOwnProperty("waitingReplyType") ) newUser.waitingReplyType = user.waitingReplyType
+
 
                 var userFile = database.usersDir + "/" + user.id + ".json";
                 console.log( "updating user to database lang:" + user.lang );
-                fs.writeFileSync( userFile, JSON.stringify(user) );
+                fs.writeFileSync( userFile, JSON.stringify(newUser) );
                 return true;
 
             },
