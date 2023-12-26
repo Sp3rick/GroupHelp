@@ -34,8 +34,6 @@ function parseCommand(text){
     var prefix = text[0];
     if( prefix == "/" || prefix == "!" || prefix == "." || prefix == "," || prefix == ";" ){
 
-        console.log( "Command prefix: " + prefix );
-
         var temp = text.replace( prefix, "" );
 
         var botCommand = temp.split(" ")[0];    // "start@usernamebot"
@@ -131,7 +129,7 @@ function isAdminOfChat(chat, userId)
 
     return false;
 
-}}
+}else return false;}
 
 function isValidChat(chat){
 
@@ -146,7 +144,7 @@ function isValidChat(chat){
 
 function isValidUser(user){
 
-    if ( !user.hasOwnProperty("id") || !user.hasOwnProperty("first_name") || !user.hasOwnProperty("last_name") || user.hasOwnProperty("type") ){
+    if ( !user.hasOwnProperty("id") || user.hasOwnProperty("type") ){
 
         return false;
 
@@ -155,7 +153,31 @@ function isValidUser(user){
 
 }
 
-var test = parseCommand("yo")
+function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
+{
+
+    var caseSensitive = caseSensitive || false;
+
+    var l = global.LGHLangs;
+    langKeys = Object.keys(l);
+    loadedLangs = Object.keys(l).length;
+
+
+    for( var langIndex = 0; langIndex < loadedLangs; langIndex++ )
+    {
+        var curLangText = l[langKeys[langIndex]][optionName]
+
+        if( caseSensitive && curLangText == text )
+            return true;
+        else if( !caseSensitive && curLangText.toUpperCase() == text.toUpperCase() )
+            return true;
+
+    }
+
+    return false;
+
+
+}
 
 module.exports = 
 {
@@ -167,5 +189,6 @@ module.exports =
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     isAdminOfChat : isAdminOfChat,
+    IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage
 
 }

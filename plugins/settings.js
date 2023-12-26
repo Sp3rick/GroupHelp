@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {randomInt, isNumber, genSettingsKeyboard, isAdminOfChat} = require( "../api/utils.js" );
+const {genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage} = require( "../api/utils.js" );
 
 function main(args)
 {
@@ -10,12 +10,42 @@ function main(args)
     langKeys = Object.keys(l);
     loadedLangs = Object.keys(l).length;
 
-    
+    GHbot.on("message", (msg, chat, user) => {
+
+        var lang = user.lang
+
+        if( !isAdminOfChat(chat, user.id) ) return;
+
+        if( chat.isGroup && msg.command && IsEqualInsideAnyLanguage(msg.command.name, "COMMAND_SETTINGS") )
+        {
+
+            TGbot.sendMessage( chat.id, l[lang].SETTINGS_WHERE_OPEN, 
+                {
+                    message_id : msg.message_id,
+                    chat_id : chat.id,
+                    parse_mode : "HTML",
+                    reply_markup : 
+                    {
+                        inline_keyboard :
+                        [
+                            [{text: l[lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+chat.id}],
+                            [{text: l[lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+chat.id}],
+                        ] 
+                    } 
+                }
+            )
+
+            //TODO: when bot tryes to send private message check if its arrives, if not ask the user to start bot in private chat
+
+        }
+
+    })
     
     GHbot.on("callback_query", (cb, chat, user) => {
 
         var msg = cb.message
         var lang = user.lang
+        var isGroup = (chat.type == "group" || chat.type == "supergroup")
 
         var isSettingsAdmin = false;
         var settingsChatId = "";
@@ -30,13 +60,14 @@ function main(args)
             console.log("Is admin for settings? " + isSettingsAdmin);
 
             if(!isSettingsAdmin) return; //if is settings, but user is not chat admin, stop here
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 
         if( cb.data.startsWith("SETTINGS_SELECT:") )
         {
 
-            TGbot.editMessageText( l[lang].SETTINGS_WHERE_OPEN, 
+            TGbot.editMessageText( l[user.lang].SETTINGS_WHERE_OPEN, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -45,12 +76,13 @@ function main(args)
                     {
                         inline_keyboard :
                         [
-                            [{text: l[lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+settingsChatId}],
-                            [{text: l[lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+settingsChatId}],
+                            [{text: l[user.lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+settingsChatId}],
+                            [{text: l[user.lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+settingsChatId}],
                         ] 
                     } 
                 }
             )
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 
@@ -63,15 +95,17 @@ function main(args)
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
-                reply_markup : { inline_keyboard : genSettingsKeyboard(lang, settingsChatId) }
+                reply_markup : { inline_keyboard : genSettingsKeyboard(user.lang, settingsChatId) }
             }
 
             var text =
-            "<b>"+l[lang].SETTINGS.toUpperCase()+"</b>\n"+
-            "<b>"+l[lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n\n"+
-            l[lang].SETTINGS_SELECT;
+            "<b>"+l[user.lang].SETTINGS.toUpperCase()+"</b>\n"+
+            "<b>"+l[user.lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n"+
+            "<b>"+l[user.lang].GROUP_LANGUAGE+":</b> <i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
+            l[user.lang].SETTINGS_SELECT;
 
             TGbot.editMessageText(text, options)
+            TGbot.answerCallbackQuery(cb.id);
 
         }
         if( cb.data.startsWith("SETTINGS_PRIVATE:") )
@@ -81,15 +115,17 @@ function main(args)
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
-                reply_markup : { inline_keyboard : genSettingsKeyboard(lang, settingsChatId) }
+                reply_markup : { inline_keyboard : genSettingsKeyboard(user.lang, settingsChatId) }
             }
 
             var text =
-            "<b>"+l[lang].SETTINGS.toUpperCase()+"</b>\n"+
-            "<b>"+l[lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n\n"+
-            l[lang].SETTINGS_SELECT;
+            "<b>"+l[user.lang].SETTINGS.toUpperCase()+"</b>\n"+
+            "<b>"+l[user.lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n"+
+            "<b>"+l[user.lang].GROUP_LANGUAGE+":</b> <i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
+            l[user.lang].SETTINGS_SELECT;
 
             TGbot.sendMessage(user.id, text, options)
+            TGbot.answerCallbackQuery(cb.id);
 
             //TODO: when bot tryes to send private message check if its arrives, if not ask the user to start bot in private chat
 
@@ -125,7 +161,7 @@ function main(args)
             }
 
             //loading langs buttons panel
-            //Note: here in this for loop we dont give a specify chatId as LANGSET for groups, its done inside if( isGroup )
+            //Note: here in this for loop we dont give a specific chatId as LANGSET for groups, its done inside if( isGroup )
             var isEven = (loadedLangs % 2 == 0) ? true : false;
             if( !isEven )
             {
@@ -172,17 +208,22 @@ function main(args)
             }
 
             
-            var text = l[config.reserveLang].LANG_CHOOSE;
+            var text = l[config.reserveLang].LANG_CHOOSE +
+            ((config.reserveLang == user.lang) ? "" : "\n"+l[user.lang].LANG_CHOOSE);
+
+            if( isGroup ) text = l[config.reserveLang].LANG_CHOOSE_GROUP_ADVICE + "\n\n" +
+            l[config.reserveLang].LANG_CHOOSE_GROUP +
+            ((config.reserveLang == user.lang) ? "" : "\n"+l[user.lang].LANG_CHOOSE_GROUP);
+
             
-            if( isGroup ) text = l[config.reserveLang].LANG_CHOOSE_GROUP_ADVICE + "\n\n" + text;;
-            
-            if( config.reserveLang != user.lang ) text += "\n" + l[lang].LANG_CHOOSE;
+            //if( config.reserveLang != user.lang ) text += "\n" + l[lang].LANG_CHOOSE;
 
             TGbot.editMessageText( text, options )
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 
-        //be sure that a non-admin user can't modify with some bug the language
+        //TODO: be sure that a non-admin user can't modify with some bug the language
         if( cb.data.startsWith( "LANGSET=" ) ) //expected "LANGSET=en_en:managedChatId" or "LANGSET=en_en" 
         {
 
@@ -231,7 +272,11 @@ function main(args)
 
             }
 
-            TGbot.editMessageText( l[newLang].LANG_CHANGED, options)
+            var text = l[newLang].LANG_CHANGED;
+            if( hasSpecificChatId ) text = l[user.lang].LANG_CHANGED_GROUP.replace("{lang}", l[newLang].LANG_SELECTOR);
+
+            TGbot.editMessageText( text, options)
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 

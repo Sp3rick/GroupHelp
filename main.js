@@ -1,14 +1,22 @@
 const { parseCommand, isAdmin } = require("./api/utils");
 const EventEmitter = require("node:events");
 const getDatabase = require( __dirname + "/api/database.js" );
+  
+  
 
 async function main(config) {
 
-    var GHbot = new EventEmitter();
+
+  
+    const GHbot = new EventEmitter();
+
+
+    
+    
 
     console.log("Starting a bot...")
     const TelegramBot = require('node-telegram-bot-api');
-    const {randomInt, isNumber, genSettingsKeyboard, isAdminOfChat} = require( __dirname + "/api/utils.js" );
+    const {randomInt, isNumber, genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage} = require( __dirname + "/api/utils.js" );
     
     // Create a bot that uses 'polling' to fetch new updates
     const TGbot = new TelegramBot(config.botToken, {polling: true});
@@ -24,11 +32,18 @@ async function main(config) {
     //some simplified variables
     l = global.LGHLangs;
 
-    
+
 
     TGbot.on( "message", async (msg, metadata) => {
 
+        var from = msg.from;
+        var user = Object.assign( {},  db.users.get( from.id ), msg.user );
+        msg.chat.isGroup =  (msg.chat.type == "supergroup" || msg.chat.type == "group")
+        var chat = Object.assign( {}, ((msg.chat.isGroup ? db.chats.get( msg.chat.id ) : {})), msg.chat );
+        
+
         var command = parseCommand(msg.text || "");
+        msg.command = command;
 
         if ( !db.users.exhist( from.id ) ){
 
@@ -36,20 +51,7 @@ async function main(config) {
 
         };
 
-        var user = Object.assign( {},  db.users.get( from.id ), user );
-        var chat = Object.assign( {},  db.chats.get( msg.chat.id ), msg.chat );
-        var from = msg.from;
-
-        if ( msg.chat.type == "group" ){
-
-
-
-        }
-        if ( msg.chat.type == "supergroup" || msg.chat.type == "group"){
-
-            
-
-        }
+        
         if ( msg.chat.type == "private" ){
 
 
@@ -61,7 +63,29 @@ async function main(config) {
              */
             //TODO make work event emitter jsdoc
             GHbot.emit( "private", msg, chat, user );
-            
+
+
+            //if no-one is expecting a message from user
+            if( user.waitingReply == false )
+            {
+
+                TGbot.sendMessage(user.id, l[user.lang].PRESENTATION.replace("{name}",user.first_name+" "+(user.last_name||"")),
+                    {
+                        parse_mode : "HTML",
+                        reply_markup :
+                        {
+                            inline_keyboard :
+                            [
+                                [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
+                                [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
+                                [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
+                                [{text: l[user.lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
+                            ] 
+                        } 
+                    }
+                )
+
+            }
 
             //if is a message directed to support
             if( (user.waitingReply == true && user.waitingReplyType == "SUPPORT") ||
@@ -144,54 +168,32 @@ async function main(config) {
                 } } )
 
             }
-
-            else
-            {
-
-                TGbot.sendMessage(user.id, l[user.lang].PRESENTATION,
-                    { 
-                        parse_mode : "HTML",
-                        reply_markup :
-                        {
-                            inline_keyboard :
-                            [
-                                [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
-                                [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
-                                [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
-                                [{text: l[user.lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
-                            ] 
-                        } 
-                    }
-                )
-                
-            }
             
 
         }
 
-        console.log( msg );
-
 
         GHbot.emit( "message", msg, chat, user );
+        
 
     } );
 
     TGbot.on( "callback_query", (cb) => {
 
-        TGbot.answerCallbackQuery(cb.id);
-        //
         var msg = cb.message;
         var from = cb.from;
         var chat = msg.chat;
         var isGroup = (chat.type == "group" || chat.type == "supergroup")
+        chat.isGroup = isGroup;
 
         if ( !db.users.exhist( from.id ) ){
 
             db.users.add( from );
 
         };
+
         var user = Object.assign( {},  db.users.get( from.id ), from );
-        var chat = Object.assign( {},  db.chats.get( msg.chat.id ), msg.chat );
+        var chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
 
         var lang = user.lang;
 
@@ -212,7 +214,7 @@ async function main(config) {
         if( cb.data == "MENU" )
         {
 
-            TGbot.editMessageText( l[lang].PRESENTATION, 
+            TGbot.editMessageText( l[lang].PRESENTATION.replace("{name}",user.first_name+" "+(user.last_name||"")), 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -229,6 +231,7 @@ async function main(config) {
                     } 
                 }
             )
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 
@@ -253,6 +256,7 @@ async function main(config) {
                     } 
                 }
             )
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 
@@ -275,15 +279,11 @@ async function main(config) {
                     } 
                 }
             )
+            TGbot.answerCallbackQuery(cb.id);
 
         }
 
-        
-       
 
-        
-
-        
         GHbot.emit( "callback_query", cb, chat, user );
 
         //todo: commands help panel
