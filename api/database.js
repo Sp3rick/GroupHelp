@@ -184,6 +184,8 @@ function getDatabase(TGbot) {
                 //TODO (maybe) : create dedicated function to initialize the custom user object (so db.user.add will only use that to write to disk)
                 //prepare object with all bot needed info// TODO: add to documentation all additional infos of users
 
+                user.waitingReply = false;
+                user.waitingReplyType = "";
                 user.lang = "en_en";
                 if( user.language_code == "en" ){
 
