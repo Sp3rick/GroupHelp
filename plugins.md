@@ -2,7 +2,7 @@
 
 Editable from /settings menù, creates the /rules command
 
-Adds on "user" a custom object "rules" with following elements:
+Adds on "chat" a custom object "rules" with following elements:
 
 text : text of rules
 entities : entities of rules text
