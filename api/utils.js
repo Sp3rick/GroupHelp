@@ -1,5 +1,32 @@
 const { parse } = require("querystring");
 
+let isObject = function(a) {
+    return (!!a) && (a.constructor === Object);
+};
+let isArray = function(a) {
+    return (!!a) && (a.constructor === Array);
+};
+const replaceLast = (str, pattern, replacement) => {
+    const match =
+      typeof pattern === 'string'
+        ? pattern
+        : (str.match(new RegExp(pattern.source, 'g')) || []).slice(-1)[0];
+    if (!match) return str;
+    const last = str.lastIndexOf(match);
+    return last !== -1
+      ? `${str.slice(0, last)}${replacement}${str.slice(last + match.length)}`
+      : str;
+};
+const isValidUrl = urlString=> {
+    var urlPattern = new RegExp('^(https?:\\/\\/)?'+ // validate protocol
+  '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|'+ // validate domain name
+  '((\\d{1,3}\\.){3}\\d{1,3}))'+ // validate OR ip (v4) address
+  '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // validate port and path
+  '(\\?[;&a-z\\d%_.~+=-]*)?'+ // validate query string
+  '(\\#[-a-z\\d_]*)?$','i'); // validate fragment locator
+return !!urlPattern.test(urlString);
+}
+
 function isNumber(str) {
     if (typeof str != "string") return false
     return !isNaN(str) && !isNaN(parseFloat(str)) 
@@ -8,6 +35,7 @@ function isNumber(str) {
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
 
 /** 
  * @typedef {Object} Command
@@ -179,9 +207,94 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 
 }
 
+
+function sendParsingError(TGbot, chatId, lang, callback_data)
+{
+
+    var l = global.LGHLangs;
+
+    TGbot.sendMessage( chatId, l[lang].PARSING_ERROR, {
+        parse_mode : "HTML",
+        reply_markup : 
+        {
+            inline_keyboard :
+            [
+                [{text: l[lang].CANCEL_BUTTON, callback_data: callback_data}],
+            ] 
+        } 
+    } )
+
+}
+
+function parseTextToInlineKeyboard(text)
+{
+
+    var culumnsLimit = 8;
+    var rowsLimit = 14; //tg limit 16
+    var totalButtonsLimit = 92; //tg limit 100
+    var buttonNameLimit = 64;
+
+    /*Group - t.me/username && Channel - @username
+    Group regulation - rules */
+
+
+    var board = [];
+    var totalButtons = 0;
+    
+    var rows = text.split("\n");
+    for( var rowIndex=0; rowIndex < rows.length; rowIndex++)
+    {
+        if(rowIndex+1 > rowsLimit) return {error:"ROWS_LIMIT", row: rowIndex+1, culumn: 0};
+        board.push([]);
+
+        var row = rows[rowIndex];
+        row = row.replaceAll(" &", "&").replaceAll("& ","&")
+        var buttons = row.split("&&")
+        for( var culumnIndex=0; culumnIndex < buttons.length; culumnIndex++ )
+        {
+            if(culumnIndex+1 > culumnsLimit) return {error:"CULUMNS_LIMIT", row: rowIndex+1, culumn: culumnIndex+1};
+            totalButtons++;
+            if(totalButtons > totalButtonsLimit) return {error:"TOTAL_LIMIT", row: rowIndex+1, culumn: culumnIndex+1};
+
+            var button = buttons[culumnIndex];
+
+            if(!button.includes("-")) return {error:"MISSING_LINK", row: rowIndex+1, culumn: culumnIndex+1};
+
+            //this code should be able to accept also things like "This - is -https://google.com"
+            var rawLink = button.split("-").slice(-1)[0]; //text after last -
+            var buttonName = replaceLast(button, "-"+rawLink, "").replace(/\s+/g, ' ').trim();
+            var link = rawLink.replaceAll(" ","");
+
+            if(buttonName.length > buttonNameLimit) return {error:"NAME_LIMIT", row: rowIndex+1, culumn: culumnIndex+1};
+            if(buttonName.length == 0) return {error:"NAME_TOO_SHORT", row: rowIndex+1, culumn: culumnIndex+1};
+
+            if(link.startsWith("@")) link = link.replace("@","t.me/");
+            else if(!link.startsWith("http://") && !link.startsWith("https://"))
+            {
+
+                link = "https://"+link;
+                if(!isValidUrl(link) || !link.includes(".")) return {error:"INVALID_LINK", row: rowIndex+1, culumn: culumnIndex+1};
+                
+            }
+            else if(!isValidUrl(link) || !link.includes(".")) return {error:"INVALID_LINK", row: rowIndex+1, culumn: culumnIndex+1};
+            
+
+            board[rowIndex].push( {text:buttonName, url: link} );
+
+        }
+
+    }
+
+    return board;
+    
+}
+
 module.exports = 
 {
 
+    isObject : isObject,
+    isArray : isArray,
+    replaceLast : replaceLast,
     isNumber : isNumber,
     randomInt : randomInt,
     isValidChat : isValidChat,
@@ -189,6 +302,8 @@ module.exports =
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     isAdminOfChat : isAdminOfChat,
-    IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage
+    IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage,
+    sendParsingError : sendParsingError,
+    parseTextToInlineKeyboard : parseTextToInlineKeyboard,
 
 }
