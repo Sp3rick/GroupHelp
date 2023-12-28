@@ -12,7 +12,7 @@ TODO:
     commands help panel
     notify founder and admins when bot get added in the group in thanksgiving message
     handle "chat_member" event adding/removing automatically from admin list
-    implement media and link buttons in rules.js
+    implement media in rules.js
 
 -medium term:
     (once bot will be declared ready to use) add code versioning system to update database when user update it
