@@ -71,6 +71,7 @@
     "MISSING_BUTTONS_ERROR" : "☑️ Button/s is not set.",
     "ENTITIES_FORMAT" : "🔮 Entities Formatting",
     "HTML_FORMAT" : "🌐 HTML Formatting",
+    "SEE_WHOLE_MESSAGE" : "👁‍🗨 See whole message",
     "COMMAND_RULES" : "rules",
     "COMMAND_SETTINGS" : "settings",
     "ADV_REPORT_ISSUE" : "If you think it is an error please report it to https://github.com/Sp3rick/GroupHelp/issues",
