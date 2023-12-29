@@ -1,4 +1,4 @@
-global.LGHVersion = "0.0.11";
+global.LGHVersion = "0.1.2";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
 const util = require('util')
