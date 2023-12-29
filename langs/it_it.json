@@ -1,30 +1,34 @@
-{
+Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
 
-    "FLAG" : "🇮🇹",
-    "LANG_SELECTOR" : "🇮🇹 Italiano",
-    "LANG_NAME" : "Italiano",
-    "LANG_CHOOSE" : "🇮🇹 Scegli la tua lingua",
-    "LANG_CHOOSE_GROUP" : "🇮🇹 Seleziona la lingua del gruppo",
-    "LANG_CHANGED" : "Ok, da adesso parlerò in italiano 🇮🇹",
-    "LANG_CHANGED_GROUP" : "Ok, da adesso parlerò in <i>{lang}</i> su questo gruppo",
-    "NEW_GROUP" : "<b>Grazie</b> per avermi aggiunto nel gruppo!\n• Non dimenticare di <b>farmi Admin nel gruppo</b> (vedi come), o non potrò funzionare correttamente\n• Usa /reload per verificare che è tutto ok",
-    "ADV_JOIN_CHANNEL" : "📢 Canale di LibreGroupHelp",
-    "PRESENTATION" : "👋🏻 Ciao {name}!\n@LibreGroupHelpBot è un bot <b>gratis, open source e rispettoso della privacy</b> alternativo a Group Help per gestire meglio i tuoi <b>gruppi</b>!\n\n👉🏻<b>Aggiungimi in un supergrouppo</b> e impostami come <b>Amministratore</b> in modo che posso entrare in azione!\n\n❓ <b>Quali sono i comandi?</b>\nUsa /help per vedere <b>tutti i comandi</b> e come funzionano! ",
-    "ADD_ME_TO_A_GROUP_BUTTON": "➕ Aggiungimi in un Gruppo ➕",
-    "GROUP_BUTTON": "👥Gruppo",
-    "SUPPORT_BUTTON" : "🔧Supporto",
-    "SUPPORT_ABOUT_BUTTON" : "🔧Supporto Bot",
-    "INFO_BUTTON" : "Informazioni💬",
-    "INFO" : "<b>Libre Group Help</b> esegue su Nodejs ed è un progetto <b>Open Source</b> che mira ad offrire un bot affidabile per gestire i tuoi gruppi restando allo stesso tempo <b>rispettoso della privacy</b>\n\n<b>Versione Bot:</b> <i>{LGHVersion}</i>\n\n<b>Staff bot</b>\n•@Sp3rick_hj, creatore e sviluppatore principale",
-    "COMMANDS_BUTTON" :  "📖 Comandi Bot",
-    "BACK_BUTTON" : "🔙Indietro",
-    "CHANNEL_BUTTON" : "Canale📢",
-    "SUPPORT_MESSAGE" : "👉🏻 Invia ora un messaggio con una richiesta allo staff.\n\n💡La richiesta vede essere inviata <b>in un solo messaggio</b>, altri messaggi non saranno ricevuti.",
-    "SUPPORT_SENT_CONFIRM" : "Messaggio inviato. Risponderemo il prima possibile.",
-    "SUPPORT_RECEIVED" : "👤Hai ricevuto un messaggio dal supporto, per replicare rispondi a questo messaggio",
-    "CANCEL_BUTTON" : "❌ Annulla",
-    "SETTINGS" : "Impostazioni",
-    "RULES_TITLE" : "<b>Regolamento del Gruppo</b>",
-    "COMMAND_RULES" : "regole",
-    "COMMAND_SETTINGS" : "impostazioni"
-}
+TODO:
+
+-short term:
+    
+    jsdoc GHbot emit events in main.js (urgent to have advices for easier creation directly on /plugins, currently you should create the plugin in main.js and then moving plugin-related code in /plugins)
+    implement time zone setting
+    jsdoc db (database) object
+    jsdoc GHbot object in GHbot.js
+    add configuration to allow/disallow adding bot from non-admin users
+    commands help panel
+    notify founder and admins when bot get added in the group in thanksgiving message
+    handle "chat_member" event adding/removing automatically from admin list
+    implement media in MessageMaker.js
+
+-medium term:
+    (once bot will be declared ready to use) add code versioning system to update database when user update it
+    optimize database.get, .update and .save to store in temporal array most used chats/users
+    create a privacy option to allow a user deleting his data from the bot
+
+-long  term:
+
+    support all group help functions and more
+    allow bot clone bot when user give a token
+
+
+
+
+config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
+
+Look also at some code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
+
+When you create a plugin you can document it on https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md
