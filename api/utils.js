@@ -248,8 +248,7 @@ function parseTextToInlineKeyboard(text)
         board.push([]);
 
         var row = rows[rowIndex];
-        row = row.replaceAll(" &", "&").replaceAll("& ","&")
-        var buttons = row.split("&&")
+        var buttons = row.split(" &&") //forcing space+&& because links may contain double &
         for( var culumnIndex=0; culumnIndex < buttons.length; culumnIndex++ )
         {
             if(culumnIndex+1 > culumnsLimit) return {error:"CULUMNS_LIMIT", row: rowIndex+1, culumn: culumnIndex+1};
@@ -261,8 +260,8 @@ function parseTextToInlineKeyboard(text)
             if(!button.includes("-")) return {error:"MISSING_LINK", row: rowIndex+1, culumn: culumnIndex+1};
 
             //this code should be able to accept also things like "This - is -https://google.com"
-            var rawLink = button.split("-").slice(-1)[0]; //text after last -
-            var buttonName = replaceLast(button, "-"+rawLink, "").replace(/\s+/g, ' ').trim();
+            var rawLink = button.split(" -").slice(-1)[0]; //forcing space+dash because links may contain double &
+            var buttonName = replaceLast(button, " -"+rawLink, "").replace(/\s+/g, ' ').trim();
             var link = rawLink.replaceAll(" ","");
 
             if(buttonName.length > buttonNameLimit) return {error:"NAME_LIMIT", row: rowIndex+1, culumn: culumnIndex+1};
@@ -304,6 +303,6 @@ module.exports =
     isAdminOfChat : isAdminOfChat,
     IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage,
     sendParsingError : sendParsingError,
-    parseTextToInlineKeyboard : parseTextToInlineKeyboard,
+    parseTextToInlineKeyboard : parseTextToInlineKeyboard
 
 }
