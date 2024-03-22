@@ -66,7 +66,7 @@ function getDatabase(TGbot) {
                 }
 
                 chat.rules = {};
-                chat.welcome = { state:true, once:false, clean:false, message:{} };
+                chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );

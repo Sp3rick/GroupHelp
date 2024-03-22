@@ -1,3 +1,9 @@
+When you create a plugin you can use our-made events with many variables already set
+If is a group the "chat" object will contain the full object
+Any "chat" object contain the boolean value chat.isGroup
+
+
+
 <b>Message Maker</b>
 (api/MessageMaker.js)
 
@@ -45,7 +51,9 @@ Adds on chat.welcome a custom object "welcomeObject"
 
 welcomeObject Object:
 
-state : true if welcome is enabled (default true)
+state : true if welcome is enabled (default false)
 once : true if should be sent only at first user join (default false)
-clean : true if last welcome message on the group should be deleted
+clean : true if last welcome message on the group should be (default false)
+joinList : array cronology of users that joined the group over time
+lastWelcomeId : messageId of last welcome message sent, useful if clean is enabled, false if never sent one before
 message : customMessage object

@@ -9,9 +9,28 @@ function main(args)
 
     l = global.LGHLangs; //importing langs object
 
-    GHbot.on( "message", (msg, chat, user) => {
+    GHbot.on( "message", async (msg, chat, user) => {
 
-        var command = msg.command;
+        //NOTE: deactivate this when captcha is enabled +create a function that handle a welcome message
+        if(chat.isGroup && chat.welcome.state && msg.hasOwnProperty("new_chat_members") )
+        {
+
+            var options = {reply_parameters: { message_id: msg.message_id, chat_id: chat.id }};
+            msg.new_chat_members.forEach(async (user) => {
+
+                if(user.is_bot) return;
+                if(chat.welcome.once && chat.welcome.joinList.includes(user.id)) return;
+
+                if(chat.welcome.clean && chat.welcome.lastWelcomeId != false)
+                    TGbot.deleteMessage(chat.id, chat.welcome.lastWelcomeId);
+
+                var sentMessage = await MSGMK.sendMessage(TGbot, chat.id, chat.welcome.message, false, options)
+                chat.welcome.joinList.push(user.id);
+                chat.welcome.lastWelcomeId = sentMessage.message_id;
+                db.chats.update(chat);
+                
+            });
+        }
 
         if( !user.waitingReply ) return;
         if( !user.waitingReplyType.startsWith("S_WELCOME") ) return;
