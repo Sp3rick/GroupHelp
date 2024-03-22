@@ -16,7 +16,7 @@ function main(args)
         if ( chat.isGroup ){
 
             if( command && IsEqualInsideAnyLanguage(command.name, "COMMAND_RULES") )
-                MSGMK.sendMessage(TGbot, chat.id, chat.rules, messageTitle);
+                MSGMK.sendMessage(TGbot, chat.id, chat.rules, l[chat.lang].RULES_TITLE);
 
         }
 
