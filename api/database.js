@@ -66,6 +66,7 @@ function getDatabase(TGbot) {
                 }
 
                 chat.rules = {};
+                chat.welcome = { state:true, once:false, clean:false, message:{} };
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -156,6 +157,7 @@ function getDatabase(TGbot) {
                 console.log( "admins added: " + JSON.stringify(newChat.admins));
                 if(chat.hasOwnProperty("lang")) newChat.lang = chat.lang;
                 if(chat.hasOwnProperty("rules")) newChat.rules = chat.rules;
+                if(chat.hasOwnProperty("welcome")) newChat.welcome = chat.welcome;
 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "updating chat to database lang:" + chat.lang );

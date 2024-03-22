@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js")
 const {IsEqualInsideAnyLanguage, isAdminOfChat} = require( "../api/utils.js" );
-const {MessageMakerCallback, MessageMakerMSG, MessageMakerSendMessage} = require( "../api/MessageMaker.js" )
+const MSGMK = require( "../api/MessageMaker.js" )
 
 function main(args)
 {
@@ -16,7 +16,7 @@ function main(args)
         if ( chat.isGroup ){
 
             if( command && IsEqualInsideAnyLanguage(command.name, "COMMAND_RULES") )
-                MessageMakerSendMessage(TGbot, chat.id, chat.rules, chat.lang);
+                MSGMK.sendMessage(TGbot, chat.id, chat.rules, messageTitle);
 
         }
 
@@ -30,9 +30,9 @@ function main(args)
 
         if( !isAdminOfChat(settingsChat, user.id) ) return;
 
-        var {MSGMK, user, updateMSGMK, updateUser} = MessageMakerMSG(TGbot, settingsChat.rules, msg, chat, user, "S_RULES");
+        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(TGbot, settingsChat.rules, msg, chat, user, "S_RULES");
 
-        settingsChat.rules = MSGMK;
+        settingsChat.rules = customMessage;
         if(updateMSGMK) db.chats.update(settingsChat);
         if(updateUser) db.users.update(user);
 
@@ -67,7 +67,7 @@ function main(args)
                     {
                         inline_keyboard :
                         [
-                            [{text: l[lang].RULES_CHANGE_BUTTON, callback_data: "S_RULES_MKMSG:"+settingsChatId}],
+                            [{text: l[lang].RULES_CHANGE_BUTTON, callback_data: "S_RULES#MSGMK:"+settingsChatId}],
                             //TODO: when it's done, add button to edit /rules command permission
                             [{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}],
                         ] 
@@ -78,13 +78,14 @@ function main(args)
 
         }
 
-        if( cb.data.startsWith("S_RULES_MKMSG") )
+        if( cb.data.startsWith("S_RULES#MSGMK") )
         {
 
-            var returnButton = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+settingsChatId}]];
-            var {MSGMK, user, updateMSGMK, updateUser} = MessageMakerCallback(TGbot, settingsChat.rules, cb, chat, user, "S_RULES", "<b>"+l[lang].REGULATION+"</b>", returnButton)
+            var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+settingsChatId}]];
+            var {customMessage, user, updateMSGMK, updateUser} =
+            MSGMK.callbackEvent(TGbot, settingsChat.rules, cb, chat, user, "S_RULES", returnButtons, l[lang].REGULATION, l[lang].RULES_TITLE)
 
-            settingsChat.rules = MSGMK;
+            settingsChat.rules = customMessage;
             if(updateMSGMK) db.chats.update(settingsChat);
             if(updateUser) db.users.update(user);
 
