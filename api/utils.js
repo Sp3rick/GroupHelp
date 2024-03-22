@@ -288,6 +288,84 @@ function parseTextToInlineKeyboard(text)
     
 }
 
+function extractMedia(msg)
+{
+
+    var type = false;
+    var fileId = false;
+    var thumbFileId = false;
+
+    if( msg.hasOwnProperty("document") && !msg.hasOwnProperty("animation"))
+    {
+        type = "document";
+        fileId = msg.document.file_id
+        if(msg.document.hasOwnProperty("thumbnail"))
+            thumbFileId = msg.document.thumbnail.file_id
+    }
+    if( msg.hasOwnProperty("animation") )
+    {
+        type = "animation";
+        fileId = msg.animation.file_id
+        if(msg.document.hasOwnProperty("thumbnail"))
+            thumbFileId = msg.document.thumbnail.file_id
+    }
+    if( msg.hasOwnProperty("audio") )
+    {
+        type = "audio";
+        fileId = msg.audio.file_id
+    }
+    if( msg.hasOwnProperty("photo") )
+    {
+        type = "photo";
+        fileId = msg.photo[0].file_id
+    }
+    if( msg.hasOwnProperty("video") )
+    {
+        type = "video";
+        fileId = msg.video.file_id
+        if(msg.video.hasOwnProperty("thumbnail"))
+            thumbFileId = msg.video.thumbnail.file_id
+    }
+    if( msg.hasOwnProperty("video_note") )
+    {
+        type = "video_note";
+        fileId = msg.video.file_id;
+        if(msg.video_note.hasOwnProperty("thumbnail"))
+            thumbFileId = msg.video_note.thumbnail.file_id
+    }
+    if( msg.hasOwnProperty("sticker") )
+    {
+        type = "sticker";
+        fileId = msg.sticker.file_id
+    }
+
+    var options = {};
+
+    if(thumbFileId)
+        options.thumbnail = thumbFileId;
+    if(msg.hasOwnProperty("has_media_spoiler"))
+        options.has_spoiler = msg.has_media_spoiler
+
+    return {type, fileId, options};
+    
+
+}
+
+function mediaTypeToMethod(type)
+{
+
+    switch (type) {
+        case "document": return "sendDocument";
+        case "animation": return "sendAnimation";
+        case "audio": return "sendAudio";
+        case "photo": return "sendPhoto";
+        case "video": return "sendVideo";
+        case "video_note": return "sendVideoNote";
+        case "sticker": return "sendSticker";
+    }
+
+}
+
 module.exports = 
 {
 
@@ -303,6 +381,8 @@ module.exports =
     isAdminOfChat : isAdminOfChat,
     IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage,
     sendParsingError : sendParsingError,
-    parseTextToInlineKeyboard : parseTextToInlineKeyboard
+    parseTextToInlineKeyboard : parseTextToInlineKeyboard,
+    extractMedia : extractMedia,
+    mediaTypeToMethod : mediaTypeToMethod
 
 }
