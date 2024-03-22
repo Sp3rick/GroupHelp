@@ -1,37 +1,45 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject} = require("./utils.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod} = require("./utils.js");
 
 /** 
- * @typedef {Object} MSGMK
+ * @typedef {Object} simpleMedia
+ * @property {String} type - Type of media (audio, photo, video, video_note, animation, sticker, document) or false
+ * @property {TelegramBot.File} fileId - media fileId or false
+ * @property {TelegramBot.FileOptions} options - additional options for TelegramBot
+ */
+
+/** 
+ * @typedef {Object} customMessage
  * @property {String} text - Text of messsage
  * @property {TelegramBot.MessageEntity} entities - Telegram entities of text
  * @property {Boolean} format - True if message should be formatted (enabled by default), mean that entities will be passed on sendMessage function
+ * @property {simpleMedia} media
  * @property {String} buttons - Can me transformed in inline_keyboard with parseTextToInlineKeyboard()
  * @property {TelegramBot.KeyboardButton} buttonsParsed - Specified bot name (ex. "usernamebot")
  */
 /** 
  * @typedef {Object} MessageMakerReturn
- * @property {MSGMK} MSGMK
+ * @property {customMessage} customMessage
  * @property {TelegramBot.User} user
- * @property {Boolean} updateMSGMK - If true means that MSGMK has changed
+ * @property {Boolean} updateMSGMK - If true means that customMessage has changed
  * @property {Boolean} updateUser - If true means that user has changed
  */
 
 /** 
  * @param  {TelegramBot} TGbot
- * @param  {MSGMK} MSGMK
+ * @param  {customMessage} customMessage
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
  * @param  {String} cb_prefix
  * @param  {String} title
- * @param  {TelegramBot.KeyboardButton} additionalButtons
+ * @param  {TelegramBot.KeyboardButton} returnButtons
  * 
  * 
  * @return {MessageMakerReturn}
  *         Parsed command object, false if is not a command
  */
-function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, additionalButtons)
+function callbackEvent(TGbot, customMessage, cb, chat, user, cb_prefix, returnButtons, title, messageTitle)
 {
 
     var l = global.LGHLangs;
@@ -40,31 +48,42 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
     var updateUser=false;
 
     title=title||"Message Maker";
-    additionalButtons=additionalButtons||[];
+    messageTitle=messageTitle||false;
+    returnButtons=returnButtons||[];
 
     var msg = cb.message;
     var lang = user.lang;
 
     var settingsChatId = cb.data.split(":")[1];
 
-    /// Deletions And Base
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_TEXT_DEL:") &&  MSGMK.hasOwnProperty("text") )
+    /// Deletions
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_DEL:") &&  customMessage.hasOwnProperty("text") )
     {
 
-        delete MSGMK.text;
-        delete MSGMK.entities;
+        delete customMessage.text;
+        delete customMessage.entities;
         updateMSGMK=true;
 
     }
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_BUTTONS_DEL:") &&  MSGMK.hasOwnProperty("buttons") )
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS_DEL:") &&  customMessage.hasOwnProperty("buttons") )
     {
 
-        delete MSGMK.buttons;
-        delete MSGMK.buttonsParsed;
+        delete customMessage.buttons;
+        delete customMessage.buttonsParsed;
         updateMSGMK=true;
 
     }
-    if( cb.data.startsWith(cb_prefix+"_MKMSG:") || cb.data.startsWith(cb_prefix+"_MKMSG_TEXT_DEL:") || cb.data.startsWith(cb_prefix+"_MKMSG_BUTTONS_DEL:") )
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA_DEL:") &&  customMessage.hasOwnProperty("media") )
+    {
+
+        delete customMessage.media;
+        updateMSGMK=true;
+
+    }
+
+    // Base panel OR deletion return
+    if( cb.data.startsWith(cb_prefix+"#MSGMK:") || cb.data.startsWith(cb_prefix+"#MSGMK_RESET-RETURN:") ||
+    cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_DEL:") || cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS_DEL:") || cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA_DEL:") )
     {
 
         if( user.waitingReply )
@@ -73,9 +92,9 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
             updateUser=true;
         }
 
-        var hasText = MSGMK.hasOwnProperty("text");
-        var hasMedia = MSGMK.hasOwnProperty("media");
-        var hasButtons = MSGMK.hasOwnProperty("buttons");
+        var hasText = customMessage.hasOwnProperty("text");
+        var hasMedia = customMessage.hasOwnProperty("media");
+        var hasButtons = customMessage.hasOwnProperty("buttons");
 
         var text = title+"\n\n"+
         l[lang].TEXT_BUTTON + (hasText ? " ✅" : " ❌") +"\n"+
@@ -91,23 +110,31 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
             {
                 inline_keyboard :
                 [
-                    [{text: l[lang].TEXT_BUTTON, callback_data: cb_prefix+"_MKMSG_TEXT:"+settingsChatId},
-                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"_MKMSG_TEXT_SEE:"+settingsChatId}],
+                    [{text: l[lang].TEXT_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT:"+settingsChatId},
+                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT_SEE:"+settingsChatId}],
 
-                    [{text: l[lang].S_MEDIA_BUTTON, callback_data: cb_prefix+"_MKMSG_MEDIA:"+settingsChatId},
-                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"_MKMSG_MEDIA_SEE:"+settingsChatId}],
+                    [{text: l[lang].S_MEDIA_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA:"+settingsChatId},
+                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA_SEE:"+settingsChatId}],
 
-                    [{text: l[lang].URLBUTTONS_BUTTON, callback_data: cb_prefix+"_MKMSG_BUTTONS:"+settingsChatId},
-                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"_MKMSG_BUTTONS_SEE:"+settingsChatId}],
+                    [{text: l[lang].URLBUTTONS_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS:"+settingsChatId},
+                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS_SEE:"+settingsChatId}],
 
-                    [{text: l[lang].SEE_WHOLE_MESSAGE, callback_data: cb_prefix+"_MKMSG_SEE:"+settingsChatId}]
+                    [{text: l[lang].SEE_WHOLE_MESSAGE, callback_data: cb_prefix+"#MSGMK_SEE:"+settingsChatId}]
                 ] 
             } 
         }
 
-        additionalButtons.forEach(button => {
+        returnButtons.forEach(button => {
             options.reply_markup.inline_keyboard.push( button );
         });
+
+        if( cb.data.startsWith(cb_prefix+"#MSGMK_RESET-RETURN:") )
+        {
+            TGbot.sendMessage(chat.id, text, options);
+            TGbot.deleteMessage(chat.id, cb.message.message_id);
+
+            return {customMessage, user, updateMSGMK, updateUser} 
+        }
     
         TGbot.editMessageText(text, options)
         TGbot.answerCallbackQuery(cb.id);
@@ -115,11 +142,11 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
     }
 
     ///TEXT related
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_TEXT:") )
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT:") )
     {
 
         user.waitingReply = true;
-        user.waitingReplyType = cb_prefix+"_MKMSG_TEXT:"+settingsChatId;
+        user.waitingReplyType = cb_prefix+"#MSGMK_TEXT:"+settingsChatId;
         updateUser=true;
 
         TGbot.editMessageText( l[lang].SET_MESSAGE_ADV, 
@@ -131,8 +158,8 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
                 {
                     inline_keyboard :
                     [
-                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"_MKMSG_TEXT_DEL:"+settingsChatId}],
-                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"_MKMSG:"+settingsChatId}],
+                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT_DEL:"+settingsChatId}],
+                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
                     ] 
                 } 
             }
@@ -140,18 +167,18 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
         TGbot.answerCallbackQuery(cb.id);
 
     }
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_TEXT_SWITCH:") ){
-        MSGMK.format = !MSGMK.format;
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_SWITCH:") ){
+        customMessage.format = !customMessage.format;
         updateMSGMK=true;
     }
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_TEXT_SEE:") || cb.data.startsWith(cb_prefix+"_MKMSG_TEXT_SWITCH:") )
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_SEE:") || cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_SWITCH:") )
     {
 
-        if( !MSGMK.hasOwnProperty("text") )
+        if( !customMessage.hasOwnProperty("text") )
         {
 
             TGbot.answerCallbackQuery(cb.id, {text: l[lang].MISSING_MESSAGE_ERROR, show_alert: true})
-            return {MSGMK, user, updateMSGMK, updateUser};
+            return {customMessage, user, updateMSGMK, updateUser};
 
         }
 
@@ -162,38 +189,98 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
             {
                 inline_keyboard :
                 [
-                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"_MKMSG:"+settingsChatId}],
+                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
                 ] 
             } 
         }
 
-        if(MSGMK.format)
+        if(customMessage.format)
         {
-            if(MSGMK.hasOwnProperty("entities"))
-                options.entities = MSGMK.entities;
+            if(customMessage.hasOwnProperty("entities"))
+                options.entities = customMessage.entities;
 
-            options.reply_markup.inline_keyboard.unshift([{text: l[lang].ENTITIES_FORMAT, callback_data: cb_prefix+"_MKMSG_TEXT_SWITCH:"+settingsChatId}])
+            options.reply_markup.inline_keyboard.unshift([{text: l[lang].ENTITIES_FORMAT, callback_data: cb_prefix+"#MSGMK_TEXT_SWITCH:"+settingsChatId}])
         }
         else
         {
             options.parse_mode = "HTML"; 
-            options.reply_markup.inline_keyboard.unshift([{text: l[lang].HTML_FORMAT, callback_data: cb_prefix+"_MKMSG_TEXT_SWITCH:"+settingsChatId}])
+            options.reply_markup.inline_keyboard.unshift([{text: l[lang].HTML_FORMAT, callback_data: cb_prefix+"#MSGMK_TEXT_SWITCH:"+settingsChatId}])
         }               
 
     
 
-        TGbot.editMessageText(MSGMK.text, options)
+        TGbot.editMessageText(customMessage.text, options)
+        TGbot.answerCallbackQuery(cb.id);
+
+
+    }
+
+    //MEDIA related
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA:") )
+    {
+
+        user.waitingReply = true;
+        user.waitingReplyType = cb_prefix+"#MSGMK_MEDIA:"+settingsChatId;
+        updateUser=true;
+
+        TGbot.editMessageText( l[lang].SET_MEDIA_ADV, 
+            {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : 
+                {
+                    inline_keyboard :
+                    [
+                        [{text: l[lang].REMOVE_MEDIA_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA_DEL:"+settingsChatId}],
+                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
+                    ] 
+                } 
+            }
+        )
+        TGbot.answerCallbackQuery(cb.id);
+
+    }
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA_SEE:") )
+    {
+
+        if( !customMessage.hasOwnProperty("media") )
+        {
+
+            TGbot.answerCallbackQuery(cb.id, {text: l[lang].MISSING_MEDIA_ERROR, show_alert: true})
+            return {customMessage, user, updateMSGMK, updateUser};
+
+        }
+
+        var options = {
+            message_id : msg.message_id,
+            chat_id : chat.id,
+            reply_markup : 
+            {
+                inline_keyboard :
+                [
+                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK_RESET-RETURN:"+settingsChatId}],
+                ] 
+            } 
+        }
+        options = Object.assign( {}, options, customMessage.media.options );
+
+        var method = mediaTypeToMethod(customMessage.media.type)
+
+        TGbot[method](chat.id, customMessage.media.fileId, options);
+        TGbot.deleteMessage(chat.id, msg.message_id);
+
         TGbot.answerCallbackQuery(cb.id);
 
 
     }
 
     ///BUTTONS related
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_BUTTONS:") )
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS:") )
     {
 
         user.waitingReply = true;
-        user.waitingReplyType = cb_prefix+"_MKMSG_BUTTONS:"+settingsChatId;
+        user.waitingReplyType = cb_prefix+"#MSGMK_BUTTONS:"+settingsChatId;
         updateUser=true;
 
         TGbot.editMessageText( l[lang].SET_BUTTONS_ADV, 
@@ -205,8 +292,8 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
                 {
                     inline_keyboard :
                     [
-                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"_MKMSG_BUTTONS_DEL:"+settingsChatId}],
-                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"_MKMSG:"+settingsChatId}],
+                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS_DEL:"+settingsChatId}],
+                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
                     ] 
                 } 
             }
@@ -214,14 +301,14 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
         TGbot.answerCallbackQuery(cb.id);
 
     }
-    if( cb.data.startsWith("S_RULES_MKMSG_BUTTONS_SEE:") )
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS_SEE:") )
     {
 
-        if( !MSGMK.hasOwnProperty("buttons") )
+        if( !customMessage.hasOwnProperty("buttons") )
         {
 
             TGbot.answerCallbackQuery(cb.id, {text: l[lang].MISSING_BUTTONS_ERROR, show_alert: true})
-            return {MSGMK, user, updateMSGMK, updateUser};;
+            return {customMessage, user, updateMSGMK, updateUser};;
 
         }
 
@@ -235,27 +322,25 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
             } 
         }
 
-        options.reply_markup.inline_keyboard = MSGMK.buttonsParsed; 
+        options.reply_markup.inline_keyboard = customMessage.buttonsParsed; 
 
-        options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_MKMSG:"+settingsChatId}])
+        options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}])
 
-        TGbot.editMessageText("<code>"+MSGMK.buttons+"</code>", options)
+        TGbot.editMessageText("<code>"+customMessage.buttons+"</code>", options)
         TGbot.answerCallbackQuery(cb.id);
 
 
     }
 
-    ///See only
-    if( cb.data.startsWith(cb_prefix+"_MKMSG_SEE:") )
+    ///See entire message
+    if( cb.data.startsWith(cb_prefix+"#MSGMK_SEE:") )
     {
 
-        console.log("bruh")
-
         TGbot.deleteMessage(chat.id, msg.message_id);
-        MessageMakerSendMessage(TGbot, chat.id, MSGMK, lang).then( () => {
+        sendMessage(TGbot, chat.id, customMessage, messageTitle).then( () => {
 
             TGbot.sendMessage(chat.id, "➖➖➖➖➖➖➖➖➖➖", {
-                reply_markup: {inline_keyboard: [[{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"_MKMSG:"+settingsChatId}]]}
+                reply_markup: {inline_keyboard: [[{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}]]}
             })
 
         } )
@@ -264,13 +349,13 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
     }
 
 
-    return {MSGMK, user, updateMSGMK, updateUser}
+    return {customMessage, user, updateMSGMK, updateUser}
 
 }
 
 /** 
  * @param  {TelegramBot} TGbot
- * @param  {MSGMK} MSGMK
+ * @param  {customMessage} customMessage
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
@@ -280,7 +365,7 @@ function MessageMakerCallback(TGbot, MSGMK, cb, chat, user, cb_prefix, title, ad
  * @return {MessageMakerReturn}
  *         Parsed command object, false if is not a command
  */
-function MessageMakerMSG(TGbot, MSGMK, msg, chat, user, cb_prefix)
+function messageEvent(TGbot, customMessage, msg, chat, user, cb_prefix)
 {
 
     var l = global.LGHLangs;
@@ -296,44 +381,65 @@ function MessageMakerMSG(TGbot, MSGMK, msg, chat, user, cb_prefix)
         {
             inline_keyboard :
             [
-                [{text: l[user.lang].BACK_BUTTON, callback_data: "S_RULES_MKMSG:"+settingsChatId}],
+                [{text: l[user.lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
             ] 
         } 
     }
 
-    if( user.waitingReplyType.startsWith(cb_prefix+"_MKMSG_TEXT:") )
+    if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_TEXT:") )
+    {
+
+        if( !msg.hasOwnProperty("text") )
         {
 
-            if( !msg.hasOwnProperty("text") )
-            {
+            TGbot.sendMessage( chat.id, l[user.lang].PARSING_ERROR_TEXT, options)
+            return {customMessage, user, updateMSGMK, updateUser};
 
-                TGbot.sendMessage( chat.id, l[user.lang].PARSING_ERROR_TEXT, options)
-                return {MSGMK, user, updateMSGMK, updateUser};
+        }
 
-            }
+        customMessage.text = msg.text;
+        customMessage.format = true;
+        if(customMessage.hasOwnProperty("entities")) delete customMessage.entities; //delete old entities
+        if(msg.hasOwnProperty("entities")) customMessage.entities = msg.entities;
+        updateMSGMK=true
 
-            MSGMK.text = msg.text;
-            MSGMK.format = true;
-            if(MSGMK.hasOwnProperty("entities")) delete MSGMK.entities; //delete old entities
-            if(msg.hasOwnProperty("entities")) MSGMK.entities = msg.entities;
-            updateMSGMK=true
+        user.waitingReply = false;
+        updateUser=true;
 
-            user.waitingReply = false;
-            updateUser=true;
-
-            TGbot.sendMessage( chat.id, l[user.lang].MESSAGE_SET_BUTTON, options )
+        TGbot.sendMessage( chat.id, l[user.lang].MESSAGE_SET_BUTTON, options )
 
 
     }
 
-    if( user.waitingReplyType.startsWith(cb_prefix+"_MKMSG_BUTTONS:") )
+    if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_MEDIA:") )
+    {
+
+        var media = extractMedia(msg);
+        console.log(media)
+        if(!media.type)
+        {
+            TGbot.sendMessage( chat.id, l[user.lang].MEDIA_INCORRECT, options )
+            return {customMessage, user, updateMSGMK, updateUser};
+        }
+
+        customMessage.media = media;
+        updateMSGMK=true
+
+        user.waitingReply = false;
+        updateUser=true;
+
+        TGbot.sendMessage( chat.id, l[user.lang].MEDIA_SET_BUTTON, options )
+
+    }
+
+    if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_BUTTONS:") )
     {
 
         if( !msg.hasOwnProperty("text") )
         {
 
             TGbot.sendMessage( chat.id, l[user.lang].PARSING_ERROR_TEXT, options )
-            return {MSGMK, user, updateMSGMK, updateUser};
+            return {customMessage, user, updateMSGMK, updateUser};
 
         }
 
@@ -363,12 +469,12 @@ function MessageMakerMSG(TGbot, MSGMK, msg, chat, user, cb_prefix)
 
             options.disable_web_page_preview = true;
             TGbot.sendMessage( chat.id, text, options);
-            return {MSGMK, user, updateMSGMK, updateUser};
+            return {customMessage, user, updateMSGMK, updateUser};
 
         }
 
-        MSGMK.buttonsParsed = keyboard;
-        MSGMK.buttons = msg.text;
+        customMessage.buttonsParsed = keyboard;
+        customMessage.buttons = msg.text;
         updateMSGMK=true;
 
         user.waitingReply = false;
@@ -378,59 +484,74 @@ function MessageMakerMSG(TGbot, MSGMK, msg, chat, user, cb_prefix)
 
     }
 
-    return {MSGMK, user, updateMSGMK, updateUser};
+    return {customMessage, user, updateMSGMK, updateUser};
 
 }
 
 /** 
  * @param  {TelegramBot} TGbot
  * @param  {TelegramBot.ChatId} chatId
- * @param  {MSGMK} MSGMK
+ * @param  {customMessage} customMessage
  * @param  {String} lang 
  * @param  {TelegramBot.SendMessageOptions} additionalOptions 
  * 
  * @return {Promise<TelegramBot.Message>}
  *         Parsed command object, false if is not a command
  */
-function MessageMakerSendMessage(TGbot, chatId, MSGMK, lang, additionalOptions)
+function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptions)
 {
 
     additionalOptions=additionalOptions||{};
+    messageTitle=messageTitle||false;
 
     var options = {reply_markup:{}};
 
-    var text = l[lang].RULES_TITLE+"\n\n";
+    var text = messageTitle ? messageTitle+"\n\n" : "";
 
-    if(MSGMK.format && MSGMK.hasOwnProperty("entities"))
+    if(customMessage.format && customMessage.hasOwnProperty("entities"))
     {
-        options.entities = MSGMK.entities;
+        options.entities = customMessage.entities;
 
         for(var i=0; i < options.entities.length; i++)
             options.entities[i].offset += text.length;
 
         options.entities.unshift({offset: 0, length: text.length, type: "bold" })
 
-        text += MSGMK.text;
+        text += customMessage.text;
     }
     else
     {
         options.parse_mode = "HTML";
-        text = "<b>"+text+"</b>"+(MSGMK.text||"");
+        text = "<b>"+text+"</b>"+(customMessage.text||"");
     }
 
-    options.reply_markup.inline_keyboard = MSGMK.buttonsParsed;
+    options.reply_markup.inline_keyboard = customMessage.buttonsParsed;
 
     options = Object.assign( {}, options, additionalOptions )
     
+    if(customMessage.media)
+    {
+
+        var method = mediaTypeToMethod(customMessage.media.type);
+        options = Object.assign( {}, options, customMessage.media.options );
+        options.caption = text;
+        if(options.hasOwnProperty("entities"))
+        {
+            options.caption_entities = JSON.stringify(options.entities);
+        }
+        console.log(options)
+        return TGbot[method]( chatId, customMessage.media.fileId, options );
+        
+    }
+
     return TGbot.sendMessage( chatId, text, options );
 
 }
 
 module.exports = {
 
-    MessageMakerCallback : MessageMakerCallback,
-    MessageMakerMSG : MessageMakerMSG,
-    MessageMakerSendMessage : MessageMakerSendMessage,
-    MessageMakerSendMessage : MessageMakerSendMessage
+    callbackEvent : callbackEvent,
+    messageEvent : messageEvent,
+    sendMessage : sendMessage,
 
 }
