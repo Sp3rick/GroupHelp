@@ -1,5 +1,6 @@
 Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
 
+Note: install dependency with "npm i yagop/node-telegram-bot-api" for latest version of api (required)
 TODO:
 
 -short term:
