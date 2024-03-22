@@ -507,6 +507,7 @@ function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptio
     var options = {reply_markup:{}};
 
     var text = messageTitle ? messageTitle+"\n\n" : "";
+    if(text.length == 0)text="CustomMessage"
 
     if(customMessage.format && customMessage.hasOwnProperty("entities"))
     {
