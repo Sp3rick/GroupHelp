@@ -3,7 +3,7 @@ Open-Source re-creation of telegram group manager Group Help in nodejs, contribs
 TODO:
 
 -short term:
-    
+
     jsdoc GHbot emit events in main.js (urgent to have advices for easier creation directly on /plugins, currently you should create the plugin in main.js and then moving plugin-related code in /plugins)
     implement time zone setting
     jsdoc db (database) object
@@ -12,7 +12,7 @@ TODO:
     commands help panel
     notify founder and admins when bot get added in the group in thanksgiving message
     handle "chat_member" event adding/removing automatically from admin list
-    implement media in MessageMaker.js
+    implement photo preview-mode in MessageMaker.js
 
 -medium term:
     (once bot will be declared ready to use) add code versioning system to update database when user update it
