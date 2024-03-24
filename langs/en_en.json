@@ -101,5 +101,10 @@
     "DELETE_LAST_MESSAGE_BUTTON" : "♻️ Delete last message",
     "COMMAND_RULES" : "rules",
     "COMMAND_SETTINGS" : "settings",
+    "MODERATOR" : "Moderator",
+    "MUTER" : "Muter",
+    "CLEANER" : "Cleaner",
+    "HELPER" : "Helper",
+    "FREE" : "Free",
     "ADV_REPORT_ISSUE" : "If you think it is an error please report it to https://github.com/Sp3rick/GroupHelp/issues"
 }
