@@ -39,65 +39,57 @@ async function main(config) {
         msg.chat.isGroup =  (msg.chat.type == "supergroup" || msg.chat.type == "group")
         var isGroup = msg.chat.isGroup;
 
-        if ( !db.users.exhist( from.id ) ){
-
+        if ( !db.users.exhist( from.id ) )
             db.users.add( from );
+        var user = Object.assign( {},  db.users.get( from.id ), msg.from );
 
-        };
+        if(isGroup && !db.chats.exhist( msg.chat.id ))
+        {    
+            console.log( "Adding new group to database" );
 
-        if(isGroup)
-        {
-            if ( !db.chats.exhist( msg.chat.id ) ){//this code should run only if bot was added to a group while was offline
-    
-                console.log( "Adding new group to database" );
-                msg.chat.lang = config.reserveLang;
-                console.log( "Group lang: " + msg.chat.lang )
-                db.chats.add(msg.chat)
+            msg.chat.lang = config.reserveLang;
+            if(msg.hasOwnProperty("new_chat_member") && msg.new_chat_members.some(user=>{user.id==bot.id}))//If possible inherit lang from who added the bot
+                msg.chat.lang = user.lang;
+            console.log( "Group lang: " + msg.chat.lang )
 
-                db.chats.update( msg.chat );
+            db.chats.add(msg.chat)
+            db.chats.update( msg.chat );
+        
+            await TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].NEW_GROUP,
+            { 
+                parse_mode : "HTML",
+                reply_markup :
+                {
+                    inline_keyboard :
+                    [
+                        [ {text: l[msg.chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"} ]
+                    ] 
+                } 
+            }
+            )
 
-                await TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].NEW_GROUP,
+            TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].SETUP_GUIDE,
                 { 
                     parse_mode : "HTML",
                     reply_markup :
                     {
                         inline_keyboard :
                         [
-                            [ {text: l[msg.chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"} ]
+                            [
+                                {text: l[msg.chat.lang].LANGS_BUTTON2, callback_data: "LANGS_BUTTON:"+msg.chat.id},
+                                {text: l[msg.chat.lang].SETTINGS_BUTTON, callback_data: "SETTINGS_SELECT:"+msg.chat.id},
+                            ]
                         ] 
                     } 
                 }
-                )
-    
-                TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].SETUP_GUIDE,
-                    { 
-                        parse_mode : "HTML",
-                        reply_markup :
-                        {
-                            inline_keyboard :
-                            [
-                                [
-                                    {text: l[msg.chat.lang].LANGS_BUTTON2, callback_data: "LANGS_BUTTON:"+msg.chat.id},
-                                    {text: l[msg.chat.lang].SETTINGS_BUTTON, callback_data: "SETTINGS_SELECT:"+msg.chat.id},
-                                ]
-                            ] 
-                        } 
-                    }
-                )
-    
-            }    
+            )
+     
         }
-
-        
-        var user = Object.assign( {},  db.users.get( from.id ), msg.from );
-
         var chat = Object.assign( {}, ((msg.chat.isGroup ? db.chats.get( msg.chat.id ) : {})), msg.chat );
         
 
         var command = parseCommand(msg.text || "");
         msg.command = command;
-
-        
 
         
         if ( msg.chat.type == "private" ){
@@ -344,66 +336,6 @@ async function main(config) {
 
         var chat = msg.chat;
         var from = msg.from;
-        console.log(msg)
-
-
-        var newMember = msg.new_chat_member;
-        if ( newMember.id == bot.id ){
-
-            if ( !db.chats.exhist( chat.id ) && !db.users.exhist( from.id ) ){
-
-                db.users.add( from );
-
-            }
-            if ( !db.chats.exhist( chat.id ) ){//if there arent already the chat add it
-
-                console.log( "Adding new group to database" );
-                chat.lang = db.users.get( from.id ).lang
-                console.log( "Group lang: " + chat.lang )
-                db.chats.add(chat)
-
-            }
-            else{
-
-                chat = db.chats.get(chat.id);
-
-            }
-
-            db.chats.update( chat );
-
-            console.log( "Added bot to a group, lang: " + chat.lang );
-            await TGbot.sendMessage(chat.id, l[chat.lang].NEW_GROUP,
-            { 
-                parse_mode : "HTML",
-                reply_markup :
-                {
-                    inline_keyboard :
-                    [
-                        [ {text: l[chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"} ]
-                    ] 
-                } 
-            }
-            )
-
-            TGbot.sendMessage(chat.id, l[chat.lang].SETUP_GUIDE,
-                { 
-                    parse_mode : "HTML",
-                    reply_markup :
-                    {
-                        inline_keyboard :
-                        [
-                            [
-                                {text: l[chat.lang].LANGS_BUTTON2, callback_data: "LANGS_BUTTON:"+chat.id},
-                                {text: l[chat.lang].SETTINGS_BUTTON, callback_data: "SETTINGS_SELECT:"+chat.id},
-                            ]
-                        ] 
-                    } 
-                }
-            )
- 
-            
-
-        }
 
     } )
 

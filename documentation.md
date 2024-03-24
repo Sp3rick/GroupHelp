@@ -32,8 +32,10 @@ var loadedLangs = Object.keys(l).length; Total number of loaded languages
 Additional data of custom <i>chat</i> object:
 lang : current setted chat lang
 isGroup : result of (chat.type == "supergroup" || chat.type == "group")
-rules : rules plugin related data
--When you modify any of this data don't forget to update it with db.chats.update(chats)
+users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
+rules : rules.js plugin related data
+welcome : welcome.js plugin related data
+-When you modify any of this data don't forget to update it with db.chats.update(chat)
 
 
 <b>Custom User Object</b>
