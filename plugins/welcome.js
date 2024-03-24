@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {IsEqualInsideAnyLanguage, isAdminOfChat} = require( "../api/utils.js" );
+const {isAdminOfChat} = require( "../api/utils.js" );
 const MSGMK = require( "../api/MessageMaker.js" )
 
 function main(args)
