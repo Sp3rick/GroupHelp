@@ -83,4 +83,8 @@ Separate language selection and management for groups and users fully implemente
 
 
 
+Complete list of implemented commands:
 
+/settings - open group settings
+/rules - show group rules
+/permissions (or /perms) - show permissions summary of a user

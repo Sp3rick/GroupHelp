@@ -1,11 +1,19 @@
 const { parse } = require("querystring");
 
+function bold(text)
+{
+    return "<b>"+text+"</b>";
+}
+
 let isObject = function(a) {
     return (!!a) && (a.constructor === Object);
 };
 let isArray = function(a) {
     return (!!a) && (a.constructor === Array);
 };
+function isString(v) {
+    return typeof v === "string";
+}
 const replaceLast = (str, pattern, replacement) => {
     const match =
       typeof pattern === 'string'
@@ -128,7 +136,7 @@ function genSettingsKeyboard(lang, chatId)
         {text: l[lang].S_PORN_BUTTON, callback_data: "S_PORN_BUTTON:"+chatId}],
 
         [{text: l[lang].S_WARN_BUTTON, callback_data: "S_RULESS_WARN_BUTTONBUTTON:"+chatId},
-        {text: l[lang].S_NIGTH_BUTTON, callback_data: "S_NIGTH_BUTTON:"+chatId}],
+        {text: l[lang].S_NIGHT_BUTTON, callback_data: "S_NIGHT_BUTTON:"+chatId}],
 
         [{text: l[lang].S_TAG_BUTTON, callback_data: "S_TAG_BUTTON:"+chatId},
         {text: l[lang].S_LINK_BUTTON, callback_data: "S_LINK_BUTTON:"+chatId}],
@@ -143,6 +151,44 @@ function genSettingsKeyboard(lang, chatId)
     ] 
 
     return keyboard;
+
+}
+
+function stateToEmoji(perm)
+{
+    switch(perm)
+    {
+        case 1: return "✅";
+        case 0: return "➖";
+        case -1: return "❌";
+    }
+}
+
+//TODO due to code here, we should force every custom command alias to be characters/numbers only, or it may inflict with html formatting or "COMMAND_" could search for unexhisting command
+function genPermsReport(lang, perms)
+{
+
+    var text=bold(l[lang].COMMANDS+": ");
+    perms.commands.forEach(commandName => {
+        var command = commandName;
+        if(commandName.startsWith("COMMAND_")) //if is language-depenent command translate it to the acutal command
+            command = l[lang][commandName];
+
+        text+="/"+command+" ";
+    });
+
+    text+="\n\n"+
+    bold(l[lang].FLOOD+": ")+stateToEmoji(perms.flood)+"\n"+
+    bold(l[lang].LINKS+": ")+stateToEmoji(perms.link)+"\n"+
+    bold(l[lang].TGLINKS+": ")+stateToEmoji(perms.tgLink)+"\n"+
+    bold(l[lang].FORWARD+": ")+stateToEmoji(perms.forward)+"\n"+
+    bold(l[lang].QUOTE+": ")+stateToEmoji(perms.quote)+"\n"+
+    bold(l[lang].PORN+": ")+stateToEmoji(perms.porn)+"\n"+
+    bold(l[lang].NIGHT+": ")+stateToEmoji(perms.night)+"\n"+
+    bold(l[lang].MEDIA+": ")+stateToEmoji(perms.media)+"\n"+
+    bold(l[lang].ROLES+": ")+stateToEmoji(perms.media)+"\n";
+
+    return text;
 
 }
 
@@ -179,6 +225,25 @@ function isValidUser(user){
     }
     return true
 
+}
+
+function exhistInsideAnyLanguage(optionName)
+{
+    var caseSensitive = caseSensitive || false;
+
+    var l = global.LGHLangs;
+    langKeys = Object.keys(l);
+    loadedLangs = Object.keys(l).length;
+
+
+    for( var langIndex = 0; langIndex < loadedLangs; langIndex++ )
+    {
+        var curLang = l[langKeys[langIndex]]
+        if(curLang.hasOwnProperty(optionName))
+            return true
+    }
+
+    return false;
 }
 
 function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
@@ -369,8 +434,10 @@ function mediaTypeToMethod(type)
 module.exports = 
 {
 
+    bold : bold,
     isObject : isObject,
     isArray : isArray,
+    isString :isString,
     replaceLast : replaceLast,
     isNumber : isNumber,
     randomInt : randomInt,
@@ -378,7 +445,10 @@ module.exports =
     isValidUser : isValidUser,
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
+    stateToEmoji : stateToEmoji,
+    genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,
+    exhistInsideAnyLanguage : exhistInsideAnyLanguage,
     IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage,
     sendParsingError : sendParsingError,
     parseTextToInlineKeyboard : parseTextToInlineKeyboard,

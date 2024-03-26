@@ -223,6 +223,9 @@ function main(args)
 
         }
 
+        if( cb.data.startsWith("S_CLOSE_BUTTON") )
+            TGbot.deleteMessage(chat.id, msg.message_id);
+
         //TODO: be sure that a non-admin user can't modify with some bug the language
         if( cb.data.startsWith( "LANGSET=" ) ) //expected "LANGSET=en_en:managedChatId" or "LANGSET=en_en" 
         {
