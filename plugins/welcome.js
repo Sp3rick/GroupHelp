@@ -129,7 +129,6 @@ function main(args)
                     parse_mode : "HTML",
                     reply_markup : 
                     {
-                        //TODO: buildare tastiera del welcome
                         inline_keyboard :
                         [
                             [{text: l[lang].TURN_OFF_BUTTON, callback_data: "S_WELCOME_OFF:"+settingsChatId}, {text: l[lang].TURN_ON_BUTTON, callback_data: "S_WELCOME_ON:"+settingsChatId} ],
