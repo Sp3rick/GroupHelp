@@ -1,6 +1,7 @@
 const fs = require( "fs" );
 const TelegramBot = require('node-telegram-bot-api');
-const {randomInt, isNumber, isValidChat, isValidUser} = require( global.directory + "/api/utils.js" );
+const {randomInt, isNumber, isValidChat, isValidUser} = require( global.directory + "/api/utils.js" )
+var RM = require("../api/rolesManager.js");
 
 /**
  * @typedef {import("node-telegram-bot-api")} TelegramBot
@@ -68,7 +69,7 @@ function getDatabase(TGbot) {
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
                 chat.users = {};
-                chat.roles = {};
+                chat.roles = RM.newPremadeRolesObject();
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
