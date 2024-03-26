@@ -1,6 +1,7 @@
 When you create a plugin you can use our-made events with many variables already set
 If is a group the "chat" object will contain the full object
-Any "chat" object contain the boolean value chat.isGroup
+Any "chat" object contain the boolean value chat.isGroup and if true also chat.lang for lang of the group
+Any "msg" object contain the "command" result of api/utils.js/parseCommand(msg.text)
 
 
 <b>Roles Manager</b>
@@ -84,15 +85,16 @@ This plugin manages users data in the group
 
 customPerms Object:
 
-commands: array of commands
+commands: array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command
 flood: permission to flood messages [1/0/-1]
 link: permission to send links [1/0/-1]
 tgLink: permission to send telegram links/usernames [1/0/-1]
 forward: permission to forward messages from anywhere [1/0/-1]
 quote: permission to quote from anywhere [1/0/-1]
 porn: bypass porn/gore checks [1/0/-1]
-nigth: bypass any nigth mode  limitation [1/0/-1]
+night: bypass any night mode  limitation [1/0/-1]
 media: bypass any media limitation [1/0/-1]
+roles: permission to change roles of lower level users [1/0/-1]
 
 
 chat.users[id].perms overwrites a permission of chat.roles[role].perms if users permission isn't neutral (0), array get summed
@@ -105,9 +107,11 @@ perms: customPerms object for all user-specific permissions
 roles: array user roles, string for pre-made roles, number for custom roles (user-made)
 
 
-chat.roles[role] GHRoles Object: ( the pre-made roles are in global.roles[roleName] )
+chat.roles[role] GHRole Object: ( the pre-made roles are in global.roles[roleName] )
 
 name: role name
+emoji: emoji for the role
+level: role level, higher level users can use commands that affect  lower level users
 perms: customPerms object applyed at lowest priority on any user in this role
 users: array of userId in this role
 
