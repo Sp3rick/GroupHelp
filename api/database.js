@@ -68,6 +68,7 @@ function getDatabase(TGbot) {
 
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
+                chat.flood = { messages:3, time:5, punishment:1, delete:true };
                 chat.users = {};
                 chat.roles = RM.newPremadeRolesObject();
                 
@@ -161,6 +162,7 @@ function getDatabase(TGbot) {
                 if(chat.hasOwnProperty("lang")) newChat.lang = chat.lang;
                 if(chat.hasOwnProperty("rules")) newChat.rules = chat.rules;
                 if(chat.hasOwnProperty("welcome")) newChat.welcome = chat.welcome;
+                if(chat.hasOwnProperty("flood")) newChat.flood = chat.flood;
                 if(chat.hasOwnProperty("users")) newChat.users = chat.users;
                 if(chat.hasOwnProperty("roles")) newChat.roles = chat.roles;
 

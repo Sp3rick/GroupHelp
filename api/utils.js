@@ -124,7 +124,7 @@ function genSettingsKeyboard(lang, chatId)
         {text: l[lang].S_ANTISPAM_BUTTON, callback_data: "S_ANTISPAM_BUTTON:"+chatId}],
 
         [{text: l[lang].S_WELCOME_BUTTON, callback_data: "S_WELCOME_BUTTON:"+chatId},
-        {text: l[lang].S_ANTIFLOOD_BUTTON, callback_data: "S_ANTIFLOOD_BUTTON:"+chatId}],
+        {text: l[lang].S_ANTIFLOOD_BUTTON, callback_data: "S_FLOOD_M_:"+chatId}],
 
         [{text: l[lang].S_CAPTCHA_BUTTON, callback_data: "S_CAPTCHA_BUTTON:"+chatId},
         {text: l[lang].S_CHECKS_BUTTON, callback_data: "S_CHECKS_BUTTON:"+chatId}],
@@ -151,6 +151,41 @@ function genSettingsKeyboard(lang, chatId)
     ] 
 
     return keyboard;
+
+}
+
+function genSetNumKeyboard(cb_prefix, settingsChatId)
+{
+
+    var line1 =
+    [
+        {text: "2", callback_data: cb_prefix+"#SNUM_MENU_N_2:"+settingsChatId},
+        {text: "3", callback_data: cb_prefix+"#SNUM_MENU_N_3:"+settingsChatId},
+        {text: "4", callback_data: cb_prefix+"#SNUM_MENU_N_4:"+settingsChatId},
+        {text: "5", callback_data: cb_prefix+"#SNUM_MENU_N_5:"+settingsChatId},
+    ]
+    var line2 =
+    [
+        {text: "6", callback_data: cb_prefix+"#SNUM_MENU_N_6:"+settingsChatId},
+        {text: "7", callback_data: cb_prefix+"#SNUM_MENU_N_7:"+settingsChatId},
+        {text: "8", callback_data: cb_prefix+"#SNUM_MENU_N_8:"+settingsChatId},
+        {text: "9", callback_data: cb_prefix+"#SNUM_MENU_N_9:"+settingsChatId},
+    ]
+    var line3 =
+    [
+        {text: "10", callback_data: cb_prefix+"#SNUM_MENU_N_10:"+settingsChatId},
+        {text: "12", callback_data: cb_prefix+"#SNUM_MENU_N_12:"+settingsChatId},
+        {text: "15", callback_data: cb_prefix+"#SNUM_MENU_N_15:"+settingsChatId},
+        {text: "20", callback_data: cb_prefix+"#SNUM_MENU_N_20:"+settingsChatId},
+    ]
+    var line4 =
+    [
+        {text: "➖1️⃣", callback_data: cb_prefix+"#SNUM_MENU_DEC:"+settingsChatId},
+        {text: "📝", callback_data: cb_prefix+"#SNUM_MENU_WRITE:"+settingsChatId},
+        {text: "➕1️⃣", callback_data: cb_prefix+"#SNUM_MENU_INC:"+settingsChatId},
+    ]
+
+    return [line1, line2, line3, line4];
 
 }
 
@@ -431,6 +466,18 @@ function mediaTypeToMethod(type)
 
 }
 
+function punishmentToText(lang, punishment)
+{
+    switch(punishment)
+    {
+        case 0: return l[lang].NOTHING;
+        case 1: return l[lang].WARN;
+        case 2: return l[lang].KICK;
+        case 3: return l[lang].MUTE;
+        case 4: return l[lang].BAN;
+    }
+}
+
 module.exports = 
 {
 
@@ -445,6 +492,7 @@ module.exports =
     isValidUser : isValidUser,
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
+    genSetNumKeyboard : genSetNumKeyboard,
     stateToEmoji : stateToEmoji,
     genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,
@@ -453,6 +501,7 @@ module.exports =
     sendParsingError : sendParsingError,
     parseTextToInlineKeyboard : parseTextToInlineKeyboard,
     extractMedia : extractMedia,
-    mediaTypeToMethod : mediaTypeToMethod
+    mediaTypeToMethod : mediaTypeToMethod,
+    punishmentToText : punishmentToText
 
 }
