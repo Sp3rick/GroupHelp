@@ -1,4 +1,4 @@
-const { parse } = require("querystring");
+const chrono = require('chrono-node');
 
 function bold(text)
 {
@@ -187,6 +187,11 @@ function genSetNumKeyboard(cb_prefix, settingsChatId)
 
     return [line1, line2, line3, line4];
 
+}
+
+function getSetTimeMessage()
+{
+    
 }
 
 function stateToEmoji(perm)
@@ -478,6 +483,67 @@ function punishmentToText(lang, punishment)
     }
 }
 
+//TODO: add translation system that replaces any word to english (like dictionary translation)
+//ATTENTION HERE: for error he may return both 0 or 1
+function parseHumanTime(text) {
+    text = text+" from now";
+    const parsedDate = chrono.parseDate(text);
+    if (!parsedDate) return 0;
+    const now = new Date();
+    var millisecondsDifference = parsedDate.getTime() - now.getTime();
+    var totalSeconds = Math.floor(millisecondsDifference / 1000);
+    return ++totalSeconds;
+}
+function secondsToTime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const remainingHours = seconds % 86400;
+    const hours = Math.floor(remainingHours / 3600);
+    const remainingMinutes = remainingHours % 3600;
+    const minutes = Math.floor(remainingMinutes / 60);
+    const remainingSeconds = remainingMinutes % 60;
+
+    return {
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        seconds: remainingSeconds
+    };
+}
+function secondsToHumanTime(lang, seconds)
+{
+    var l = global.LGHLangs;
+
+    var time = secondsToTime(seconds);
+
+    var text = "";
+
+    if(time.days == 1)
+        text+="1 "+l[lang].DAY;
+    if(time.days > 1)
+        text+=time.days+" "+l[lang].DAYS;
+    
+    if(time.hours != 0 && (time.days != 0)) text+=", ";
+    if(time.hours == 1)
+        text+="1 "+l[lang].HOUR;
+    if(time.hours > 1)
+        text+=time.hours+" "+l[lang].HOURS;
+
+    if(time.minutes != 0 && (time.days != 0 || time.hours != 0)) text+=", ";
+    if(time.minutes == 1)
+        text+="1 "+l[lang].MINUTE;
+    if(time.minutes > 1)
+        text+=time.minutes+" "+l[lang].MINUTES;
+
+    if(time.seconds != 0 && (time.days != 0 || time.hours != 0 || time.minutes != 0)) text+=", ";
+    if(time.seconds == 1)
+        text+="1 "+l[lang].SECOND;
+    if(time.seconds > 1)
+        text+=time.seconds+" "+l[lang].SECONDS;
+
+    return text;
+
+}
+
 module.exports = 
 {
 
@@ -502,6 +568,9 @@ module.exports =
     parseTextToInlineKeyboard : parseTextToInlineKeyboard,
     extractMedia : extractMedia,
     mediaTypeToMethod : mediaTypeToMethod,
-    punishmentToText : punishmentToText
+    punishmentToText : punishmentToText,
+    parseHumanTime : parseHumanTime,
+    secondsToTime : secondsToTime,
+    secondsToHumanTime : secondsToHumanTime
 
 }

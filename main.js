@@ -126,6 +126,7 @@ async function main(config) {
                 )
 
             }
+            else console.log("message from waitingReply user: " + user.waitingReplyType);
 
             //if is a message directed to support
             if( (user.waitingReply == true && user.waitingReplyType == "SUPPORT") ||

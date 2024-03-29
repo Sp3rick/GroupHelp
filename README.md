@@ -1,6 +1,14 @@
 Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
 
-Note: install dependency with "npm i yagop/node-telegram-bot-api" for latest version of api (required)
+To Install use:
+$ npm i node-telegram-bot-api/yagop
+$ npm i chrono-node
+
+Run with:
+$ node index.js
+
+Dont forget to set it up on config.json!
+
 TODO:
 
 -short term:
@@ -14,6 +22,7 @@ TODO:
     notify founder and admins when bot get added in the group in thanksgiving message
     handle "chat_member" event adding/removing automatically from admin list
     implement photo preview-mode in MessageMaker.js
+    create custom function for all needed native method of TelegramBot to handle errors or crash on fail
 
 -medium term:
     (once bot will be declared ready to use) add code versioning system to update database when user update it

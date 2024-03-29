@@ -1,6 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, isAdminOfChat } = require("../api/utils.js");
+const { bold, punishmentToText, isAdminOfChat, secondsToHumanTime } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
+const ST = require("../api/setTime.js");
 
 function main(args)
 {
@@ -65,8 +66,8 @@ function main(args)
             var text = l[lang].ANTIFLOOD+"\n"+
             l[lang].ANTIFLOOD_DESCRIPTION.replace("{messages}",settingsChat.flood.messages).replace("{seconds}",settingsChat.flood.time)+"\n\n"+
             bold(l[lang].PUNISHMENT)+": "+punishmentText;
-            if(punishment == 1 || punishment == 3 || punishment == 4)
-                 text+=" + "//convert Punishment time to a readable string
+            if((punishment == 1 || punishment == 3 || punishment == 4) && settingsChat.flood.PTime != 0)
+                 text+=" "+l[lang].FOR_HOW_MUCH+" "+secondsToHumanTime(lang, settingsChat.flood.PTime);
         
             var deleteSwitchButtonName = l[lang].DELETE_MESSAGES_BUTTON+(settingsChat.flood.delete?"✔️":"✖️");
             var options = 
@@ -87,9 +88,9 @@ function main(args)
             }
             switch(settingsChat.flood.punishment)
             {
-                case 1: options.reply_markup.inline_keyboard.push([{text: "❕"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText), callback_data: "S_FLOOD_PTIME_WARN:"+settingsChatId}]); break;
-                case 3: options.reply_markup.inline_keyboard.push([{text: "🔇"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText), callback_data: "S_FLOOD_PTIME_MUTE:"+settingsChatId}]); break;
-                case 4: options.reply_markup.inline_keyboard.push([{text: "🚷"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText), callback_data: "S_FLOOD_PTIME_BAN:"+settingsChatId}]); break;
+                case 1: options.reply_markup.inline_keyboard.push([{text: "❕"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText), callback_data: "S_FLOOD_PTIME_WARN#STIME:"+settingsChatId}]); break;
+                case 3: options.reply_markup.inline_keyboard.push([{text: "🔇"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText), callback_data: "S_FLOOD_PTIME_MUTE#STIME:"+settingsChatId}]); break;
+                case 4: options.reply_markup.inline_keyboard.push([{text: "🚷"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText), callback_data: "S_FLOOD_PTIME_BAN#STIME:"+settingsChatId}]); break;
             }
             options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}])
 
@@ -116,14 +117,31 @@ function main(args)
         }
 
         //Set punishment duration
-        if(cb.data.startsWith("S_FLOOD_PTIME_") )
+        var returnButtons = [[{text: l[lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
+        var setTimeReturn =  {};
+        if(cb.data.startsWith("S_FLOOD_PTIME_") ) //example S_FLOOD_PTIME_WARN
         {
-            
+            var PString = cb.data.split("S_FLOOD_PTIME_")[1].split("#")[0];
+            cb_prefix = "S_FLOOD_PTIME_"+PString;
+            var oldPTime = settingsChat.flood.PTime;
+            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.flood.punishment));
+            var setTimeReturn = ST.callbackEvent(TGbot, oldPTime, cb, chat, user, cb_prefix, returnButtons, title)
+
+            if(oldPTime != setTimeReturn.time)
+            {
+                settingsChat.flood.PTime = setTimeReturn.time;
+                db.chats.update(settingsChat);
+            }
         }
 
         if(setNumReturn.updateUser)
         {
             user = setNumReturn.user;
+            db.users.update(user);
+        };
+        if(setTimeReturn.updateUser)
+        {
+            user = setTimeReturn.user;
             db.users.update(user);
         };
 
@@ -156,27 +174,21 @@ function main(args)
 
         if( !isAdminOfChat(settingsChat, user.id) ) return;
 
-        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        var newValue = -1;
-        if( user.waitingReplyType.startsWith("S_FLOOD_MESSAGES") )
+        var returnButtons = [[{text: l[user.lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
+        var newTime = -1;
+        var cb_prefix = "";
+        if( user.waitingReplyType.startsWith("S_FLOOD_PTIME_") )
         {
-            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            newValue = SN.messageEvent(TGbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title);
-        }
-        if( user.waitingReplyType.startsWith("S_FLOOD_TIME") )
-        {
-            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            newValue = SN.messageEvent(TGbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title);
+            var PString = user.waitingReplyType.split("S_FLOOD_PTIME_")[1].split("#")[0];
+            cb_prefix = "S_FLOOD_PTIME_"+PString
+            var oldPTime = settingsChat.flood.PTime;
+            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
+            newTime = ST.messageEvent(TGbot, oldPTime, msg, chat, user, cb_prefix, returnButtons, title);
         }
 
-        if(newValue != -1)
+        if(newTime != -1 && settingsChat.flood.PTime != newTime)
         {
-            if(user.waitingReplyType.startsWith("S_FLOOD_MESSAGES"))
-                settingsChat.flood.messages = newValue;
-            else if(user.waitingReplyType.startsWith("S_FLOOD_TIME"))
-                settingsChat.flood.time = newValue;
-            else return;
-
+            settingsChat.flood.PTime = newTime;
             db.chats.update(settingsChat);
         }
 

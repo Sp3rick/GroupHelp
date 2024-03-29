@@ -68,7 +68,7 @@ function getDatabase(TGbot) {
 
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
-                chat.flood = { messages:3, time:5, punishment:1, delete:true };
+                chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true };
                 chat.users = {};
                 chat.roles = RM.newPremadeRolesObject();
                 

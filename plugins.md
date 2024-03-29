@@ -89,7 +89,7 @@ floodObject Object:
 messages: number of messages needed to triggher the Antiflood
 time: seconds within the specified message should be sent to triggher the Antiflood
 punishment: punishment to apply at the user that trigghers the Antiflood [0:off|1:warn|2:kick|3:mute|4:ban]
-punishmentTime: avaiable if punishment is set to warn/mute/bban, contains seconds of mute
+PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of mute
 delete: true if flooded messages should be deleted
 
 -
