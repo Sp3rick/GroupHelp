@@ -43,7 +43,7 @@
     "S_WARN_BUTTON" : "❗️ Warn 🟥",
     "S_TAG_BUTTON" : "🛎 Tag 🟥",
     "S_ANTISPAM_BUTTON" : "📨 Anti-Spam 🟥",
-    "S_ANTIFLOOD_BUTTON" : "🗣 Anti-Flood 🟥",
+    "S_ANTIFLOOD_BUTTON" : "🗣 Anti-Flood 🟨",
     "S_CHECKS_BUTTON" : "🔦 Checks 🟥",
     "S_BLOCKS_BUTTON" : "🔐 Blocks 🟥",
     "S_PORN_BUTTON" : "🔞 Porn 🟥",
