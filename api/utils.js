@@ -544,6 +544,12 @@ function secondsToHumanTime(lang, seconds)
 
 }
 
+function getUnixTime() {
+    const currentTimeMillis = new Date().getTime();
+    const currentTimeSeconds = Math.floor(currentTimeMillis / 1000);
+    return currentTimeSeconds;
+}
+
 module.exports = 
 {
 
@@ -571,6 +577,7 @@ module.exports =
     punishmentToText : punishmentToText,
     parseHumanTime : parseHumanTime,
     secondsToTime : secondsToTime,
-    secondsToHumanTime : secondsToHumanTime
+    secondsToHumanTime : secondsToHumanTime,
+    getUnixTime : getUnixTime
 
 }
