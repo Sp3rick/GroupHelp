@@ -1,7 +1,17 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, isAdminOfChat, secondsToHumanTime } = require("../api/utils.js");
+const { bold, punishmentToText, isAdminOfChat, secondsToHumanTime, getUnixTime } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
+const RM = require("../api/rolesManager.js");
+
+//object structure: global.LGHFlood[chatId] = { lastUse, lastPunishment, messages: {[messageId] : messageTime} }
+global.LGHFlood = {};
+
+function checkMessages(flood, messages)
+{
+    
+}
+
 
 function main(args)
 {
@@ -9,13 +19,6 @@ function main(args)
     var {GHbot, TGbot, db, config} = new LGHelpTemplate(args);
 
     l = global.LGHLangs; //importing langs object
-
-    GHbot.on( "private", (msg, chat, user) => {
-
-        if( msg.text == "/test999" )
-            TGbot.sendMessage( chat.id, "Hello, i send this because im a plugin\n"+l[user.lang].flag );
-
-    } )
 
     GHbot.on( "callback_query", (cb, chat, user) => {
 
@@ -164,6 +167,58 @@ function main(args)
     GHbot.on( "message", async (msg, chat, user) => {
 
 
+        if(chat.type != "private")
+        {
+            if(chat.flood.punishment = 0 && chat.flood.delete == false) return;
+            var userPerms = RM.sumUserPerms(chat, user.id);
+            if(userPerms.flood == 1) return;
+
+            if(!global.LGHFlood.hasOwnProperty(chat.id))
+                global.LGHFlood[chat.id] = {lastUse: 0, lastPunishment : 0, messages: {}};
+
+            var now = getUnixTime();
+            global.LGHFlood[chat.id].lastUse = now;
+            global.LGHFlood[chat.id].messages[msg.message_id] = now;
+
+            //triggher detection
+            var isFloodLimitFired = false;
+
+            var mLevel = chat.flood.messages;
+            var tLevel = chat.flood.time;
+
+            var inRangeMessagesIds = [];
+            var messageIds = Object.keys(global.LGHFlood[chat.id].messages)
+            messageIds.forEach((messageId)=>{
+                var time = global.LGHFlood[chat.id].messages[messageId];
+                if( (now - time) <= tLevel )
+                    inRangeMessagesIds.push(messageId);
+                else
+                    delete global.LGHFlood[chat.id].messages[messageId]
+            })
+
+            if(inRangeMessagesIds.length >= mLevel)
+                isFloodLimitFired = true;
+
+
+            if(chat.flood.delete && isFloodLimitFired)
+                TGbot.deleteMessages(chat.id, inRangeMessagesIds)
+
+
+            var lastPunishment = global.LGHFlood[chat.id].lastPunishment;
+            if(isFloodLimitFired && (now - lastPunishment) > tLevel)
+            {
+                global.LGHFlood[chat.id].lastPunishment = now;
+                console.log("punish")
+            }
+            if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
+                global.LGHFlood[chat.id].lastPunishment = now;
+
+            //TODO: options in config.json to set maximum and minimum values that can be set for messages and seconds
+            //TODO: interval that delete from global.LGHFlood expired messages (based on maximum of config.json) +repeat the interval using also this value??
+
+        }
+
+
         if( !user.waitingReply ) return;
         if( !user.waitingReplyType.startsWith("S_FLOOD") ) return;
 
@@ -174,6 +229,7 @@ function main(args)
 
         if( !isAdminOfChat(settingsChat, user.id) ) return;
 
+        //punishment time setting
         var returnButtons = [[{text: l[user.lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
         var newTime = -1;
         var cb_prefix = "";
@@ -190,6 +246,38 @@ function main(args)
         {
             settingsChat.flood.PTime = newTime;
             db.chats.update(settingsChat);
+        }
+
+
+        var newValue = -1;
+        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
+        var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
+        if( user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM")  )
+        {
+            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
+            newValue = SN.messageEvent(TGbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title);
+        }
+    
+        if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM")  )
+        {
+            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
+            newValue = SN.messageEvent(TGbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title);
+        }
+
+        if(newValue != -1)
+        {
+            console.log("NEW VALUE "+ newValue)
+            if(user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM") && newValue != settingsChat.flood.messages)
+            {
+                settingsChat.flood.messages = newValue;
+                db.chats.update(settingsChat);
+            }
+
+            if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM") && newValue != settingsChat.flood.time )
+            {
+                settingsChat.flood.time = newValue;
+                db.chats.update(settingsChat);
+            }
         }
 
     } )
