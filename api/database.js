@@ -1,6 +1,6 @@
 const fs = require( "fs" );
 const TelegramBot = require('node-telegram-bot-api');
-const {randomInt, isNumber, isValidChat, isValidUser} = require( global.directory + "/api/utils.js" )
+const {randomInt, isNumber, isValidChat, isValidUser, getUnixTime} = require( global.directory + "/api/utils.js" )
 var RM = require("../api/rolesManager.js");
 
 /**
@@ -42,6 +42,7 @@ function getDatabase(TGbot) {
 
     }
 
+    global.DBCHATS = {};
 
     //TODO: IF POSSIBLE fuse database.chats and database.users functions
     var database = {
@@ -66,9 +67,10 @@ function getDatabase(TGbot) {
 
                 }
 
+                chat.warns = {};
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
-                chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true };
+                chat.flood = { messages:3, time:5, punishment:1, PTime: 0, delete:true };
                 chat.users = {};
                 chat.roles = RM.newPremadeRolesObject();
                 
@@ -85,6 +87,9 @@ function getDatabase(TGbot) {
              */
             delete : function(chatId){
 
+                if(global.DBCHATS.hasOwnProperty(chatId))
+                    delete global.DBCHATS[chatId];
+
                 var chatFile = database.chatsDir + "/" + chatId + ".json";
                 if ( !fs.existsSync(chatFile) ){
                     
@@ -97,20 +102,24 @@ function getDatabase(TGbot) {
                 fs.unlinkSync( chatFile );
                 return true;
 
-
             },
 
             /**
              * @param {TelegramBot.ChatId} ChatId The user id of the user.
              */
             exhist : function(chatId){
+                var now = getUnixTime();
+
+                if(global.DBCHATS.hasOwnProperty(chatId))
+                {
+                    global.DBCHATS[chatId].lastUse = now;
+                    return true;
+                }
 
                 var chatsFile = database.chatsDir + "/" + chatId + ".json";
-                if( fs.existsSync(chatsFile) ){
-
+                if( fs.existsSync(chatsFile) )
                     return true;
 
-                };
                 return false;
 
             },
@@ -118,30 +127,42 @@ function getDatabase(TGbot) {
             /**
              * @param {TelegramBot.ChatId} ChatId The user id of the user.
              */
-            //TODO: optimize get functions to store mostly used chats in a temporary array, if the chat isn't used for too time it get unloaded
             get : function(chatId){
+                var now = getUnixTime();
+
+                if(global.DBCHATS.hasOwnProperty(chatId))
+                {
+                    global.DBCHATS[chatId].lastUse = now;
+                    return global.DBCHATS[chatId];
+                }
 
                 var chatFile = database.chatsDir + "/" + chatId + ".json";
                 if( !database.chats.exhist( chatId ) ){
-
                     console.log( "breaking chats.get, failed to get chat data from id " + chatId )
                     return false;
-
                 }
-                return JSON.parse( fs.readFileSync( chatFile, "utf-8" ) );
+
+                var chat = JSON.parse(fs.readFileSync( chatFile, "utf-8" ));
+                global.DBCHATS[chatId] = chat;
+                global.DBCHATS[chatId].lastUse = now;
+                return chat;
             },
 
             /**
              * @param {TelegramBot.Chat} chat
              */
             update : async (chat) => {
+                var now = getUnixTime();
 
-                var oldChat = database.chats.get( chat.id );
-                var newChat = oldChat;
+                var oldChat = database.chats.get( chat.id ); //check if exhist and be sure to load it
+                if(oldChat == false)
+                {
+                    console.log("the updated chat does not exhist " + chat.id);
+                    return false;
+                }
 
-                newChat.title = chat.title;
-                newChat.type = chat.type;
-                newChat.admins = await ( async () => {
+                //TODO: implement this anotherwhere
+                /*newChat.admins = await ( async () => {
                     
                     var adminList = await TGbot.getChatAdministrators( chat.id );
                     
@@ -158,20 +179,39 @@ function getDatabase(TGbot) {
                     return adminList;
 
                 } )()
-                console.log( "admins added: " + JSON.stringify(newChat.admins));
-                if(chat.hasOwnProperty("lang")) newChat.lang = chat.lang;
-                if(chat.hasOwnProperty("rules")) newChat.rules = chat.rules;
-                if(chat.hasOwnProperty("welcome")) newChat.welcome = chat.welcome;
-                if(chat.hasOwnProperty("flood")) newChat.flood = chat.flood;
-                if(chat.hasOwnProperty("users")) newChat.users = chat.users;
-                if(chat.hasOwnProperty("roles")) newChat.roles = chat.roles;
+                console.log( "admins added: " + JSON.stringify(newChat.admins));*/
 
-                var chatFile = database.chatsDir + "/" + chat.id + ".json";
-                console.log( "updating chat to database lang:" + chat.lang );
-                fs.writeFileSync( chatFile, JSON.stringify(newChat) )
+                //this allow the caller to edit single elements of chat (chat.id is required)
+                if(chat.hasOwnProperty("admins")) global.DBCHATS[chat.id].admins = chat.admins;
+                if(chat.hasOwnProperty("title")) global.DBCHATS[chat.id].title = chat.title;
+                if(chat.hasOwnProperty("type")) global.DBCHATS[chat.id].type = chat.type;
+                if(chat.hasOwnProperty("lang")) global.DBCHATS[chat.id].lang = chat.lang;
+                if(chat.hasOwnProperty("warns")) global.DBCHATS[chat.id].warns = chat.warns;
+                if(chat.hasOwnProperty("rules")) global.DBCHATS[chat.id].rules = chat.rules;
+                if(chat.hasOwnProperty("welcome")) global.DBCHATS[chat.id].welcome = chat.welcome;
+                if(chat.hasOwnProperty("flood")) global.DBCHATS[chat.id].flood = chat.flood;
+                if(chat.hasOwnProperty("users")) global.DBCHATS[chat.id].users = chat.users;
+                if(chat.hasOwnProperty("roles")) global.DBCHATS[chat.id].roles = chat.roles;
+
+                global.DBCHATS[chat.id].lastUse = now;
+
                 return true;
 
-            }
+            },
+
+            //write on disk
+            /**
+             * @param {TelegramBot.ChatId} ChatId The user id of the user.
+             */
+            save : function (chatId)
+            {
+                if(!global.DBCHATS.hasOwnProperty(chatId)) return false;
+                var chatFile = database.chatsDir + "/" + chatId + ".json";
+                console.log( "saving chat to database, id:" + chatId );
+                delete global.DBCHATS[chatId].lastUse;
+                fs.writeFileSync( chatFile, JSON.stringify(global.DBCHATS[chatId]) )
+                return true;
+            },
 
         },
         
@@ -294,9 +334,40 @@ function getDatabase(TGbot) {
                 return JSON.parse( fs.readFileSync( userFile, "utf-8" ) );
             }
 
+        },
+
+        unload : function ()
+        {
+            var ids = Object.keys(global.DBCHATS);
+            console.log("unloading " + ids.length + " chats");
+            console.log(ids)
+            ids.forEach((id)=>{
+                database.chats.save(id);
+                delete global.DBCHATS[id];
+            })
         }
 
     }
+
+    //TODO: an interval that saves on disk every chat every... hour? (useful if server crash)
+    //that's for keep most used chats loaded and allowing database functions spamming
+    //this is a clean up for inactive chats to prevent ram from blowing up
+    var cleanerIntervalTime = 60000; //milliseconds
+    var unloadAfter = 60; //seconds
+    setInterval( () => {
+        var ids = Object.keys(global.DBCHATS);
+        var now = getUnixTime();
+        ids.forEach((id)=>{
+            var chat = global.DBCHATS[id];
+            //console.log(now + " - " + chat.lastUse + " = " + (now - chat.lastUse) + " > " + unloadAfter)
+            if( (now - chat.lastUse) > unloadAfter ) 
+            {
+                console.log("unloading " + id);
+                database.chats.save(id);
+                delete global.DBCHATS[id];
+            }
+        })
+    }, cleanerIntervalTime )
 
     return database;
 
