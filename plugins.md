@@ -81,6 +81,8 @@ message : customMessage object
 
 >Depends on api/rolesManager.js
 >Depends on api/utils.js
+>Depends on api/setNum.js
+>Depends on api/setTime.js
 
 Adds on chat.flood a custom object "floodObject"
 
@@ -107,6 +109,7 @@ This plugin manages users data in the group
 customPerms Object:
 
 commands: array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command
+immune: active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1](TO IMPLEMENT)
 flood: permission to flood messages [1/0/-1]
 link: permission to send links [1/0/-1]
 tgLink: permission to send telegram links/usernames [1/0/-1]
