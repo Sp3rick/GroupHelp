@@ -1,4 +1,4 @@
-global.LGHVersion = "0.1.2";
+global.LGHVersion = "0.1.8";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
 const util = require('util')
@@ -65,6 +65,15 @@ async function main()
     } )
 
 
+    
+    //unload management
+    var quitFunc = ()=>{
+        db.unload();
+        process.exit(0);
+    }
+    process.on('SIGINT', quitFunc);  // CTRL+C
+    process.on('SIGQUIT', quitFunc); // Keyboard quit
+    process.on('SIGTERM', quitFunc); // `kill` command
 
 
     console.log("#LibreGroupHelp started#")
