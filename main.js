@@ -1,4 +1,4 @@
-const {randomInt, parseCommand, isNumber, genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage} = require( __dirname + "/api/utils.js" );
+const {randomInt, parseCommand, isNumber, genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage, getAdmins} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( __dirname + "/api/database.js" );
   
@@ -52,9 +52,10 @@ async function main(config) {
                 msg.chat.lang = user.lang;
             console.log( "Group lang: " + msg.chat.lang )
 
-            db.chats.add(msg.chat)
-            db.chats.update( msg.chat );
-        
+            msg.chat.admins = await getAdmins(TGbot, msg.chat.id);
+            console.log("added admins: " + msg.chat.admins)
+            db.chats.add(msg.chat);
+            
             await TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].NEW_GROUP,
             { 
                 parse_mode : "HTML",
