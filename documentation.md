@@ -33,7 +33,7 @@ Additional data of custom <i>chat</i> object:
 admins: array with known admins objects (user data anonymized)
 lang : current setted chat lang
 isGroup : result of (chat.type == "supergroup" || chat.type == "group")
-warns : ([userId]: [time, time, time]) contains necerray data to revoke warn when scheduled time is over
+warns : warns.js plugin related data
 users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
 rules : rules.js plugin related data
 welcome : welcome.js plugin related data
