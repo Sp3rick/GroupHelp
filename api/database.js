@@ -67,10 +67,10 @@ function getDatabase(TGbot) {
 
                 }
 
-                chat.warns = {};
+                chat.warns = { timed:{}, limit:3, punishment:3, PTime: -1 };
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
-                chat.flood = { messages:3, time:5, punishment:1, PTime: 0, delete:true };
+                chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true };
                 chat.users = {};
                 chat.roles = RM.newPremadeRolesObject();
                 
@@ -153,6 +153,7 @@ function getDatabase(TGbot) {
              */
             update : async (chat) => {
                 var now = getUnixTime();
+                console.log("called update")
 
                 var oldChat = database.chats.get( chat.id ); //check if exhist and be sure to load it
                 if(oldChat == false)
