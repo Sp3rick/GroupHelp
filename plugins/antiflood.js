@@ -3,6 +3,7 @@ const { bold, punishmentToText, isAdminOfChat, secondsToHumanTime, getUnixTime }
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 const RM = require("../api/rolesManager.js");
+const { punishUser } = require("../api/punishment.js");
 
 //object structure: global.LGHFlood[chatId] = { lastUse, lastPunishment, messages: {[messageId] : messageTime} }
 global.LGHFlood = {};
@@ -169,7 +170,7 @@ function main(args)
 
         if(chat.type != "private")
         {
-            if(chat.flood.punishment = 0 && chat.flood.delete == false) return;
+            if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
             var userPerms = RM.sumUserPerms(chat, user.id);
             if(userPerms.flood == 1) return;
 
@@ -208,7 +209,8 @@ function main(args)
             if(isFloodLimitFired && (now - lastPunishment) > tLevel)
             {
                 global.LGHFlood[chat.id].lastPunishment = now;
-                console.log("punish")
+                var PTime = (chat.flood.PTime == 0) ? -1 : chat.flood.PTime;
+                punishUser(TGbot, chat, user, chat.flood.punishment, PTime, l[chat.lang].S_ANTIFLOOD_BUTTON)
             }
             if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
                 global.LGHFlood[chat.id].lastPunishment = now;
@@ -217,7 +219,6 @@ function main(args)
             //TODO: interval that delete from global.LGHFlood expired messages (based on maximum of config.json) +repeat the interval using also this value??
 
         }
-
 
         if( !user.waitingReply ) return;
         if( !user.waitingReplyType.startsWith("S_FLOOD") ) return;
@@ -266,7 +267,6 @@ function main(args)
 
         if(newValue != -1)
         {
-            console.log("NEW VALUE "+ newValue)
             if(user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM") && newValue != settingsChat.flood.messages)
             {
                 settingsChat.flood.messages = newValue;
