@@ -91,7 +91,7 @@ floodObject Object:
 messages: number of messages needed to triggher the Antiflood
 time: seconds within the specified message should be sent to triggher the Antiflood
 punishment: punishment to apply at the user that trigghers the Antiflood [0:off|1:warn|2:kick|3:mute|4:ban]
-PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of mute
+PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of punishment 
 delete: true if flooded messages should be deleted
 
 -
@@ -140,4 +140,13 @@ perms: customPerms object applyed at lowest priority on any user in this role
 users: array of userId in this role
 
 
-Staff and user management warn
+
+
+<b>warns.js</b>
+
+chat.warns Warns Object:
+
+timed: ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over
+limit: number of warns after wich should be applyed a punishment
+punishment: punishment when limit is hit [2:kick|3:mute|4:ban]
+PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of punishment
