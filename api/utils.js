@@ -550,6 +550,33 @@ function getUnixTime() {
     return currentTimeSeconds;
 }
 
+function usernameOrFullName(user)
+{
+    if(user.hasOwnProperty("username"))
+        return "@"+user.username
+
+    var text = user.first_name;
+    if(user.hasOwnProperty("last_name"))
+        text = " "+user.last_name;
+
+    return text;
+}
+
+async function getAdmins(TGbot, chatId)
+{
+    var adminList = await TGbot.getChatAdministrators( chatId );
+                    
+    //anonymize admins data
+    for(var i=0; i < adminList.length; ++i)
+    {
+        adminList[i].id = adminList[i].user.id;
+        delete adminList[i].user;
+        adminList[i].user = {id : adminList[i].id} //re-enabling id only for compatibility
+    }
+
+    return adminList
+}
+
 module.exports = 
 {
 
@@ -578,6 +605,7 @@ module.exports =
     parseHumanTime : parseHumanTime,
     secondsToTime : secondsToTime,
     secondsToHumanTime : secondsToHumanTime,
-    getUnixTime : getUnixTime
-
+    getUnixTime : getUnixTime,
+    usernameOrFullName : usernameOrFullName,
+    getAdmins : getAdmins
 }
