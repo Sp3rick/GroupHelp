@@ -9,12 +9,13 @@ function main(args)
     l = global.LGHLangs; //importing langs object
 
     //founder role is automatically set from /reload command
-    var founderPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_WARN","COMMAND_DEL"], 1, 1, 1, 1, 1, 1, 1, 1, 1);
-    var modPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_WARN","COMMAND_DEL"], 1, 1, 1, 1, 1, 1, 1, 1);
+    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PERMS", "COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"]
+    var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    var modPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"], 1, 1, 1, 1, 1, 1, 1, 1);
     var muterPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_MUTE"], 1, 1, 1, 1, 1, 1, 1, 1);
-    var cleanerPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_DEL"]);
+    var cleanerPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_DELETE"]);
     var helperPerms = RM.newPerms(["COMMAND_RULES"]);
-    var freePerms = RM.newPerms([], 1, 1, 1, 1, 1, 1, 1, 1)
+    var freePerms = RM.newPerms([], 1, 1, 1, 1, 1, 1, 1, 1);
 
     global.roles = {
         founder : RM.newRole("FOUNDER", "👑", 100, founderPerms),
