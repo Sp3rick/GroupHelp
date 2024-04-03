@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, isAdminOfChat, secondsToHumanTime, getUnixTime } = require("../api/utils.js");
+const { bold, punishmentToText, secondsToHumanTime, getUnixTime } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 const RM = require("../api/rolesManager.js");
@@ -26,13 +26,18 @@ function main(args)
         var msg = cb.message;
         var lang = user.lang;
 
-        var settingsChatId = {};"{number}"
+        var settingsChatId = {};
         var settingsChat = {};
         if( cb.data.startsWith("S_FLOOD") )
         {
             settingsChatId = cb.data.split(":")[1]
             settingsChat = db.chats.get(settingsChatId)
         }
+
+        //security guards
+        if( !cb.data.startsWith("S_FLOOD") ) return;
+        if( !(user.hasOwnProperty("perms") && user.perms.settings) ) return;
+        if( chat.isGroup && settingsChatId != chat.id) return;
 
         //main menu based settings
         var toSetPunishment = -1;
@@ -169,7 +174,7 @@ function main(args)
 
 
         if(chat.type != "private")
-        {
+        {(()=>{
             if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
             var userPerms = RM.sumUserPerms(chat, user.id);
             if(userPerms.flood == 1) return;
@@ -218,18 +223,16 @@ function main(args)
             //TODO: options in config.json to set maximum and minimum values that can be set for messages and seconds
             //TODO: interval that delete from global.LGHFlood expired messages (based on maximum of config.json) +repeat the interval using also this value??
 
-        }
+        })()}
 
-        if( !user.waitingReply ) return;
-        if( !user.waitingReplyType.startsWith("S_FLOOD") ) return;
-
-
+        //security guards
+        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_FLOOD")) ) return;
         var settingsChatId = user.waitingReplyType.split(":")[1];
         if( chat.isGroup && settingsChatId != chat.id ) return;//additional security guard
+        if( !(user.perms && user.perms.settings) ) return;
+        
         var settingsChat = db.chats.get(settingsChatId)
-
-        if( !isAdminOfChat(settingsChat, user.id) ) return;
-
+        
         //punishment time setting
         var returnButtons = [[{text: l[user.lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
         var newTime = -1;

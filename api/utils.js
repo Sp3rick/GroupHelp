@@ -226,7 +226,8 @@ function genPermsReport(lang, perms)
     bold(l[lang].PORN+": ")+stateToEmoji(perms.porn)+"\n"+
     bold(l[lang].NIGHT+": ")+stateToEmoji(perms.night)+"\n"+
     bold(l[lang].MEDIA+": ")+stateToEmoji(perms.media)+"\n"+
-    bold(l[lang].ROLES+": ")+stateToEmoji(perms.media)+"\n";
+    bold(l[lang].ROLES+": ")+stateToEmoji(perms.media)+"\n"+
+    bold(l[lang].SETTINGS+": ")+stateToEmoji(perms.settings)+"\n";
 
     return text;
 

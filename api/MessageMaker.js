@@ -415,7 +415,6 @@ function messageEvent(TGbot, customMessage, msg, chat, user, cb_prefix)
     {
 
         var media = extractMedia(msg);
-        console.log(media)
         if(!media.type)
         {
             TGbot.sendMessage( chat.id, l[user.lang].MEDIA_INCORRECT, options )
@@ -443,7 +442,7 @@ function messageEvent(TGbot, customMessage, msg, chat, user, cb_prefix)
 
         }
 
-        var keyboard = parseTextToInlineKeyboard(msg.text); console.log(JSON.stringify(keyboard));
+        var keyboard = parseTextToInlineKeyboard(msg.text);
 
         if( isObject(keyboard) && keyboard.hasOwnProperty("error") )
         {
@@ -540,7 +539,6 @@ function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptio
         {
             options.caption_entities = JSON.stringify(options.entities);
         }
-        console.log(options)
         return TGbot[method]( chatId, customMessage.media.fileId, options );
         
     }

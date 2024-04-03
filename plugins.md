@@ -1,13 +1,62 @@
 When you create a plugin you can use our-made events with many variables already set
-If is a group the "chat" object will contain the full object
-Any "chat" object contain the boolean value chat.isGroup and if true also chat.lang for lang of the group
-Any "msg" object contain the "command" result of api/utils.js/parseCommand(msg.text)
+
+ONLY for events from LGHBot you have additional elements bot-related
+If event comes from a group the "chat" object will contain the full Custom Chat Object (look at documentation.md) by the database (it's identified by isGroup or if callback data contains a groupId)
+user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: if chat.isGroup is true, if callback.data contains a groupId, or on message if user.waitingReply is true and user.waitingReplyType contains a groupId
+NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
+Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
+
+You can find a comment referring security guards that you can use too in plugins/welcome.js
 
 
 <b>Roles Manager</b>
 (api/rolesManager.js)
 
 >Depends on api/utils.js
+
+This plugin manages users data and roles in the group
+1 means true
+0 means neutral
+-1 means false
+
+customPerms Object:
+
+commands: array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command
+immune: active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1](TO IMPLEMENT)
+flood: permission to flood messages [1/0/-1]
+link: permission to send links [1/0/-1]
+tgLink: permission to send telegram links/usernames [1/0/-1]
+forward: permission to forward messages from anywhere [1/0/-1]
+quote: permission to quote from anywhere [1/0/-1]
+porn: bypass porn/gore checks [1/0/-1]
+night: bypass any night mode  limitation [1/0/-1]
+media: bypass any media limitation [1/0/-1]
+roles: permission to change roles of lower level users [1/0/-1]
+settings: permission to change bot group settings [1/0/-1]
+
+
+Intended permissions anarchy: (if a left-side permission is not neutral overwrites everything in the right side)
+chat.users[id].perms > chat.users[id].adminPerms > chat.roles[role].perms (higher role level has higher priority)
+
+
+
+chat.users[id] userStatus Object:
+
+warnCount: number of user warns
+perms: customPerms object for all user-specific permissions
+roles: array user roles, string for pre-made roles, number for custom roles (user-made)
+adminPerms: customPerms object for user permissions if admin
+title: user administrator title
+
+
+chat.roles[role] GHRole Object: ( the pre-made roles are in global.roles[roleName] )
+
+name: role name
+emoji: emoji for the role
+level: role level, higher level users can use commands that affect  lower level users
+perms: customPerms object applyed at lowest priority on any user in this role
+users: array of userId in this role
+
 
 
 
@@ -101,43 +150,11 @@ delete: true if flooded messages should be deleted
 
 <b>UsersHandler.js</b>
 
-This plugin manages users data in the group
-1 means true
-0 means neutral
--1 means false
+>Depends on api/rolesManager.js
+>Depends on api/utils.js
 
-customPerms Object:
-
-commands: array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command
-immune: active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1](TO IMPLEMENT)
-flood: permission to flood messages [1/0/-1]
-link: permission to send links [1/0/-1]
-tgLink: permission to send telegram links/usernames [1/0/-1]
-forward: permission to forward messages from anywhere [1/0/-1]
-quote: permission to quote from anywhere [1/0/-1]
-porn: bypass porn/gore checks [1/0/-1]
-night: bypass any night mode  limitation [1/0/-1]
-media: bypass any media limitation [1/0/-1]
-roles: permission to change roles of lower level users [1/0/-1]
-
-
-chat.users[id].perms overwrites a permission of chat.roles[role].perms if users permission isn't neutral (0), array get summed
-
-
-chat.users[id] userStatus Object:
-
-warnCount: number of user warns
-perms: customPerms object for all user-specific permissions
-roles: array user roles, string for pre-made roles, number for custom roles (user-made)
-
-
-chat.roles[role] GHRole Object: ( the pre-made roles are in global.roles[roleName] )
-
-name: role name
-emoji: emoji for the role
-level: role level, higher level users can use commands that affect  lower level users
-perms: customPerms object applyed at lowest priority on any user in this role
-users: array of userId in this role
+Adds on global.roles[roleName] data about pre-made roles: founder, moderator, muter, cleaner, helper, free.
+This plugin adds /perms command and handle any new user on the chat
 
 
 

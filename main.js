@@ -1,6 +1,7 @@
-const {randomInt, parseCommand, isNumber, genSettingsKeyboard, isAdminOfChat, IsEqualInsideAnyLanguage, getAdmins} = require( __dirname + "/api/utils.js" );
+const {parseCommand, getAdmins} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( __dirname + "/api/database.js" );
+const RM = require("./api/rolesManager.js")
   
   
 
@@ -53,8 +54,11 @@ async function main(config) {
             console.log( "Group lang: " + msg.chat.lang )
 
             msg.chat.admins = await getAdmins(TGbot, msg.chat.id);
-            console.log("added admins: " + msg.chat.admins)
             db.chats.add(msg.chat);
+
+            msg.chat = db.chats.get(msg.chat.id)
+            msg.chat = RM.reloadAdmins(msg.chat, msg.chat.admins);
+            db.chats.update(msg.chat);
             
             await TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].NEW_GROUP,
             { 
@@ -214,6 +218,11 @@ async function main(config) {
 
         }
 
+        if( isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
+        {
+            var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1]);
+            user.perms = RM.sumUserPerms(selectedChat, user.id);
+        }
 
         GHbot.emit( "message", msg, chat, user );
         
@@ -326,6 +335,11 @@ async function main(config) {
         }
 
 
+        if(isGroup || cb.data.includes(":"))
+        {
+            var selectedChat = isGroup ? chat : db.chats.get(cb.data.split(":")[1]);
+            user.perms = RM.sumUserPerms(selectedChat, user.id);
+        }
         GHbot.emit( "callback_query", cb, chat, user );
 
         //todo: commands help panel

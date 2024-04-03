@@ -20,12 +20,12 @@ function main(args)
 
         }
 
-
-        if( !user.waitingReply ) return;
-        if( !user.waitingReplyType.startsWith("S_RULES") ) return;
-
+        //security guards
+        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_RULES")) ) return;
         var settingsChatId = user.waitingReplyType.split(":")[1];
         if( chat.isGroup && settingsChatId != chat.id ) return;//additional security guard
+        if( !(user.perms && user.perms.settings) ) return;
+
         var settingsChat = db.chats.get(settingsChatId)
 
         if( !isAdminOfChat(settingsChat, user.id) ) return;
@@ -54,6 +54,11 @@ function main(args)
             settingsChat = db.chats.get(settingsChatId)
 
         }
+
+        //security guards
+        if( !cb.data.startsWith("S_RULES") ) return;
+        if( !(user.perms && user.perms.settings) ) return;
+        if( chat.isGroup && settingsChatId != chat.id) return;
 
         if( cb.data.startsWith("S_RULES_BUTTON:") )
         {

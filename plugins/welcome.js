@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {isAdminOfChat} = require( "../api/utils.js" );
+const {} = require( "../api/utils.js" );
 const MSGMK = require( "../api/MessageMaker.js" )
 
 function main(args)
@@ -32,14 +32,13 @@ function main(args)
             });
         }
 
-        if( !user.waitingReply ) return;
-        if( !user.waitingReplyType.startsWith("S_WELCOME") ) return;
-
+        //security guards
+        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_WELCOME")) ) return;
         var settingsChatId = user.waitingReplyType.split(":")[1];
         if( chat.isGroup && settingsChatId != chat.id ) return;//additional security guard
-        var settingsChat = db.chats.get(settingsChatId)
+        if( !(user.perms && user.perms.settings) ) return;
 
-        if( !isAdminOfChat(settingsChat, user.id) ) return;
+        var settingsChat = db.chats.get(settingsChatId);
 
         var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(TGbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
 
@@ -65,6 +64,11 @@ function main(args)
             settingsChat = db.chats.get(settingsChatId)
 
         }
+
+        //security guards
+        if( !cb.data.startsWith("S_WELCOME") ) return;
+        if( !(user.perms && user.perms.settings) ) return;
+        if( chat.isGroup && settingsChatId != chat.id) return;
 
         if( cb.data.startsWith("S_WELCOME_OFF:") )
         {

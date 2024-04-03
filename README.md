@@ -13,6 +13,7 @@ TODO:
 
 -short term:
 
+    ask double confirm to give an user the "settings" permission
     jsdoc GHbot emit events in main.js (urgent to have advices for easier creation directly on /plugins, currently you should create the plugin in main.js and then moving plugin-related code in /plugins)
     implement time zone setting
     jsdoc db (database) object

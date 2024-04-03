@@ -162,26 +162,6 @@ function getDatabase(TGbot) {
                     return false;
                 }
 
-                //TODO: implement this anotherwhere
-                /*newChat.admins = await ( async () => {
-                    
-                    var adminList = await TGbot.getChatAdministrators( chat.id );
-                    
-                    //anonymize admins data
-                    for(var i=0; i < adminList.length; ++i)
-                    {
-
-                        adminList[i].id = adminList[i].user.id;
-                        delete adminList[i].user;
-                        adminList[i].user = {id : adminList[i].id} //re-enabling id only for compatibility
-
-                    }
-
-                    return adminList;
-
-                } )()
-                console.log( "admins added: " + JSON.stringify(newChat.admins));*/
-
                 //this allow the caller to edit single elements of chat (chat.id is required)
                 if(chat.hasOwnProperty("admins")) global.DBCHATS[chat.id].admins = chat.admins;
                 if(chat.hasOwnProperty("title")) global.DBCHATS[chat.id].title = chat.title;
@@ -269,14 +249,13 @@ function getDatabase(TGbot) {
 
                 }
 
-                oldUser = database.users.get( user.id );
-                newUser = oldUser;
+                var oldUser = database.users.get( user.id );
+                var newUser = oldUser;
 
-                newUser.lang = user.lang;
+                if( user.hasOwnProperty("lang") ) newUser.lang = user.lang;
                 if( user.hasOwnProperty("premium") ) newUser.premium = user.premium;
-
-                if( user.hasOwnProperty("waitingReply") ) newUser.waitingReply = user.waitingReply
-                if( user.hasOwnProperty("waitingReplyType") ) newUser.waitingReplyType = user.waitingReplyType
+                if( user.hasOwnProperty("waitingReply") ) newUser.waitingReply = user.waitingReply;
+                if( user.hasOwnProperty("waitingReplyType") ) newUser.waitingReplyType = user.waitingReplyType;
 
 
                 var userFile = database.usersDir + "/" + user.id + ".json";

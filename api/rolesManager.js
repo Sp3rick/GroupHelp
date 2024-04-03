@@ -18,6 +18,7 @@ const {isString} = require("./utils.js");
  * @property {1|0|-1} night - bypass any night mode  limitation
  * @property {1|0|-1} media - bypass any media limitation
  * @property {1|0|-1} roles - permission to change roles of lower level users
+ * @property {1|0|-1} settings - permission to change bot group settings
  */
 
 /** 
@@ -25,6 +26,8 @@ const {isString} = require("./utils.js");
  * @property {Number} warnCount - number of user warns
  * @property {customPerms} perms - customPerms object for all user-specific permissions
  * @property {Array<String|Number>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
+ * @property {customPerms} adminPerms - customPerms object for user permissions if admin
+ * @property {String} title - user administrator title
  */
 
 /** 
@@ -44,7 +47,7 @@ const {isString} = require("./utils.js");
  * @return {customPerms}
  *      Get a default customPerms object
  */
-function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, media, roles)
+function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
 {
     commands = commands || [];
     flood = flood || 0;
@@ -56,6 +59,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
     night = night || 0;
     media = media || 0;
     roles = roles || 0;
+    settings = settings || 0;
     
     flood = (flood === false) ? -1 : flood;
     link = (link === false) ? -1 : link;
@@ -65,6 +69,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
     porn = (porn === false) ? -1 : porn;
     night = (night === false) ? -1 : night;
     roles = (roles === false) ? -1 : roles;
+    settings = (settings === false) ? -1 : settings;
 
 
     var defaultPermissions = {
@@ -77,7 +82,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
         porn: porn,
         night : night,
         media: media,
-        roles: roles,
+        settings: settings,
     }
     
     return defaultPermissions;
@@ -130,15 +135,19 @@ function newPremadeRolesObject()
  * @return {userStatus}
  *      Get a default userStatus object
  */
-function newUser(warnCount, perms, roles)
+function newUser(warnCount, perms, roles, adminPerms, title)
 {
     warnCount = warnCount || 0;
     perms = perms || newPerms();
     roles = roles || [];
+    adminPerms = adminPerms || newPerms();
+    title = title || "";
 
     var userData = {
         warnCount: warnCount,
         perms: perms,
+        adminPerms: adminPerms,
+        title: title,
         roles: roles,
     }
 
@@ -158,6 +167,11 @@ function getRoleUsers(chat, role)
 function getUserPerms(chat, userId)
 {
     return chat.users[userId].perms;
+}
+
+function getAdminPerms(chat, userId)
+{
+    return chat.users[userId].adminPerms;
 }
 
 function getUserLevel(chat, userId)
@@ -246,6 +260,11 @@ function changeRoleEmoji(role, chat, newName) //Premade roles can't change emoji
 function setRole(chat, userId, role)
 {
     chat.users[userId].roles.push(role);
+
+    //this if should run only if it is a pre-made role
+    if(!chat.roles.hasOwnProperty(role))
+        chat.roles[role] = {users:[]};
+
     chat.roles[role].users.push(userId);
 
     return chat;
@@ -259,6 +278,59 @@ function unsetRole(chat, userId, role)
 
     var userIndex = chat.roles[role].users.indexOf(userId);
     chat.roles[role].users.splice(userIndex, 1);
+
+    return chat;
+}
+
+function adminToPerms(admin)
+{
+
+    var perms = newPerms();
+    var restrictCommands = ["COMMAND_WARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_BAN"]
+
+    if(admin.status != "administrator")return perms;
+
+    if(admin.can_manage_chat)
+        perms = newPerms(["COMMAND_PERMS", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
+    if(admin.can_delete_messages)
+        perms.commands.push("COMMAND_DELETE");
+    if(admin.can_restrict_members)
+        restrictCommands.forEach(c=>perms.commands.push(c));
+    if(admin.can_promote_members)
+        perms.roles = 1;
+    if(admin.can_change_info)
+        {perms.commands.push("COMMAND_SETTINGS");perms.settings=1};
+    if(admin.can_pin_messages)
+        perms.commands.push("COMMAND_PIN");
+    
+    return perms;
+
+}
+function reloadAdmins(chat, admins)
+{
+    //clear adminPerms for every user
+    var emptyPerms = newPerms();
+    var chatUsers = Object.keys(chat.users);
+    chatUsers.forEach(userId=>{chat.users[userId].adminPerms = emptyPerms});
+
+    //acutally loads admins
+    admins.forEach(member=>{
+
+        var userId = member.user.id
+        if(!chat.users.hasOwnProperty(userId))
+            chat.users[userId] = newUser();
+
+        chat.users[userId].adminPerms = newPerms();
+
+        if(member.status == "creator")
+            chat = setRole(chat, userId, "founder");
+        if(member.status == "administrator")
+            chat.users[userId].adminPerms = adminToPerms(member);
+
+        if(member.custom_title)
+            chat.users[userId].title = chat.custom_title;
+
+    })
 
     return chat;
 }
@@ -277,7 +349,7 @@ function sumPermsPriority(perms1, perms2)
     perms2.commands.forEach(command => {commands.push(command)});
     commands = commands.filter((item,pos)=>{return commands.indexOf(item)==pos}) //remove duplicates
 
-    var flood, link, tgLink, forward, quote, porn, night, media, roles;
+    var flood, link, tgLink, forward, quote, porn, night, media, roles, settings;
 
     flood = (perms1.flood == 0) ? perms2.flood : perms1.flood; //if perms1 is neutral inherit from second
     link = (perms1.link == 0) ? perms2.link : perms1.link;
@@ -288,11 +360,11 @@ function sumPermsPriority(perms1, perms2)
     night = (perms1.night == 0) ? perms2.night : perms1.night;
     media = (perms1.media == 0) ? perms2.media : perms1.media;
     roles = (perms1.roles == 0) ? perms2.roles : perms1.roles;
+    settings = (perms1.settings == 0) ? perms2.settings : perms1.settings;
 
-    return newPerms(commands, flood, link, tgLink, forward, quote, porn, night, media, roles)
+    return newPerms(commands, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
 
 }
-
 function orderRolesByPriority(roles, chat) //Chat required only if role is number (custom role)
 {
     chat = chat || 0;
@@ -307,7 +379,6 @@ function orderRolesByPriority(roles, chat) //Chat required only if role is numbe
 
     return newRoles;
 }
-
 /**
  * @return {customPerms}
  *      Get complete object of effective user permissions counting her roles
@@ -317,11 +388,16 @@ function sumUserPerms(chat, userId)
 
     var perms = newPerms();
 
+    if(!chat.users.hasOwnProperty(userId))
+        return perms;
     var roles = orderRolesByPriority(chat.users[userId].roles, chat);
     roles.forEach((role)=>{
         var rolePerms = getRolePerms(role);
         perms = sumPermsPriority(rolePerms, perms);
     })
+
+    var adminPerms = getAdminPerms(chat, userId);
+    perms = sumPermsPriority(adminPerms, perms);
 
     var userPerms = getUserPerms(chat, userId);
     perms = sumPermsPriority(userPerms, perms);
@@ -331,7 +407,7 @@ function sumUserPerms(chat, userId)
 }
 
 module.exports = {newPerms, newRole, newUser, newPremadeRolesObject,
-    getUserRoles, getRoleUsers, getUserPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles,
+    getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles,
     deleteRole, deleteUser, renameRole, changeRoleEmoji,
     setRole, unsetRole,
-    sumPermsPriority, orderRolesByPriority, sumUserPerms}
+    adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms}
