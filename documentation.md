@@ -88,6 +88,13 @@ Separate language selection and management for groups and users fully implemente
 
 Complete list of implemented commands:
 
-/settings - open group settings
-/rules - show group rules
-/permissions (or /perms) - show permissions summary of a user
+/settings - open group settings (COMMAND_SETTINGS)
+/rules - show group rules (COMMAND_RULES)
+/permissions (or /perms) - show permissions summary of a user (COMMAND_PERMS)
+
+(Toimplement):
+/del - delete a message (COMMAND_DELETE)
+/warn - warn user and punish if reach group warn limit (COMMAND_WARN)
+/kick - kick an user out from the group (COMMAND_KICK)
+/mute - disable messages to a user (COMMAND_MUTE)
+/ban - permanently remove an user from the group (COMMAND_BAN)
