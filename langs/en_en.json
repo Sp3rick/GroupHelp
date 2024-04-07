@@ -61,7 +61,7 @@
     "TEXT_BUTTON" : "📄 Text",
     "SEE_BUTTON" : "👀 See",
     "URLBUTTONS_BUTTON" : "🔠 Url Buttons",
-    "RULES_TITLE" : "<b>Group rules</b>",
+    "RULES_TITLE" : "Group rules",
     "SET_MESSAGE_ADV" : "👉🏻 <b>Send now the message</b> you want to set.\n<i>You can send it already formatted or use HTML</i>",
     "SET_MEDIA_ADV" : "👉🏻<b>Send now any media</b> (photo, video, sticker, file) you want to set.\n<i>You can type a caption.</i>",
     "SET_BUTTONS_ADV" : "👉🏻<b>Send now the list of buttons</b> to insert on the inline keyboard, with texts and links, <b>using this format:</b>\n\n<code>Text button - link.com\nText button - @LibreGroupHelpBot</code>\n\n• If you want to set 2 or more buttons on the same row separe them with <code>&&</code>.\n\n<b>Example:</b>\n<code>Website - https://github.com/ && Channel - @username</code>",
