@@ -6,6 +6,8 @@ user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: i
 NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
 Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
 
+NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database
+
 You can find a comment referring security guards that you can use too in plugins/welcome.js
 
 
@@ -19,7 +21,7 @@ This plugin manages users data and roles in the group
 0 means neutral
 -1 means false
 
-customPerms Object:
+LGHPerms Object:
 
 commands: array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command
 immune: active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1](TO IMPLEMENT)
@@ -43,18 +45,18 @@ chat.users[id].perms > chat.users[id].adminPerms > chat.roles[role].perms (highe
 chat.users[id] userStatus Object:
 
 warnCount: number of user warns
-perms: customPerms object for all user-specific permissions
-roles: array user roles, string for pre-made roles, number for custom roles (user-made)
-adminPerms: customPerms object for user permissions if admin
+perms: LGHPerms object for all user-specific permissions
+roles: array of user roles, string for pre-made roles, number for custom roles (user-made)
+adminPerms: LGHPerms object for user permissions if admin
 title: user administrator title
 
 
-chat.roles[role] GHRole Object: ( the pre-made roles are in global.roles[roleName] )
+chat.roles[role] LGHRole Object: ( the pre-made roles are in global.roles[roleName] )
 
 name: role name
 emoji: emoji for the role
 level: role level, higher level users can use commands that affect  lower level users
-perms: customPerms object applyed at lowest priority on any user in this role
+perms: LGHPerms object applyed at lowest priority on any user in this role
 users: array of userId in this role
 
 
@@ -111,9 +113,9 @@ Note: if format is false or entities unavaiable set message parse_mode to HTML (
 >Depends on api/MessageMaker.js
 >Depends on api/utils.js
 
-Adds on chat.welcome a custom object "welcomeObject"
+Adds on chat.welcome a custom object "LGHWelcome"
 
-welcomeObject Object:
+LGHWelcome Object:
 
 state : true if welcome is enabled (default false)
 once : true if should be sent only at first user join (default false)
@@ -133,9 +135,9 @@ message : customMessage object
 >Depends on api/setNum.js
 >Depends on api/setTime.js
 
-Adds on chat.flood a custom object "floodObject"
+Adds on chat.flood a custom object "LGHFlood"
 
-floodObject Object:
+LGHFlood Object:
 
 messages: number of messages needed to triggher the Antiflood
 time: seconds within the specified message should be sent to triggher the Antiflood

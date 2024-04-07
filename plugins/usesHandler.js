@@ -5,7 +5,9 @@ var {genPermsReport, IsEqualInsideAnyLanguage} = require ("../api/utils.js");
 function main(args)
 {
 
-    var {GHbot, TGbot, db, config} = new LGHelpTemplate(args);
+    const GHbot = new LGHelpTemplate(args);
+    const {TGbot, db, config} = GHbot;
+
     l = global.LGHLangs; //importing langs object
 
     //founder role is automatically set from /reload command
@@ -26,7 +28,7 @@ function main(args)
         free : RM.newRole("FREE", "🔓", 0, freePerms),
     }
 
-    GHbot.on( "message", (msg, chat, user) => {
+    GHbot.onMessage( (msg, chat, user) => {
 
         if(!chat.isGroup) return;
 

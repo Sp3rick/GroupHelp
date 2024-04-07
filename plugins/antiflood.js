@@ -17,11 +17,12 @@ function checkMessages(flood, messages)
 function main(args)
 {
 
-    var {GHbot, TGbot, db, config} = new LGHelpTemplate(args);
+    const GHbot = new LGHelpTemplate(args);
+    const {TGbot, db, config} = GHbot;
 
     l = global.LGHLangs; //importing langs object
 
-    GHbot.on( "callback_query", (cb, chat, user) => {
+    GHbot.onCallback( (cb, chat, user) => {
 
         var msg = cb.message;
         var lang = user.lang;
@@ -170,11 +171,10 @@ function main(args)
 
     })
 
-    GHbot.on( "message", async (msg, chat, user) => {
+    GHbot.onMessage( async (msg, chat, user) => {
 
 
-        if(chat.type != "private")
-        {(()=>{
+        if(chat.type != "private"){(()=>{
             if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
             var userPerms = RM.sumUserPerms(chat, user.id);
             if(userPerms.flood == 1) return;

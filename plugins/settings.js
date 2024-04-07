@@ -5,18 +5,19 @@ const {genSettingsKeyboard, IsEqualInsideAnyLanguage} = require( "../api/utils.j
 function main(args)
 {
 
-    var {GHbot, TGbot, db, config} = new LGHelpTemplate(args);
+    const GHbot = new LGHelpTemplate(args);
+    const {TGbot, db, config} = GHbot;
 
     l = global.LGHLangs; //importing langs object
     langKeys = Object.keys(l);
     loadedLangs = Object.keys(l).length;
 
-    GHbot.on("message", (msg, chat, user) => {
+    GHbot.onMessage((msg, chat, user) => {
 
         var lang = user.lang
 
         if(!chat.isGroup) return;
-        if(user.settings != 1) return;
+        if(user.perms.settings != 1) return;
 
         if( chat.isGroup && msg.command && IsEqualInsideAnyLanguage(msg.command.name, "COMMAND_SETTINGS") )
         {
@@ -41,7 +42,7 @@ function main(args)
 
     })
     
-    GHbot.on("callback_query", async (cb, chat, user) => {
+    GHbot.onCallback(async (cb, chat, user) => {
 
         var msg = cb.message
         var lang = user.lang
@@ -253,8 +254,6 @@ function main(args)
         }
 
     })
-
-    
 
 }
 
