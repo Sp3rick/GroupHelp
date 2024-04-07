@@ -31,10 +31,11 @@ var loadedLangs = Object.keys(l).length; Total number of loaded languages
 
 Additional data of custom <i>chat</i> object:
 admins: array with known admins objects (user data anonymized)
-lang : current setted chat lang
+lang : current chat lang
 isGroup : result of (chat.type == "supergroup" || chat.type == "group")
-warns : warns.js plugin related data
 users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
+roles : GHRole data about a specific role, full role Object if it's a custom role (key with a number)
+warns : warns.js plugin related data
 rules : rules.js plugin related data
 welcome : welcome.js plugin related data
 flood : flood.js plugin related data
