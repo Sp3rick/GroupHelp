@@ -298,18 +298,16 @@ class main {
     }
 
     /**
-     * Documentazione per il metodo che gestisce l'evento su GHbot
-     * @param {string} eventName - Nome dell'evento
-     * @param {(arg1: LGHMessage, arg2: LGHChat, arg3: LGHUser) => void} handler - Funzione di gestione dell'evento
+     * LGHbot message event handler
+     * @param {(arg1: LGHMessage, arg2: LGHChat, arg3: LGHUser) => void} handler - handler function
      */
     onMessage(handler) {
         this.GHbot.on("message", handler);
     }
 
     /**
-     * Documentazione per il metodo che gestisce l'evento su GHbot
-     * @param {string} eventName - Nome dell'evento
-     * @param {(arg1: TelegramBot.CallbackQuery, arg2: LGHChat, arg3: LGHUser) => void} handler - Funzione di gestione dell'evento
+     * LGHbot callback event handler
+     * @param {(arg1: TelegramBot.CallbackQuery, arg2: LGHChat, arg3: LGHUser) => void} handler - handler function
      */
     onCallback(handler) {
         this.GHbot.on("callback_query", handler);
