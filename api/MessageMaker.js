@@ -322,7 +322,7 @@ function callbackEvent(TGbot, customMessage, cb, chat, user, cb_prefix, returnBu
             } 
         }
 
-        options.reply_markup.inline_keyboard = customMessage.buttonsParsed; 
+        options.reply_markup.inline_keyboard = JSON.parse(JSON.stringify(customMessage.buttonsParsed)); 
 
         options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}])
 
@@ -420,6 +420,17 @@ function messageEvent(TGbot, customMessage, msg, chat, user, cb_prefix)
             TGbot.sendMessage( chat.id, l[user.lang].MEDIA_INCORRECT, options )
             return {customMessage, user, updateMSGMK, updateUser};
         }
+        
+        if( msg.hasOwnProperty("caption") )
+        {
+            if(customMessage.hasOwnProperty("entities")) delete customMessage.entities; //delete old entities
+            customMessage.text = msg.caption;
+        }
+        if(msg.hasOwnProperty("caption_entities"))
+        {
+            customMessage.entities = msg.caption_entities;
+            customMessage.format = true;
+        }
 
         customMessage.media = media;
         updateMSGMK=true
@@ -505,25 +516,31 @@ function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptio
 
     var options = {reply_markup:{}};
 
-    var text = messageTitle ? messageTitle+"\n\n" : "";
-    if(text.length == 0)text="CustomMessage"
+    var text = messageTitle ? messageTitle+"\n\n" : "CustomMessage\n\n";
 
     if(customMessage.format && customMessage.hasOwnProperty("entities"))
     {
-        options.entities = customMessage.entities;
+        options.entities = JSON.parse(JSON.stringify(customMessage.entities));
 
         for(var i=0; i < options.entities.length; i++)
             options.entities[i].offset += text.length;
 
-        options.entities.unshift({offset: 0, length: text.length, type: "bold" })
+        options.entities.unshift({offset: 0, length: text.length, type: "bold"})
 
         text += customMessage.text;
     }
-    else
+    else if(customMessage.format && !customMessage.hasOwnProperty("entities"))
+    {
+        options.entities = [{offset: 0, length: text.length, type: "bold" }];
+        text += customMessage.text;
+    }
+    
+    if(!customMessage.format)
     {
         options.parse_mode = "HTML";
-        text = "<b>"+text+"</b>"+(customMessage.text||"");
+        text = "<b>"+text+"</b>"+customMessage.text;
     }
+
 
     options.reply_markup.inline_keyboard = customMessage.buttonsParsed;
 
