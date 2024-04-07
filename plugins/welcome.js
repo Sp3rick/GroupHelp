@@ -1,15 +1,16 @@
-var LGHelpTemplate = require("../GHbot.js")
+const LGHelpTemplate = require("../GHbot.js")
 const {} = require( "../api/utils.js" );
 const MSGMK = require( "../api/MessageMaker.js" )
 
 function main(args)
 {
 
-    var {GHbot, TGbot, db, config} = new LGHelpTemplate(args);
+    const GHbot = new LGHelpTemplate(args);
+    const {TGbot, db, config} = GHbot;
 
     l = global.LGHLangs; //importing langs object
 
-    GHbot.on( "message", async (msg, chat, user) => {
+    GHbot.onMessage(async (msg, chat, user) => {
 
         //NOTE: deactivate this when captcha is enabled +create a function that handle a welcome message
         if(chat.isGroup && chat.welcome.state && msg.hasOwnProperty("new_chat_members") )
@@ -49,7 +50,7 @@ function main(args)
     } )
 
 
-    GHbot.on( "callback_query", (cb, chat, user) => {
+    GHbot.onCallback( (cb, chat, user) => {
 
         var msg = cb.message;
         var lang = user.lang;
