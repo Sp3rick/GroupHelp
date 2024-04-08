@@ -5,5 +5,9 @@
     "deleteChatDataAfterBotRemove" : false,
     "overwriteChatDataIfReAddedToGroup" : false,
     "reserveLang" : "en_en"
-    
+    "saveDatabaseSeconds" : 3600,
+    "ANTIFLOOD_msgMin" : 2,
+    "ANTIFLOOD_msgMax" : 100,
+    "ANTIFLOOD_timeMin" : 2,
+    "ANTIFLOOD_timeMax" : 100
 }
