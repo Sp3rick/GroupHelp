@@ -92,6 +92,7 @@ Complete list of implemented commands:
 /settings - open group settings (COMMAND_SETTINGS)
 /rules - show group rules (COMMAND_RULES)
 /permissions (or /perms) - show permissions summary of a user (COMMAND_PERMS)
+/staffers (or /staff) - show group staff with default and custom roles (COMMAND_STAFF)
 
 (Toimplement):
 /del - delete a message (COMMAND_DELETE)
