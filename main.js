@@ -1,6 +1,6 @@
 const {parseCommand, getAdmins} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
-const getDatabase = require( __dirname + "/api/database.js" );
+const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js")
   
   
@@ -24,7 +24,7 @@ async function main(config) {
 
 
     //load database
-    var db = getDatabase(TGbot);
+    var db = getDatabase(config);
     console.log("log db path");
     console.log(db.dir)
 
@@ -106,7 +106,6 @@ async function main(config) {
              * @property {boolean} msg - Indicates whether the snowball is tightly packed.
              * @fires private
              */
-            //TODO make work event emitter jsdoc
             GHbot.emit( "private", msg, chat, user );
 
 
