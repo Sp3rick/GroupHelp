@@ -55,10 +55,11 @@ const TelegramBot = require("node-telegram-bot-api");
 
 /**
  * @typedef {Object} userStatus - object with data about an user in a group
- * @property {Number} warnCount - number of user warns
  * @property {LGHPerms} perms - LGHPerms object for all user-specific permissions
- * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
  * @property {LGHPerms} adminPerms - LGHPerms object for user permissions if admin
+ * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
+ * @property {Number} warnCount - number of user warns
+ * @property {String} fullName - result of usernameOrFullName(user)
  * @property {String} title - user administrator title
  */
 
@@ -104,7 +105,7 @@ const TelegramBot = require("node-telegram-bot-api");
  * @property {String|null} lang - current chat lang
  * @property {Boolean} isGroup - result of (chat.type == "supergroup" || chat.type == "group")
  * @property {Object.<string, userStatus>|null} users - Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
- * @property {Object.<string, roleData>|null} roles - data about a specific role, full role Object if it's a custom role (key with a number)
+ * @property {Object.<string, LGHRole>|null} roles - data about a specific role, full role Object if it's a custom role (key with a number)
  * @property {LGHWarns|null} warns - warns.js plugin related data
  * @property {customMessage|null} rules - rules.js plugin related data
  * @property {LGHWelcome|null} welcome - welcome.js plugin related data
