@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {genPermsReport, IsEqualInsideAnyLanguage} = require ("../api/utils.js");
+var {genPermsReport, IsEqualInsideAnyLanguage, checkCommandPerms, genStaffListMessage} = require ("../api/utils.js");
 
 function main(args)
 {
@@ -11,7 +11,7 @@ function main(args)
     l = global.LGHLangs; //importing langs object
 
     //founder role is automatically set from /reload command
-    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PERMS", "COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"]
+    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"]
     var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     var modPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"], 1, 1, 1, 1, 1, 1, 1, 1);
     var muterPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_MUTE"], 1, 1, 1, 1, 1, 1, 1, 1);
@@ -21,6 +21,7 @@ function main(args)
 
     global.roles = {
         founder : RM.newRole("FOUNDER", "👑", 100, founderPerms),
+        cofounder : RM.newRole("COFOUNDER", "⚜️", 90, founderPerms),
         moderator : RM.newRole("MODERATOR", "👷🏻‍♂️", 60, modPerms),
         muter : RM.newRole("MUTER", "🙊", 40, muterPerms),
         cleaner : RM.newRole("CLEANER", "🛃", 20, cleanerPerms),
@@ -34,12 +35,12 @@ function main(args)
 
         if(!chat.users.hasOwnProperty(user.id))
         {
-            chat.users[user.id] = RM.newUser();
+            chat.users[user.id] = RM.newUser(msg.from);
             db.chats.update(chat);
         }
 
         var command = msg.command;
-        if(command && (command.name == "perms" || IsEqualInsideAnyLanguage(command.name, "COMMAND_PERMS")))
+        if(checkCommandPerms(command, "COMMAND_PERMS", user.perms, ["perms"]))
         {
             if(!msg.hasOwnProperty("reply_to_message")) return;
 
@@ -54,6 +55,16 @@ function main(args)
             var text = target.first_name+" permissions: \n"+genPermsReport(chat.lang, targetPerms);
 
             TGbot.sendMessage(chat.id, text, options);
+        }
+
+        if( chat.isGroup && checkCommandPerms(command, "COMMAND_STAFF", user.perms, ["staff"]))
+        {
+            var options = {
+                parse_mode : "HTML",
+                reply_parameters: {message_id:msg.message_id}
+            }
+
+            TGbot.sendMessage(chat.id, genStaffListMessage(chat.lang, chat), options);
         }
 
     } )
