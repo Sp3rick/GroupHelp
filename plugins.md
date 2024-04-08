@@ -46,9 +46,11 @@ chat.users[id] userStatus Object:
 
 warnCount: number of user warns
 perms: LGHPerms object for all user-specific permissions
-roles: array of user roles, string for pre-made roles, number for custom roles (user-made)
 adminPerms: LGHPerms object for user permissions if admin
+fullName: result of usernameOrFullName(user)
 title: user administrator title
+roles: array of user roles, string for pre-made roles, number for custom roles (user-made)
+
 
 
 chat.roles[role] LGHRole Object: ( the pre-made roles are in global.roles[roleName] )
