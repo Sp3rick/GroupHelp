@@ -98,7 +98,6 @@ function parseCommand(text){
             bot: bot,
             args : args,
             splitArgs : splitArgs,
-
         }
 
         return cmd;
@@ -186,6 +185,75 @@ function genSetNumKeyboard(cb_prefix, settingsChatId)
     ]
 
     return [line1, line2, line3, line4];
+
+}
+
+function genUserList(userIds, chat)
+{
+    var text = "";
+
+    userIds.forEach((userId, index)=>{
+        if(index+1 != userIds.length)
+            text+=" ├";
+        else
+            text+=" └";
+
+        var userData = chat.users[userId];
+        var fullName = userData.fullName;
+        text += "<a href=\"tg://user?id="+userId+"\">"+fullName+"</a>";
+
+        text += (userData.title && userData.title.length > 0) ? " » <i>"+userData.title+"</i>" : "";
+
+        text+="\n";
+    })
+
+
+    return text;
+}
+
+/**
+ * @typedef {import('../GHbot.js').LGHChat} LGHChat
+ */
+/**
+ * @param {LGHChat} chat
+ */
+function genStaffListMessage(lang, chat)
+{
+
+    var text = bold(l[lang].GROUP_STAFF.toUpperCase())+"\n\n";
+
+    var rolesList = Object.keys(chat.roles);
+    rolesList.forEach(roleKey=>{
+        var isPremade = !isNumber(roleKey);
+        var roleData = chat.roles[roleKey];
+
+        if(roleData.users.length == 0) return;
+
+        var roleEmoji = isPremade ? global.roles[roleKey].emoji : roleData.emoji;
+        text += roleEmoji+" ";
+        var roleName = isPremade ? l[lang][global.roles[roleKey].name] : roleData.name;
+        text += bold(roleName);
+
+        text+="\n";
+
+        var userIds = roleData.users;
+        text += genUserList(userIds, chat);
+
+        text+="\n";
+        
+    })
+
+    var adminIds = [];
+    chat.admins.forEach(admin=>{
+        adminIds.push(admin.user.id);
+    })
+    if(adminIds.length != 0)
+    {
+        text+="👮🏼"+bold(l[lang].ADMINISTRATOR)+"\n";
+        text += genUserList(adminIds, chat);
+    }
+
+    return text;
 
 }
 
@@ -566,16 +634,37 @@ function usernameOrFullName(user)
 async function getAdmins(TGbot, chatId)
 {
     var adminList = await TGbot.getChatAdministrators( chatId );
-                    
-    //anonymize admins data
+
+    //remove deleted accounts
+    for(var i=0; i < adminList.length; ++i)
+        if(adminList[i].user.first_name.length == 0)
+            adminList.splice(i, 1)
+
+    return adminList
+}
+
+function anonymizeAdmins(adminList)
+{
     for(var i=0; i < adminList.length; ++i)
     {
         adminList[i].id = adminList[i].user.id;
         delete adminList[i].user;
         adminList[i].user = {id : adminList[i].id} //re-enabling id only for compatibility
     }
+    
+    return adminList;
+}
 
-    return adminList
+//check if it's a valid command and if the user has the permission to run that
+function checkCommandPerms(command, commandKey, perms, literalNames)
+{
+    literalNames = literalNames || [];
+
+    if(command &&
+        ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == ln}))&&
+        ( perms.commands.includes(commandKey) || literalNames.some(ln=>{return perms.commands.includes(ln)}) )
+    ) return true;
+    else return false;
 }
 
 module.exports = 
@@ -593,6 +682,7 @@ module.exports =
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     genSetNumKeyboard : genSetNumKeyboard,
+    genStaffListMessage : genStaffListMessage,
     stateToEmoji : stateToEmoji,
     genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,
@@ -608,5 +698,7 @@ module.exports =
     secondsToHumanTime : secondsToHumanTime,
     getUnixTime : getUnixTime,
     usernameOrFullName : usernameOrFullName,
-    getAdmins : getAdmins
+    getAdmins : getAdmins,
+    anonymizeAdmins : anonymizeAdmins,
+    checkCommandPerms : checkCommandPerms
 }
