@@ -6,11 +6,8 @@ var RM = require("../api/rolesManager.js");
 /**
  * @typedef {import("node-telegram-bot-api")} TelegramBot
  */
-/**
- *
- * @param {TelegramBot} TGbot - Instance o TelegramBot
- */
-function getDatabase(TGbot) {
+
+function getDatabase(config) {
 
     //config database directory here
     var dbInnerDir = global.directory;
@@ -189,8 +186,10 @@ function getDatabase(TGbot) {
                 if(!global.DBCHATS.hasOwnProperty(chatId)) return false;
                 var chatFile = database.chatsDir + "/" + chatId + ".json";
                 console.log( "saving chat to database, id:" + chatId );
+                var lastUse = global.DBCHATS[chatId].lastUse; 
                 delete global.DBCHATS[chatId].lastUse;
                 fs.writeFileSync( chatFile, JSON.stringify(global.DBCHATS[chatId]) )
+                global.DBCHATS[chatId].lastUse = lastUse
                 return true;
             },
 
@@ -329,7 +328,14 @@ function getDatabase(TGbot) {
 
     }
 
-    //TODO: an interval that saves on disk every chat every... hour? (useful if server crash)
+    //save on disk every chat (preventing case of uncontrolled crash)
+    setInterval( () => {
+        var ids = Object.keys(global.DBCHATS);
+        ids.forEach((id)=>{
+            database.chats.save(id);
+        })
+    }, config.saveDatabaseSeconds*1000)
+
     //that's for keep most used chats loaded and allowing database functions spamming
     //this is a clean up for inactive chats to prevent ram from blowing up
     var cleanerIntervalTime = 60000; //milliseconds
