@@ -20,6 +20,37 @@ function main(args)
     const GHbot = new LGHelpTemplate(args);
     const {TGbot, db, config} = GHbot;
 
+    var msgMin = config.ANTIFLOOD_msgMin;
+    var msgMax = config.ANTIFLOOD_msgMax;
+    var timeMin = config.ANTIFLOOD_timeMin;
+    var timeMax = config.ANTIFLOOD_timeMax;
+
+    //clear useless chats/messages on global.LGHFlood
+    setInterval(()=>{
+
+        var now = getUnixTime();
+        var chatIds = Object.keys(global.LGHFlood);
+        chatIds.forEach((chatId)=>{
+
+            var chat = global.LGHFlood[chatId];
+            
+            //delete useless messages for the antiflood
+            var msgIds = Object.keys(chat.messages)
+            msgIds.forEach((msgId)=>{
+                var time = chat.messages[msgId]
+                if(now - time > config.ANTIFLOOD_timeMax)
+                    delete global.LGHFlood[chatId].messages[msgId]
+            })
+
+            //if no messages clear chat object
+            msgIds = Object.keys(chat.messages)
+            if(msgIds.length == 0)
+                delete global.LGHFlood[chatId] 
+
+        }
+
+    )},timeMax*1000)
+
     l = global.LGHLangs; //importing langs object
 
     GHbot.onCallback( (cb, chat, user) => {
@@ -116,13 +147,13 @@ function main(args)
         if( cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            setNumReturn = SN.callbackEvent(TGbot, settingsChat.flood.messages, cb, chat, user, "S_FLOOD_MESSAGES", returnButtons, title);
+            setNumReturn = SN.callbackEvent(TGbot, settingsChat.flood.messages, cb, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
             cb_prefix = "S_FLOOD_MESSAGES";
         }
         if( cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            setNumReturn = SN.callbackEvent(TGbot, settingsChat.flood.time, cb, chat, user, "S_FLOOD_TIME", returnButtons, title);
+            setNumReturn = SN.callbackEvent(TGbot, settingsChat.flood.time, cb, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
             cb_prefix = "S_FLOOD_TIME";
         }
 
@@ -220,9 +251,6 @@ function main(args)
             if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
                 global.LGHFlood[chat.id].lastPunishment = now;
 
-            //TODO: options in config.json to set maximum and minimum values that can be set for messages and seconds
-            //TODO: interval that delete from global.LGHFlood expired messages (based on maximum of config.json) +repeat the interval using also this value??
-
         })()}
 
         //security guards
@@ -259,13 +287,13 @@ function main(args)
         if( user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM")  )
         {
             var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            newValue = SN.messageEvent(TGbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title);
+            newValue = SN.messageEvent(TGbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
         }
     
         if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM")  )
         {
             var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            newValue = SN.messageEvent(TGbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title);
+            newValue = SN.messageEvent(TGbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
         }
 
         if(newValue != -1)

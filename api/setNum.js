@@ -23,7 +23,7 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  * @return {Number}
  */
 //TODO: add a minimum and maximum option in this function and messageEvent
-function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnButtons, title)
+function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -31,6 +31,8 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
 
     title=title||"Number selector {number}";
     returnButtons=returnButtons||[];
+    min = min || 1;
+    max = max || 100;
 
     var msg = cb.message;
     var lang = user.lang;
@@ -78,14 +80,31 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
             reply_markup : {} 
         }
 
+        var errorCb = {show_alert:true}
+
         options.reply_markup.inline_keyboard = genSetNumKeyboard(cb_prefix, settingsChatId);
 
         returnButtons.forEach(button => {
             options.reply_markup.inline_keyboard.push( button );
         })
 
-        TGbot.editMessageText(title, options)
-        TGbot.answerCallbackQuery(cb.id);
+        if(number > max && number != currentNumber)
+        {
+            number = currentNumber;
+            errorCb.text = l[user.lang].SNUM_CB_TOOBIG.replace("{number}",max)
+            TGbot.answerCallbackQuery(cb.id, errorCb);
+        }
+        else if(number < min && number != currentNumber)
+        {
+            number = currentNumber;
+            errorCb.text = l[user.lang].SNUM_CB_TOOSMALL.replace("{number}",min)
+            TGbot.answerCallbackQuery(cb.id, errorCb);
+        }
+        else
+        {
+            TGbot.editMessageText(title, options);
+            TGbot.answerCallbackQuery(cb.id);
+        }
 
     }
 
@@ -104,7 +123,7 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
  * 
  * @return {Number}
  */
-function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnButtons, title)
+function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -112,7 +131,8 @@ function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnBu
     var settingsChatId = user.waitingReplyType.split(":")[1];
     var text = msg.text;
     var number = currentNumber
-    var limit = 100;
+    min = min || 1;
+    max = max || 100;
 
     var options = {
         parse_mode : "HTML",
@@ -145,10 +165,16 @@ function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnBu
         }
 
 
-        if(number > limit && number != currentNumber)
+        if(number > max && number != currentNumber)
         {
             number = currentNumber;
-            var errorText = l[user.lang].SNUM_TOOBIG.replace("{number}",limit)
+            var errorText = l[user.lang].SNUM_TOOBIG.replace("{number}",max)
+            TGbot.sendMessage(chat.id, errorText, errorOpts);
+        }
+        else if(number < min && number != currentNumber)
+        {
+            number = currentNumber;
+            var errorText = l[user.lang].SNUM_TOOSMALL.replace("{number}",min)
             TGbot.sendMessage(chat.id, errorText, errorOpts);
         }
         else

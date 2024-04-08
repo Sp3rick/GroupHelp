@@ -63,7 +63,6 @@ function main(args)
         if( cb.data.startsWith("SETTINGS") ) //handle settings and prevent non-admin user from using it
         {
             lang = settingsChat.lang;
-            TGbot.answerCallbackQuery(cb.id);
         }
 
         if( cb.data.startsWith("SETTINGS_SELECT:") )
@@ -87,8 +86,6 @@ function main(args)
             TGbot.answerCallbackQuery(cb.id);
         }
 
-        //TODO: when bot tryes to send private message check if its arrives, if not ask the user to start bot in private chat
-        //SETTINGS_HERE for edit, SETTINGS_PRIVATE to send new in private
         if( cb.data.startsWith("SETTINGS_HERE:") )
         {
             console.log("inside SETTINGS_HERE")
@@ -125,11 +122,12 @@ function main(args)
             "<b>"+l[user.lang].GROUP_LANGUAGE+":</b> <i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
             l[user.lang].SETTINGS_SELECT;
 
-            var sentMessage = await TGbot.sendMessage(user.id, text, options)
-
-            TGbot.answerCallbackQuery(cb.id);
-
-            //TODO: when bot tryes to send private message check if its arrives, if not ask the user to start bot in private chat
+            try {
+                var sentMessage = await TGbot.sendMessage(user.id, text, options);
+                TGbot.answerCallbackQuery(cb.id);
+            } catch (err) {
+                await TGbot.answerCallbackQuery(cb.id, { text: l[lang].SETTINGS_PRIVATE_ERROR, show_alert: true });
+            }
 
         }
 

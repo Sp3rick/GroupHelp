@@ -5,6 +5,9 @@
 botToken:
     Your bot token that you can get from @BotFather
 
+botStaff:
+    Array of userId(String) considered bot staff
+
 
 <b>Privacy settings</b>
 
@@ -20,5 +23,22 @@ overwriteChatDataIfReAddedToGroup:
 reserveLang:
     Principal language for the bot, this will be used to overwrite other languages with incompleted translations, we advise to keep it unchanged or use a full implemented language
 
-botStaff:
-    Array of userId(String) considered bot staff
+saveDatabaseSeconds:
+    Number of seconds of how often loaded chats should be written on disk, useful to prevent data loss on crash
+
+
+<b>Plugin settings</b>
+
+ANTIFLOOD_msgMin:
+    minimum allowed number of messages to triggher the antiflood
+
+ANTIFLOOD_msgMax:
+    maximum allowed number of messages to triggher the antiflood
+
+ANTIFLOOD_timeMin:
+    minimum allowed time in which N messages should be sent to triggher the antiflood
+
+ANTIFLOOD_timeMax:
+    maximum allowed time in which N messages should be sent to triggher the antiflood
+
+
