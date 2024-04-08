@@ -1,4 +1,4 @@
-const {isString} = require("./utils.js");
+const {isString, usernameOrFullName} = require("./utils.js");
 
 //Roles with string name is intended as a pre-made role
 //pre-made roles chat.roles[role] will contain only "users" array, data about the role are stored on global.roles[role]
@@ -135,20 +135,25 @@ function newPremadeRolesObject()
  * @return {userStatus}
  *      Get a default userStatus object
  */
-function newUser(warnCount, perms, roles, adminPerms, title)
+function newUser(user, perms, adminPerms, roles, warnCount, fullName, title)
 {
-    warnCount = warnCount || 0;
+    
+    if(user) fullName = usernameOrFullName(user);
+    
     perms = perms || newPerms();
-    roles = roles || [];
     adminPerms = adminPerms || newPerms();
+    roles = roles || [];
+    warnCount = warnCount || 0;
+    fullName = fullName;
     title = title || "";
 
     var userData = {
-        warnCount: warnCount,
         perms: perms,
         adminPerms: adminPerms,
-        title: title,
         roles: roles,
+        warnCount: warnCount,
+        fullName : fullName,
+        title: title,
     }
 
     return userData
@@ -291,7 +296,7 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
-        perms = newPerms(["COMMAND_PERMS", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
+        perms = newPerms(["COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -317,18 +322,16 @@ function reloadAdmins(chat, admins)
     admins.forEach(member=>{
 
         var userId = member.user.id
-        if(!chat.users.hasOwnProperty(userId))
-            chat.users[userId] = newUser();
-
-        chat.users[userId].adminPerms = newPerms();
-
+        if(!chat.users.hasOwnProperty(userId)){
+            chat.users[userId] = newUser(member.user);
+}
         if(member.status == "creator")
             chat = setRole(chat, userId, "founder");
         if(member.status == "administrator")
             chat.users[userId].adminPerms = adminToPerms(member);
 
         if(member.custom_title)
-            chat.users[userId].title = chat.custom_title;
+            chat.users[userId].title = member.custom_title;
 
     })
 

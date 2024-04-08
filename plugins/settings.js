@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 const RM = require("../api/rolesManager.js");
-const {genSettingsKeyboard, IsEqualInsideAnyLanguage} = require( "../api/utils.js" );
+const {genSettingsKeyboard, IsEqualInsideAnyLanguage, checkCommandPerms} = require( "../api/utils.js" );
 
 function main(args)
 {
@@ -19,7 +19,7 @@ function main(args)
         if(!chat.isGroup) return;
         if(user.perms.settings != 1) return;
 
-        if( chat.isGroup && msg.command && IsEqualInsideAnyLanguage(msg.command.name, "COMMAND_SETTINGS") )
+        if( chat.isGroup && checkCommandPerms(msg.command, "COMMAND_SETTINGS", user.perms ) )
         {
 
             TGbot.sendMessage( chat.id, l[lang].SETTINGS_WHERE_OPEN, 

@@ -1,7 +1,8 @@
 const {parseCommand, getAdmins} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( "./api/database.js" );
-const RM = require("./api/rolesManager.js")
+const RM = require("./api/rolesManager.js");
+const { anonymizeAdmins, removeBotAdmins } = require("./api/utils.js");
   
   
 
@@ -53,11 +54,13 @@ async function main(config) {
                 msg.chat.lang = user.lang;
             console.log( "Group lang: " + msg.chat.lang )
 
-            msg.chat.admins = await getAdmins(TGbot, msg.chat.id);
+            var adminList = await getAdmins(TGbot, msg.chat.id);
+            var anonAdminList = anonymizeAdmins(JSON.parse(JSON.stringify(adminList)))
+            msg.chat.admins = anonAdminList;
             db.chats.add(msg.chat);
 
             msg.chat = db.chats.get(msg.chat.id)
-            msg.chat = RM.reloadAdmins(msg.chat, msg.chat.admins);
+            msg.chat = RM.reloadAdmins(msg.chat, adminList);
             db.chats.update(msg.chat);
             
             await TGbot.sendMessage(msg.chat.id, l[msg.chat.lang].NEW_GROUP,
