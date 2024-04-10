@@ -224,8 +224,6 @@ async function main(config) {
             var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
-<<<<<<< Updated upstream
-=======
 
         //add any new chat user
         if(chat.users && !chat.users.hasOwnProperty(user.id))
@@ -233,7 +231,6 @@ async function main(config) {
             chat.users[user.id] = RM.newUser(msg.from);
             db.chats.update(chat);
         }
->>>>>>> Stashed changes
 
         GHbot.emit( "message", msg, chat, user );
         
