@@ -148,10 +148,7 @@
     "COMMAND_RULES" : "rules",
     "COMMAND_PERMS" : "permissions",
     "COMMAND_STAFF" : "staffers",
-<<<<<<< Updated upstream
-=======
     "COMMAND_INFO" : "informations",
->>>>>>> Stashed changes
     "COMMAND_PIN" : "pin",
     "COMMAND_DELETE" : "delete",
     "COMMAND_WARN" : "warn",
@@ -164,11 +161,8 @@
     "KICK" : "Kick",
     "MUTE" : "Mute",
     "BAN" : "Ban",
-<<<<<<< Updated upstream
-=======
     "NAME" : "Name",
     "SURNAM" : "Surname",
->>>>>>> Stashed changes
     "FOUNDER" : "Founder",
     "COFOUNDER" : "Co-founder",
     "ADMINISTRATOR" : "Administrator",
