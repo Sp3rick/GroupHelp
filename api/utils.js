@@ -1,8 +1,13 @@
 const chrono = require('chrono-node');
+const TelegramBot = require('node-telegram-bot-api');
 
 function bold(text)
 {
     return "<b>"+text+"</b>";
+}
+function tag(text, userId)
+{
+    return "<a href=\"tg://user?id="+userId+"\">"+text+"</a>";
 }
 
 let isObject = function(a) {
@@ -200,7 +205,7 @@ function genUserList(userIds, chat)
 
         var userData = chat.users[userId];
         var fullName = userData.fullName;
-        text += "<a href=\"tg://user?id="+userId+"\">"+fullName+"</a>";
+        text += tag(fullName, userId);
 
         text += (userData.title && userData.title.length > 0) ? " » <i>"+userData.title+"</i>" : "";
 
@@ -255,6 +260,69 @@ function genStaffListMessage(lang, chat)
 
     return text;
 
+}
+
+/**
+ * @param {LGHChat} chat
+ * @param {TelegramBot.ChatMember} member
+ */
+function memberToChatStatus(lang, member)
+{
+    var text = "";
+
+    if(member.status == "creator")
+        text+=l[lang].FOUNDER;
+    if(member.status == "administrator")
+        text+=l[lang].ADMINISTRATOR
+    if(member.status == "member")
+        text+=l[lang].MEMBER
+    if(member.status == "left")
+        text+=l[lang].LEFT_OUT;
+    if(member.status == "kicked")
+        text+=l[lang].BANNED;
+
+    if(member.status == "restricted")
+    {
+        if(!member.can_send_messages)
+            text+=l[lang].MUTED
+        else if( !(member.can_send_audios || member.can_send_documents || member.can_send_photos || member.can_send_videos ||
+        member.can_send_video_notes || member.can_send_voice_notes || member.can_send_polls || member.can_send_other_messages || 
+        member.can_add_web_page_previews) )
+            text+=l[lang].RESTRICTED+" ("+l[lang].MEDIA+")";
+        else
+            text+=l[lang].RESTRICTED;
+    }
+
+    return text;
+}
+
+/**
+ * @typedef {import('../GHbot.js').LGHUser} LGHUser
+ */
+/**
+ * @param {LGHChat} chat
+ * @param {LGHUser} user
+ * @param {TelegramBot.ChatMember} member
+ */
+function genMemberInfoText(lang, chat, user, member)
+{
+    var text = "";
+
+    var status = memberToChatStatus(lang, member);
+    var warns = chat.users[user.id] ? chat.users[user.id].warnCount : 0;
+    var joinDate = chat.users[user.id] ? chat.users[user.id].firtJoin : false; //TODO: translate to date based on group UTC data
+
+    text+=bold("🆔 ID: ")+"<code>"+user.id+"</code>\n";
+    text+=bold("👱 "+l[lang].NAME+": ")+tag(user.first_name, user.id)+"\n";
+    if(user.hasOwnProperty("last_name"))
+        text+=bold("👪 "+l[lang].SURNAME+": ")+tag(user.last_name, user.id)+"\n";
+    if(user.hasOwnProperty("username"))
+        text+=bold("🌐 Username: ")+"@"+user.username+"\n";
+    text+=bold("👀 "+l[lang].SITUATION+": ")+status+"\n";
+    text+=bold("❕ "+l[lang].WARNS+": ")+warns+"/"+chat.warns.limit+"\n";
+    text+=bold("⤵️ "+l[lang].JOIN_WHEN+" ")+(joinDate ? joinDate : l[lang].UNKNOWN)+"\n";
+
+    return text;
 }
 
 function getSetTimeMessage()
@@ -683,6 +751,7 @@ module.exports =
     genSettingsKeyboard : genSettingsKeyboard,
     genSetNumKeyboard : genSetNumKeyboard,
     genStaffListMessage : genStaffListMessage,
+    genMemberInfoText : genMemberInfoText,
     stateToEmoji : stateToEmoji,
     genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,

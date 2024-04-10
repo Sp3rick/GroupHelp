@@ -148,6 +148,7 @@ function newUser(user, perms, adminPerms, roles, warnCount, fullName, title)
     title = title || "";
 
     var userData = {
+        firstJoin: false,
         perms: perms,
         adminPerms: adminPerms,
         roles: roles,
@@ -296,7 +297,7 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
-        perms = newPerms(["COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
+        perms = newPerms(["COMMAND_PERMS", "COMMAND_INFO", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -389,7 +390,7 @@ function orderRolesByPriority(roles, chat) //Chat required only if role is numbe
 function sumUserPerms(chat, userId)
 {
 
-    var perms = newPerms();
+    var perms = chat.basePerms;
 
     if(!chat.users.hasOwnProperty(userId))
         return perms;
