@@ -1,7 +1,7 @@
 Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
 
 To Install use:
-$ npm i node-telegram-bot-api/yagop
+$ npm i node-telegram-bot-api/yagop (or $ npm i https://github.com/yagop/node-telegram-bot-api)
 $ npm i chrono-node
 
 Run with:
