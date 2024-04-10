@@ -148,6 +148,10 @@ function newUser(user, perms, adminPerms, roles, warnCount, fullName, title)
     title = title || "";
 
     var userData = {
+<<<<<<< Updated upstream
+=======
+        firstJoin: false,
+>>>>>>> Stashed changes
         perms: perms,
         adminPerms: adminPerms,
         roles: roles,
@@ -296,7 +300,11 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
+<<<<<<< Updated upstream
         perms = newPerms(["COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
+=======
+        perms = newPerms(["COMMAND_PERMS", "COMMAND_INFO", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
+>>>>>>> Stashed changes
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -389,7 +397,7 @@ function orderRolesByPriority(roles, chat) //Chat required only if role is numbe
 function sumUserPerms(chat, userId)
 {
 
-    var perms = newPerms();
+    var perms = chat.basePerms;
 
     if(!chat.users.hasOwnProperty(userId))
         return perms;
@@ -413,4 +421,8 @@ module.exports = {newPerms, newRole, newUser, newPremadeRolesObject,
     getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles,
     deleteRole, deleteUser, renameRole, changeRoleEmoji,
     setRole, unsetRole,
+<<<<<<< Updated upstream
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms}
+=======
+    adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms}
+>>>>>>> Stashed changes

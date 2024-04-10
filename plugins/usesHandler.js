@@ -1,6 +1,10 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
+<<<<<<< Updated upstream
 var {genPermsReport, IsEqualInsideAnyLanguage, checkCommandPerms, genStaffListMessage} = require ("../api/utils.js");
+=======
+var {genPermsReport, genMemberInfoText, checkCommandPerms, genStaffListMessage} = require ("../api/utils.js");
+>>>>>>> Stashed changes
 
 function main(args)
 {
@@ -11,9 +15,15 @@ function main(args)
     l = global.LGHLangs; //importing langs object
 
     //founder role is automatically set from /reload command
+<<<<<<< Updated upstream
     var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"]
     var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     var modPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"], 1, 1, 1, 1, 1, 1, 1, 1);
+=======
+    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_RULES", "COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"]
+    var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    var modPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE"], 1, 1, 1, 1, 1, 1, 1, 1);
+>>>>>>> Stashed changes
     var muterPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_MUTE"], 1, 1, 1, 1, 1, 1, 1, 1);
     var cleanerPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_DELETE"]);
     var helperPerms = RM.newPerms(["COMMAND_RULES"]);
@@ -29,6 +39,7 @@ function main(args)
         free : RM.newRole("FREE", "🔓", 0, freePerms),
     }
 
+<<<<<<< Updated upstream
     GHbot.onMessage( (msg, chat, user) => {
 
         if(!chat.isGroup) return;
@@ -39,6 +50,12 @@ function main(args)
             db.chats.update(chat);
         }
 
+=======
+    GHbot.onMessage( async (msg, chat, user) => {
+
+        if(!chat.isGroup) return;
+
+>>>>>>> Stashed changes
         var command = msg.command;
         if(checkCommandPerms(command, "COMMAND_PERMS", user.perms, ["perms"]))
         {
@@ -67,6 +84,24 @@ function main(args)
             TGbot.sendMessage(chat.id, genStaffListMessage(chat.lang, chat), options);
         }
 
+<<<<<<< Updated upstream
+=======
+        if( chat.isGroup && checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]))
+        {
+            var targetUser = user;
+            if(msg.reply_to_message)
+                targetUser = msg.reply_to_message.from;
+    
+            var options = {
+                parse_mode : "HTML",
+                reply_parameters: {message_id:msg.message_id}
+            }
+
+            var member = await TGbot.getChatMember(chat.id, targetUser.id);
+            TGbot.sendMessage(chat.id, genMemberInfoText(chat.lang, chat, targetUser, member), options);
+        }
+
+>>>>>>> Stashed changes
     } )
 
 }

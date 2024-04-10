@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {IsEqualInsideAnyLanguage, isAdminOfChat} = require( "../api/utils.js" );
+const {IsEqualInsideAnyLanguage, isAdminOfChat, checkCommandPerms} = require( "../api/utils.js" );
 const MSGMK = require( "../api/MessageMaker.js" )
 
 function main(args)
@@ -16,7 +16,7 @@ function main(args)
 
         if ( chat.isGroup ){
 
-            if( command && IsEqualInsideAnyLanguage(command.name, "COMMAND_RULES") )
+            if( command && checkCommandPerms(command, "COMMAND_RULES", user.perms) )
                 MSGMK.sendMessage(TGbot, chat.id, chat.rules, l[chat.lang].RULES_TITLE);
 
         }
@@ -26,10 +26,13 @@ function main(args)
         var settingsChatId = user.waitingReplyType.split(":")[1];
         if( chat.isGroup && settingsChatId != chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
+<<<<<<< Updated upstream
 
         var settingsChat = db.chats.get(settingsChatId)
+=======
+>>>>>>> Stashed changes
 
-        if( !isAdminOfChat(settingsChat, user.id) ) return;
+        var settingsChat = db.chats.get(settingsChatId)
 
         var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(TGbot, settingsChat.rules, msg, chat, user, "S_RULES");
 

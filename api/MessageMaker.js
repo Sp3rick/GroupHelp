@@ -37,7 +37,6 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod} = r
  * 
  * 
  * @return {MessageMakerReturn}
- *         Parsed command object, false if is not a command
  */
 function callbackEvent(TGbot, customMessage, cb, chat, user, cb_prefix, returnButtons, title, messageTitle)
 {
@@ -363,7 +362,6 @@ function callbackEvent(TGbot, customMessage, cb, chat, user, cb_prefix, returnBu
  * 
  * 
  * @return {MessageMakerReturn}
- *         Parsed command object, false if is not a command
  */
 function messageEvent(TGbot, customMessage, msg, chat, user, cb_prefix)
 {
@@ -506,27 +504,25 @@ function messageEvent(TGbot, customMessage, msg, chat, user, cb_prefix)
  * @param  {TelegramBot.SendMessageOptions} additionalOptions 
  * 
  * @return {Promise<TelegramBot.Message>}
- *         Parsed command object, false if is not a command
+ *         Telegram message object, false is message is not sent
  */
 function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptions)
 {
 
     additionalOptions=additionalOptions||{};
-    messageTitle=messageTitle||false;
 
     var options = {reply_markup:{}};
-
-    var text = messageTitle ? messageTitle+"\n\n" : "CustomMessage\n\n";
+    
+    var text = "";
+    if(messageTitle !== false)
+        text = messageTitle ? messageTitle+"\n\n" : "CustomMessage\n\n";
 
     if(customMessage.format && customMessage.hasOwnProperty("entities"))
     {
         options.entities = JSON.parse(JSON.stringify(customMessage.entities));
-
         for(var i=0; i < options.entities.length; i++)
             options.entities[i].offset += text.length;
-
         options.entities.unshift({offset: 0, length: text.length, type: "bold"})
-
         text += customMessage.text;
     }
     else if(customMessage.format && !customMessage.hasOwnProperty("entities"))
@@ -534,8 +530,7 @@ function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptio
         options.entities = [{offset: 0, length: text.length, type: "bold" }];
         text += customMessage.text;
     }
-    
-    if(!customMessage.format)
+    else if(!customMessage.format)
     {
         options.parse_mode = "HTML";
         text = "<b>"+text+"</b>"+customMessage.text;
@@ -543,23 +538,20 @@ function sendMessage(TGbot, chatId, customMessage, messageTitle, additionalOptio
 
 
     options.reply_markup.inline_keyboard = customMessage.buttonsParsed;
-
     options = Object.assign( {}, options, additionalOptions )
     
     if(customMessage.media)
     {
-
         var method = mediaTypeToMethod(customMessage.media.type);
         options = Object.assign( {}, options, customMessage.media.options );
-        options.caption = text;
+        if(text.length != 0) options.caption = text;
         if(options.hasOwnProperty("entities"))
-        {
             options.caption_entities = JSON.stringify(options.entities);
-        }
         return TGbot[method]( chatId, customMessage.media.fileId, options );
-        
     }
 
+    if(!customMessage.hasOwnProperty("text"))
+        return false;
     return TGbot.sendMessage( chatId, text, options );
 
 }

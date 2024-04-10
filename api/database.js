@@ -64,12 +64,16 @@ function getDatabase(config) {
 
                 }
 
+                
+                chat.admins = {};
+                chat.lang = config.reserveLang;
+                chat.users = {};
+                chat.basePerms = RM.newPerms();
+                chat.roles = RM.newPremadeRolesObject();
                 chat.warns = { timed:{}, limit:3, punishment:3, PTime: -1 };
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
-                chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true };
-                chat.users = {};
-                chat.roles = RM.newPremadeRolesObject();
+                chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true }
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -160,16 +164,17 @@ function getDatabase(config) {
                 }
 
                 //this allow the caller to edit single elements of chat (chat.id is required)
-                if(chat.hasOwnProperty("admins")) global.DBCHATS[chat.id].admins = chat.admins;
                 if(chat.hasOwnProperty("title")) global.DBCHATS[chat.id].title = chat.title;
                 if(chat.hasOwnProperty("type")) global.DBCHATS[chat.id].type = chat.type;
+                if(chat.hasOwnProperty("admins")) global.DBCHATS[chat.id].admins = chat.admins;
                 if(chat.hasOwnProperty("lang")) global.DBCHATS[chat.id].lang = chat.lang;
+                if(chat.hasOwnProperty("users")) global.DBCHATS[chat.id].users = chat.users;
+                if(chat.hasOwnProperty("basePerms")) global.DBCHATS[chat.id].basePerms = chat.basePerms;
+                if(chat.hasOwnProperty("roles")) global.DBCHATS[chat.id].roles = chat.roles;
                 if(chat.hasOwnProperty("warns")) global.DBCHATS[chat.id].warns = chat.warns;
                 if(chat.hasOwnProperty("rules")) global.DBCHATS[chat.id].rules = chat.rules;
                 if(chat.hasOwnProperty("welcome")) global.DBCHATS[chat.id].welcome = chat.welcome;
                 if(chat.hasOwnProperty("flood")) global.DBCHATS[chat.id].flood = chat.flood;
-                if(chat.hasOwnProperty("users")) global.DBCHATS[chat.id].users = chat.users;
-                if(chat.hasOwnProperty("roles")) global.DBCHATS[chat.id].roles = chat.roles;
 
                 global.DBCHATS[chat.id].lastUse = now;
 

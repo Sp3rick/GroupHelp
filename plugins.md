@@ -44,12 +44,22 @@ chat.users[id].perms > chat.users[id].adminPerms > chat.roles[role].perms (highe
 
 chat.users[id] userStatus Object:
 
+<<<<<<< Updated upstream
 warnCount: number of user warns
 perms: LGHPerms object for all user-specific permissions
 adminPerms: LGHPerms object for user permissions if admin
 fullName: result of usernameOrFullName(user)
 title: user administrator title
 roles: array of user roles, string for pre-made roles, number for custom roles (user-made)
+=======
+firtJoin: Unix number of first user join time in seconds, false if unknown
+perms: LGHPerms object for all user-specific permissions
+adminPerms: LGHPerms object for user permissions if admin
+roles: array of user roles, string for pre-made roles, number for custom roles (user-made)
+warnCount: number of user warns
+fullName: result of usernameOrFullName(user)
+title: user administrator title
+>>>>>>> Stashed changes
 
 
 

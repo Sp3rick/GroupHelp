@@ -95,7 +95,6 @@ async function main(config) {
         }
         var chat = Object.assign( {}, ((msg.chat.isGroup ? db.chats.get( msg.chat.id ) : {})), msg.chat );
         
-
         var command = parseCommand(msg.text || "");
         msg.command = command;
 
@@ -225,6 +224,16 @@ async function main(config) {
             var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
+<<<<<<< Updated upstream
+=======
+
+        //add any new chat user
+        if(chat.users && !chat.users.hasOwnProperty(user.id))
+        {
+            chat.users[user.id] = RM.newUser(msg.from);
+            db.chats.update(chat);
+        }
+>>>>>>> Stashed changes
 
         GHbot.emit( "message", msg, chat, user );
         
