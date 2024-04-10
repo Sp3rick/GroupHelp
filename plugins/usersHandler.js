@@ -1,10 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-<<<<<<< Updated upstream
-var {genPermsReport, IsEqualInsideAnyLanguage, checkCommandPerms, genStaffListMessage} = require ("../api/utils.js");
-=======
 var {genPermsReport, genMemberInfoText, checkCommandPerms, genStaffListMessage} = require ("../api/utils.js");
->>>>>>> Stashed changes
 
 function main(args)
 {
