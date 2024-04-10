@@ -205,11 +205,7 @@ function genUserList(userIds, chat)
 
         var userData = chat.users[userId];
         var fullName = userData.fullName;
-<<<<<<< Updated upstream
-        text += "<a href=\"tg://user?id="+userId+"\">"+fullName+"</a>";
-=======
         text += tag(fullName, userId);
->>>>>>> Stashed changes
 
         text += (userData.title && userData.title.length > 0) ? " » <i>"+userData.title+"</i>" : "";
 
@@ -266,8 +262,6 @@ function genStaffListMessage(lang, chat)
 
 }
 
-<<<<<<< Updated upstream
-=======
 /**
  * @param {LGHChat} chat
  * @param {TelegramBot.ChatMember} member
@@ -331,7 +325,6 @@ function genMemberInfoText(lang, chat, user, member)
     return text;
 }
 
->>>>>>> Stashed changes
 function getSetTimeMessage()
 {
     
@@ -758,10 +751,7 @@ module.exports =
     genSettingsKeyboard : genSettingsKeyboard,
     genSetNumKeyboard : genSetNumKeyboard,
     genStaffListMessage : genStaffListMessage,
-<<<<<<< Updated upstream
-=======
     genMemberInfoText : genMemberInfoText,
->>>>>>> Stashed changes
     stateToEmoji : stateToEmoji,
     genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,
