@@ -34,10 +34,7 @@ admins: array with known admins objects (user data anonymized)
 lang : current chat lang
 isGroup : result of (chat.type == "supergroup" || chat.type == "group")
 users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
-<<<<<<< Updated upstream
-=======
 basePerms : base permissions applyed to every user
->>>>>>> Stashed changes
 roles : GHRole data about a specific role, full role Object if it's a custom role (key with a number)
 warns : warns.js plugin related data
 rules : rules.js plugin related data
@@ -97,10 +94,7 @@ Complete list of implemented commands:
 /rules - show group rules (COMMAND_RULES)
 /permissions (or /perms) - show permissions summary of a user (COMMAND_PERMS)
 /staffers (or /staff) - show group staff with default and custom roles (COMMAND_STAFF)
-<<<<<<< Updated upstream
-=======
 /informations (or /info) - show info about a group user and edit it (COMMAND_INFO)
->>>>>>> Stashed changes
 
 (Toimplement):
 /del - delete a message (COMMAND_DELETE)
