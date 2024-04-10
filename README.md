@@ -13,11 +13,6 @@ TODO:
 
 -short term:
 
-<<<<<<< Updated upstream
-    ask double confirm to give an user the "settings" permission
-    implement time zone setting
-    add configuration to allow/disallow adding bot from non-admin users
-=======
     add on usersHandler.js /info command
     add id-to-tag and tag-to-id translation system (trough logging)
     add adding/removing role commands (with title if entered)
@@ -30,7 +25,6 @@ TODO:
     allow to see perms calculation trogh user perms, then roles by priority, then base group perms, going from left to right (or opposite)
     add something to allow a group admin to identify all users with special perms
     create a panel to set who can use various commands: everyone, role, admin, founder (4 switch buttons for each, for role open another panel)
->>>>>>> Stashed changes
     commands help panel
     notify founder and admins when bot get added in the group in thanksgiving message
     implement photo preview-mode in MessageMaker.js
