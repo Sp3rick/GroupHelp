@@ -26,11 +26,6 @@ function main(args)
         var settingsChatId = user.waitingReplyType.split(":")[1];
         if( chat.isGroup && settingsChatId != chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
-<<<<<<< Updated upstream
-
-        var settingsChat = db.chats.get(settingsChatId)
-=======
->>>>>>> Stashed changes
 
         var settingsChat = db.chats.get(settingsChatId)
 
