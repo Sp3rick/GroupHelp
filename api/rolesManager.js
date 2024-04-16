@@ -1,4 +1,5 @@
-const {isString, usernameOrFullName} = require("./utils.js");
+const {usernameOrFullName, genUserList, bold, isString} = require("./utils.js");
+var l = global.LGHLangs;
 
 //Roles with string name is intended as a pre-made role
 //pre-made roles chat.roles[role] will contain only "users" array, data about the role are stored on global.roles[role]
@@ -82,6 +83,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
         porn: porn,
         night : night,
         media: media,
+        roles : roles,
         settings: settings,
     }
     
@@ -104,7 +106,7 @@ function newRole(name, emoji, level, perms, users)
     var defualtRole = {
         name: name,
         emoji: emoji,
-        level: 0,
+        level: level,
         perms: perms,
         users: users,
     }
@@ -201,10 +203,10 @@ function getRolePerms(role, chat) //Chat required only if role is number (custom
     return chat.roles[role].perms
 }
 
-function getRoleName(role, chat) //Chat required only if role is number (custom role)
+function getRoleName(role, lang, chat) //Chat required only if role is number (custom role)
 {
     if(isString(role))
-        return global.roles[role].name
+        return l[lang][global.roles[role].name]
     return chat.roles[role].name
 }
 
@@ -225,6 +227,16 @@ function getRoleLevel(role, chat)  //Chat required only if role is number (custo
 function getPremadeRoles()
 {
     return Object.keys(global.roles);
+}
+
+function getChatRoles(chat)
+{
+    return Object.keys(chat.roles);
+}
+
+function getFullRoleName(role, lang, chat)
+{
+    return getRoleEmoji(role, chat)+" "+getRoleName(role, lang, chat);
 }
 
 //Delete every role reference
@@ -265,13 +277,15 @@ function changeRoleEmoji(role, chat, newName) //Premade roles can't change emoji
 //Set role to user
 function setRole(chat, userId, role)
 {
-    chat.users[userId].roles.push(role);
 
-    //this if should run only if it is a pre-made role
-    if(!chat.roles.hasOwnProperty(role))
+    if(!chat.roles.hasOwnProperty(role)) //this if should run only if it is a pre-made role
         chat.roles[role] = {users:[]};
 
-    chat.roles[role].users.push(userId);
+    if(!chat.users[userId].roles.includes(role))
+        chat.users[userId].roles.push(role);
+
+    if(!chat.roles[role].users.includes(userId))
+        chat.roles[role].users.push(userId);
 
     return chat;
 }
@@ -288,11 +302,15 @@ function unsetRole(chat, userId, role)
     return chat;
 }
 
+//admin translation management
 function adminToPerms(admin)
 {
 
     var perms = newPerms();
     var restrictCommands = ["COMMAND_WARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_BAN"]
+    var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMIN", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMIN"]
+    var promoteAndRestrictCommands = ["COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR"]
+    var promoteAndDeleteCommands = ["COMMAND_CLEANER", "COMMAND_UNCLEANER"]
 
     if(admin.status != "administrator")return perms;
 
@@ -303,11 +321,17 @@ function adminToPerms(admin)
     if(admin.can_restrict_members)
         restrictCommands.forEach(c=>perms.commands.push(c));
     if(admin.can_promote_members)
-        perms.roles = 1;
+        {perms.roles = 1; promoteCommands.forEach(c=>perms.commands.push(c));}
     if(admin.can_change_info)
         {perms.commands.push("COMMAND_SETTINGS");perms.settings=1};
     if(admin.can_pin_messages)
         perms.commands.push("COMMAND_PIN");
+
+    if(admin.can_promote_members && admin.can_restrict_members)
+        promoteAndRestrictCommands.forEach(c=>perms.commands.push(c));
+
+    if(admin.can_promote_members && admin.can_delete_messages)
+        promoteAndDeleteCommands.forEach(c=>perms.commands.push(c));
     
     return perms;
 
@@ -410,8 +434,54 @@ function sumUserPerms(chat, userId)
 
 }
 
-module.exports = {newPerms, newRole, newUser, newPremadeRolesObject,
-    getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles,
+
+////////////////////
+/**
+ * @typedef {import('../GHbot.js').LGHChat} LGHChat
+ */
+/**
+ * @param {LGHChat} chat
+ */
+function genStaffListMessage(lang, chat)
+{
+
+    var text = bold(l[lang].GROUP_STAFF.toUpperCase())+"\n\n";
+
+    var rolesList = orderRolesByPriority(getChatRoles(chat), chat).reverse();
+    rolesList.forEach(roleKey=>{
+
+        if(getRoleUsers(chat, roleKey).length == 0) return;
+
+        text += bold(getFullRoleName(roleKey, lang, chat));
+
+        text+="\n";
+
+        var userIds = getRoleUsers(chat, roleKey);
+        text += genUserList(userIds, chat);
+
+        text+="\n";
+        
+    })
+
+    var adminIds = [];
+    chat.admins.forEach(admin=>{
+        adminIds.push(admin.user.id);
+    })
+    if(adminIds.length != 0)
+    {
+        text+="👮🏼"+bold(l[lang].ADMINISTRATOR)+"\n";
+        text += genUserList(adminIds, chat);
+    }
+
+    return text;
+
+}
+
+module.exports = {
+    newPerms, newRole, newUser, newPremadeRolesObject,
+    getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
     deleteRole, deleteUser, renameRole, changeRoleEmoji,
     setRole, unsetRole,
-    adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms}
+    adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,
+    genStaffListMessage,
+}

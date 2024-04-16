@@ -65,7 +65,7 @@ function getDatabase(config) {
                 }
 
                 
-                chat.admins = {};
+                chat.admins = [];
                 chat.lang = config.reserveLang;
                 chat.users = {};
                 chat.basePerms = RM.newPerms();

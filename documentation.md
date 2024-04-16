@@ -87,14 +87,30 @@ Separate language selection and management for groups and users fully implemente
 
 
 
-
+Note: COMMAND_ prefix means that command can be solved in multiple languages
 Complete list of implemented commands:
 
 /settings - open group settings (COMMAND_SETTINGS)
 /rules - show group rules (COMMAND_RULES)
-/permissions (or /perms) - show permissions summary of a user (COMMAND_PERMS)
-/staffers (or /staff) - show group staff with default and custom roles (COMMAND_STAFF)
-/informations (or /info) - show info about a group user and edit it (COMMAND_INFO)
+/perms - show permissions summary of a user (COMMAND_PERMS)
+/staff - show group staff with default and custom roles (COMMAND_STAFF)
+/info - show info about a group user and edit it (COMMAND_INFO)
+
+(Toimplement):
+/free - give free role to user (COMMAND_FREE)
+/unfree - remove free role to user (COMMAND_UNFREE)
+/helper - set helper role to user (COMMAND_HELPER)
+/unhelper - remove helper role to user (COMMAND_UNHELPER)
+/cleaner - set cleaner role to user (COMMAND_CLEANER)
+/uncleaner - remove cleaner role to user (COMMAND_UNCLEANER)
+/muter - set muter role to user (COMMAND_MUTER)
+/unmuter - remove muter role to user (COMMAND_UNMUTER)
+/mod - set moderator role to user (COMMAND_MODERATOR)
+/unmod - remove moderator role to user (COMMAND_UNMODERATOR)
+/cofounder - set cofounder role to user (COMMAND_COFOUNDER)
+/uncofounder - remove cofounder role to user (COMMAND_UNCOFOUNDER)
+/admin - make user admin (COMMAND_ADMIN)
+/unadmin - remove admin role to user (COMMAND_UNADMIN)
 
 (Toimplement):
 /del - delete a message (COMMAND_DELETE)

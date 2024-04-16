@@ -2,6 +2,7 @@ const {parseCommand, getAdmins} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js");
+const TR = require("./api/tagResolver.js")
 const { anonymizeAdmins, removeBotAdmins } = require("./api/utils.js");
   
   
@@ -37,6 +38,8 @@ async function main(config) {
 
     TGbot.on( "message", async (msg, metadata) => {
 
+        TR.log(msg)
+
         var from = msg.from;
         msg.chat.isGroup =  (msg.chat.type == "supergroup" || msg.chat.type == "group")
         var isGroup = msg.chat.isGroup;
@@ -54,12 +57,12 @@ async function main(config) {
                 msg.chat.lang = user.lang;
             console.log( "Group lang: " + msg.chat.lang )
 
+            db.chats.add(msg.chat);
+            msg.chat = db.chats.get(msg.chat.id)
+
             var adminList = await getAdmins(TGbot, msg.chat.id);
             var anonAdminList = anonymizeAdmins(JSON.parse(JSON.stringify(adminList)))
             msg.chat.admins = anonAdminList;
-            db.chats.add(msg.chat);
-
-            msg.chat = db.chats.get(msg.chat.id)
             msg.chat = RM.reloadAdmins(msg.chat, adminList);
             db.chats.update(msg.chat);
             

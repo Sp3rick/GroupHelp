@@ -1,5 +1,6 @@
 const chrono = require('chrono-node');
 const TelegramBot = require('node-telegram-bot-api');
+var l = global.LGHLangs;
 
 function bold(text)
 {
@@ -49,6 +50,71 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+//TODO: add translation system that replaces any word to english (like dictionary translation)
+//ATTENTION HERE: for error he may return both 0 or 1
+function parseHumanTime(text) {
+    text = text+" from now";
+    const parsedDate = chrono.parseDate(text);
+    if (!parsedDate) return 0;
+    const now = new Date();
+    var millisecondsDifference = parsedDate.getTime() - now.getTime();
+    var totalSeconds = Math.floor(millisecondsDifference / 1000);
+    return ++totalSeconds;
+}
+function secondsToTime(seconds) {
+    const days = Math.floor(seconds / 86400);
+    const remainingHours = seconds % 86400;
+    const hours = Math.floor(remainingHours / 3600);
+    const remainingMinutes = remainingHours % 3600;
+    const minutes = Math.floor(remainingMinutes / 60);
+    const remainingSeconds = remainingMinutes % 60;
+
+    return {
+        days: days,
+        hours: hours,
+        minutes: minutes,
+        seconds: remainingSeconds
+    };
+}
+function secondsToHumanTime(lang, seconds)
+{
+    var time = secondsToTime(seconds);
+
+    var text = "";
+
+    if(time.days == 1)
+        text+="1 "+l[lang].DAY;
+    if(time.days > 1)
+        text+=time.days+" "+l[lang].DAYS;
+    
+    if(time.hours != 0 && (time.days != 0)) text+=", ";
+    if(time.hours == 1)
+        text+="1 "+l[lang].HOUR;
+    if(time.hours > 1)
+        text+=time.hours+" "+l[lang].HOURS;
+
+    if(time.minutes != 0 && (time.days != 0 || time.hours != 0)) text+=", ";
+    if(time.minutes == 1)
+        text+="1 "+l[lang].MINUTE;
+    if(time.minutes > 1)
+        text+=time.minutes+" "+l[lang].MINUTES;
+
+    if(time.seconds != 0 && (time.days != 0 || time.hours != 0 || time.minutes != 0)) text+=", ";
+    if(time.seconds == 1)
+        text+="1 "+l[lang].SECOND;
+    if(time.seconds > 1)
+        text+=time.seconds+" "+l[lang].SECONDS;
+
+    return text;
+
+}
+
+function getUnixTime() {
+    const currentTimeMillis = new Date().getTime();
+    const currentTimeSeconds = Math.floor(currentTimeMillis / 1000);
+    return currentTimeSeconds;
+}
+
 
 /** 
  * @typedef {Object} Command
@@ -56,16 +122,16 @@ function randomInt(min, max) {
  * @property {String} prefix - Prefix, example: / ! . , ;
  * @property {String} botCommand - Command and bot specifier (ex. "start@usernamebot")
  * @property {String} name - Command name (ex. "start")
- * @property {String} bot - Specified bot name (ex. "usernamebot")
- * @property {String} args - Raw arguments text after the command
- * @property {Array} splitArgs - Array of arguments split by space
+ * @property {String|false} bot - Specified bot name (ex. "usernamebot")
+ * @property {String|false} args - Raw arguments text after the command
+ * @property {Array|false} splitArgs - Array of arguments split by space
  */
 
 
 /** 
  * @param  {string} text
  *         Raw message text.
- * @return {Command|Boolean} 
+ * @return {Command|false} 
  *         Parsed command object, false if is not a command
  */
 function parseCommand(text){
@@ -80,12 +146,13 @@ function parseCommand(text){
         var botCommand = temp.split(" ")[0];    // "start@usernamebot"
         var name = botCommand.split("@")[0]; // "start"
         var bot = botCommand.split("@")[1];     // "usernamebot"
+        if(bot == undefined) bot = false;
 
         var args;
         var splitArgs;
-        if( temp.split(" ").lentgh > 1)
+        if( temp.split(" ").length > 1)
         {
-            args = temp.split(" ")[1];
+            args = temp.replace(botCommand+" ","");
             splitArgs = args.split(" ");
         }
         else
@@ -119,8 +186,6 @@ function parseCommand(text){
 
 function genSettingsKeyboard(lang, chatId)
 {
-
-    var l = global.LGHLangs;
 
     var keyboard =
     [
@@ -217,52 +282,6 @@ function genUserList(userIds, chat)
 }
 
 /**
- * @typedef {import('../GHbot.js').LGHChat} LGHChat
- */
-/**
- * @param {LGHChat} chat
- */
-function genStaffListMessage(lang, chat)
-{
-
-    var text = bold(l[lang].GROUP_STAFF.toUpperCase())+"\n\n";
-
-    var rolesList = Object.keys(chat.roles);
-    rolesList.forEach(roleKey=>{
-        var isPremade = !isNumber(roleKey);
-        var roleData = chat.roles[roleKey];
-
-        if(roleData.users.length == 0) return;
-
-        var roleEmoji = isPremade ? global.roles[roleKey].emoji : roleData.emoji;
-        text += roleEmoji+" ";
-        var roleName = isPremade ? l[lang][global.roles[roleKey].name] : roleData.name;
-        text += bold(roleName);
-
-        text+="\n";
-
-        var userIds = roleData.users;
-        text += genUserList(userIds, chat);
-
-        text+="\n";
-        
-    })
-
-    var adminIds = [];
-    chat.admins.forEach(admin=>{
-        adminIds.push(admin.user.id);
-    })
-    if(adminIds.length != 0)
-    {
-        text+="👮🏼"+bold(l[lang].ADMINISTRATOR)+"\n";
-        text += genUserList(adminIds, chat);
-    }
-
-    return text;
-
-}
-
-/**
  * @param {LGHChat} chat
  * @param {TelegramBot.ChatMember} member
  */
@@ -320,7 +339,7 @@ function genMemberInfoText(lang, chat, user, member)
         text+=bold("🌐 Username: ")+"@"+user.username+"\n";
     text+=bold("👀 "+l[lang].SITUATION+": ")+status+"\n";
     text+=bold("❕ "+l[lang].WARNS+": ")+warns+"/"+chat.warns.limit+"\n";
-    text+=bold("⤵️ "+l[lang].JOIN_WHEN+" ")+(joinDate ? joinDate : l[lang].UNKNOWN)+"\n";
+    text+=bold("⤵️ "+l[lang].JOIN_WHEN+": ")+(joinDate ? joinDate : l[lang].UNKNOWN)+"\n";
 
     return text;
 }
@@ -408,7 +427,6 @@ function exhistInsideAnyLanguage(optionName)
 {
     var caseSensitive = caseSensitive || false;
 
-    var l = global.LGHLangs;
     langKeys = Object.keys(l);
     loadedLangs = Object.keys(l).length;
 
@@ -428,7 +446,6 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 
     var caseSensitive = caseSensitive || false;
 
-    var l = global.LGHLangs;
     langKeys = Object.keys(l);
     loadedLangs = Object.keys(l).length;
 
@@ -449,11 +466,8 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 
 }
 
-
 function sendParsingError(TGbot, chatId, lang, callback_data)
 {
-
-    var l = global.LGHLangs;
 
     TGbot.sendMessage( chatId, l[lang].PARSING_ERROR, {
         parse_mode : "HTML",
@@ -620,73 +634,6 @@ function punishmentToText(lang, punishment)
     }
 }
 
-//TODO: add translation system that replaces any word to english (like dictionary translation)
-//ATTENTION HERE: for error he may return both 0 or 1
-function parseHumanTime(text) {
-    text = text+" from now";
-    const parsedDate = chrono.parseDate(text);
-    if (!parsedDate) return 0;
-    const now = new Date();
-    var millisecondsDifference = parsedDate.getTime() - now.getTime();
-    var totalSeconds = Math.floor(millisecondsDifference / 1000);
-    return ++totalSeconds;
-}
-function secondsToTime(seconds) {
-    const days = Math.floor(seconds / 86400);
-    const remainingHours = seconds % 86400;
-    const hours = Math.floor(remainingHours / 3600);
-    const remainingMinutes = remainingHours % 3600;
-    const minutes = Math.floor(remainingMinutes / 60);
-    const remainingSeconds = remainingMinutes % 60;
-
-    return {
-        days: days,
-        hours: hours,
-        minutes: minutes,
-        seconds: remainingSeconds
-    };
-}
-function secondsToHumanTime(lang, seconds)
-{
-    var l = global.LGHLangs;
-
-    var time = secondsToTime(seconds);
-
-    var text = "";
-
-    if(time.days == 1)
-        text+="1 "+l[lang].DAY;
-    if(time.days > 1)
-        text+=time.days+" "+l[lang].DAYS;
-    
-    if(time.hours != 0 && (time.days != 0)) text+=", ";
-    if(time.hours == 1)
-        text+="1 "+l[lang].HOUR;
-    if(time.hours > 1)
-        text+=time.hours+" "+l[lang].HOURS;
-
-    if(time.minutes != 0 && (time.days != 0 || time.hours != 0)) text+=", ";
-    if(time.minutes == 1)
-        text+="1 "+l[lang].MINUTE;
-    if(time.minutes > 1)
-        text+=time.minutes+" "+l[lang].MINUTES;
-
-    if(time.seconds != 0 && (time.days != 0 || time.hours != 0 || time.minutes != 0)) text+=", ";
-    if(time.seconds == 1)
-        text+="1 "+l[lang].SECOND;
-    if(time.seconds > 1)
-        text+=time.seconds+" "+l[lang].SECONDS;
-
-    return text;
-
-}
-
-function getUnixTime() {
-    const currentTimeMillis = new Date().getTime();
-    const currentTimeSeconds = Math.floor(currentTimeMillis / 1000);
-    return currentTimeSeconds;
-}
-
 function usernameOrFullName(user)
 {
     if(user.hasOwnProperty("username"))
@@ -697,6 +644,12 @@ function usernameOrFullName(user)
         text = " "+user.last_name;
 
     return text;
+}
+
+//return @UsernameOrName [Id923295] html formatted
+function LGHUserName(user)
+{
+    return usernameOrFullName(user)+" [<code>"+user.id+"</code>] ";
 }
 
 async function getAdmins(TGbot, chatId)
@@ -723,7 +676,7 @@ function anonymizeAdmins(adminList)
     return adminList;
 }
 
-//check if it's a valid command and if the user has the permission to run that
+//check if it's a valid command and if the user has a specific permission to run that
 function checkCommandPerms(command, commandKey, perms, literalNames)
 {
     literalNames = literalNames || [];
@@ -750,7 +703,7 @@ module.exports =
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     genSetNumKeyboard : genSetNumKeyboard,
-    genStaffListMessage : genStaffListMessage,
+    genUserList : genUserList,
     genMemberInfoText : genMemberInfoText,
     stateToEmoji : stateToEmoji,
     genPermsReport : genPermsReport,
@@ -767,7 +720,8 @@ module.exports =
     secondsToHumanTime : secondsToHumanTime,
     getUnixTime : getUnixTime,
     usernameOrFullName : usernameOrFullName,
+    LGHUserName : LGHUserName,
     getAdmins : getAdmins,
     anonymizeAdmins : anonymizeAdmins,
-    checkCommandPerms : checkCommandPerms
+    checkCommandPerms : checkCommandPerms,
 }

@@ -1,8 +1,8 @@
 global.LGHVersion = "0.1.8";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
-const util = require('util')
-const config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) )
+const TR = require("./api/tagResolver.js");
+const config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) );
 
 console.log("Starting...")
 console.log( "Libre group help current version: " + global.LGHVersion )
@@ -69,6 +69,7 @@ async function main()
     //unload management
     var quitFunc = ()=>{
         db.unload();
+        TR.save();
         process.exit(0);
     }
     process.on('SIGINT', quitFunc);  // CTRL+C

@@ -18,7 +18,7 @@ async function punishUser(TGbot, chat, user, punishment, time, reason)
 
     if(punishment == 0) return;
 
-    var text = usernameOrFullName(user)+" [<code>"+userId+"</code>] ";
+    var text = LGHUserName(user);
     var buttons = [];
     var options = {};
     if(validTime) options.until_date = now+time+5;

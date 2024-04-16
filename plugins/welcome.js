@@ -15,9 +15,6 @@ function main(args)
         //NOTE: deactivate this when captcha is enabled +create a function that handle a welcome message
         if(chat.isGroup && chat.welcome.state && msg.hasOwnProperty("new_chat_members") )
         {
-            if(!chat.users[user.id].firtJoin)
-                chat.users[user.id].firtJoin = getUnixTime();
-
             var options = {reply_parameters: { message_id: msg.message_id, chat_id: chat.id }};
             msg.new_chat_members.forEach(async (user) => {
 
