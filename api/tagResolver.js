@@ -1,4 +1,5 @@
 const fs = require( "fs" );
+const { usernameOrFullName, isNumber } = require("./utils");
 
 if(!global.LGHTagToId) global.LGHTagToId = {};
 if(!global.LGHIdToTag) global.LGHIdToTag = {};
@@ -56,7 +57,7 @@ var tagResolver = {
     getTag : function(userId)
     {
         if(global.LGHIdToTag.hasOwnProperty(userId))
-            return global.LGHIdToTag[tag];
+            return global.LGHIdToTag[userId];
         return false;
     },
 
@@ -74,16 +75,28 @@ var tagResolver = {
         
         if(msg.command.splitArgs && msg.command.splitArgs.length > 0){
 
-            var username = msg.command.splitArgs[0];
-            if(msg.command.splitArgs[0].includes("t.me/"))
-                username = msg.command.splitArgs[0].split("t.me/")[1];
-            if(msg.command.splitArgs[0].startsWith("@"))
-                username = msg.command.splitArgs[0].replace("@","");
+            var firstArg = msg.command.splitArgs[0];
+            if(isNumber(firstArg) && Number(firstArg) > 99999 && Number(firstArg) < 999999999999)
+                return Number(firstArg);
+
+            var username = firstArg;
+            if(firstArg.includes("t.me/"))
+                username = firstArg.split("t.me/")[1];
+            if(firstArg.startsWith("@"))
+                username = firstArg.replace("@","");
 
             return this.getId(username);
         }
 
         return false;
+    },
+
+    LGHUserNameByTarget : function(msg, userId)
+    {
+        var LGHUserName = msg.hasOwnProperty("reply_to_message") ?
+                usernameOrFullName(msg.reply_to_message.from)+" " : (this.getTag(userId) ? "@"+this.getTag(userId)+" " : "");
+        LGHUserName += "[<code>"+userId+"</code>] ";
+        return LGHUserName;
     }
 
 }

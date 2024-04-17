@@ -78,6 +78,8 @@ function secondsToTime(seconds) {
 }
 function secondsToHumanTime(lang, seconds)
 {
+    var l = global.LGHLangs;
+
     var time = secondsToTime(seconds);
 
     var text = "";
@@ -186,6 +188,7 @@ function parseCommand(text){
 
 function genSettingsKeyboard(lang, chatId)
 {
+    var l = global.LGHLangs;
 
     var keyboard =
     [
@@ -258,21 +261,24 @@ function genSetNumKeyboard(cb_prefix, settingsChatId)
 
 }
 
-function genUserList(userIds, chat)
+function genUserList(userIds, chat, db)
 {
     var text = "";
 
     userIds.forEach((userId, index)=>{
         if(index+1 != userIds.length)
-            text+=" ├";
+            text+=" ├ ";
         else
-            text+=" └";
+            text+=" └ ";
 
-        var userData = chat.users[userId];
-        var fullName = userData.fullName;
-        text += tag(fullName, userId);
+        var userStatus = chat.users[userId];
+        var userData = db.users.get(userId);
+        if(userData)
+            text += tag(usernameOrFullName(userData), userId);
+        else
+            text += tag(userId, userId)
 
-        text += (userData.title && userData.title.length > 0) ? " » <i>"+userData.title+"</i>" : "";
+        text += (userStatus.title && userStatus.title.length > 0) ? " » <i>"+userStatus.title+"</i>" : "";
 
         text+="\n";
     })
@@ -287,6 +293,8 @@ function genUserList(userIds, chat)
  */
 function memberToChatStatus(lang, member)
 {
+    var l = global.LGHLangs;
+
     var text = "";
 
     if(member.status == "creator")
@@ -325,6 +333,8 @@ function memberToChatStatus(lang, member)
  */
 function genMemberInfoText(lang, chat, user, member)
 {
+    var l = global.LGHLangs;
+
     var text = "";
 
     var status = memberToChatStatus(lang, member);
@@ -363,6 +373,8 @@ function stateToEmoji(perm)
 function genPermsReport(lang, perms)
 {
 
+    var l = global.LGHLangs;
+
     var text=bold(l[lang].COMMANDS+": ");
     perms.commands.forEach(commandName => {
         var command = commandName;
@@ -381,7 +393,7 @@ function genPermsReport(lang, perms)
     bold(l[lang].PORN+": ")+stateToEmoji(perms.porn)+"\n"+
     bold(l[lang].NIGHT+": ")+stateToEmoji(perms.night)+"\n"+
     bold(l[lang].MEDIA+": ")+stateToEmoji(perms.media)+"\n"+
-    bold(l[lang].ROLES+": ")+stateToEmoji(perms.media)+"\n"+
+    bold(l[lang].ROLES+": ")+stateToEmoji(perms.roles)+"\n"+
     bold(l[lang].SETTINGS+": ")+stateToEmoji(perms.settings)+"\n";
 
     return text;
@@ -425,6 +437,8 @@ function isValidUser(user){
 
 function exhistInsideAnyLanguage(optionName)
 {
+    var l = global.LGHLangs;
+
     var caseSensitive = caseSensitive || false;
 
     langKeys = Object.keys(l);
@@ -443,6 +457,7 @@ function exhistInsideAnyLanguage(optionName)
 
 function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 {
+    var l = global.LGHLangs;
 
     var caseSensitive = caseSensitive || false;
 
@@ -452,6 +467,8 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 
     for( var langIndex = 0; langIndex < loadedLangs; langIndex++ )
     {
+        if(!l[langKeys[langIndex]].hasOwnProperty(optionName)) continue;
+        
         var curLangText = l[langKeys[langIndex]][optionName]
 
         if( caseSensitive && curLangText == text )
@@ -468,6 +485,7 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 
 function sendParsingError(TGbot, chatId, lang, callback_data)
 {
+    var l = global.LGHLangs;
 
     TGbot.sendMessage( chatId, l[lang].PARSING_ERROR, {
         parse_mode : "HTML",
@@ -624,6 +642,8 @@ function mediaTypeToMethod(type)
 
 function punishmentToText(lang, punishment)
 {
+    var l = global.LGHLangs;
+
     switch(punishment)
     {
         case 0: return l[lang].NOTHING;
@@ -639,17 +659,19 @@ function usernameOrFullName(user)
     if(user.hasOwnProperty("username"))
         return "@"+user.username
 
-    var text = user.first_name;
+    var text = user.first_name || false;
     if(user.hasOwnProperty("last_name"))
         text = " "+user.last_name;
 
     return text;
 }
 
-//return @UsernameOrName [Id923295] html formatted
+//return @UsernameOrName [Id923295] html formatted, needs at least user.id
 function LGHUserName(user)
 {
-    return usernameOrFullName(user)+" [<code>"+user.id+"</code>] ";
+    var fullName = usernameOrFullName(user);
+    fullName = fullName ? fullName+" " : "";
+    return fullName+"[<code>"+user.id+"</code>] ";
 }
 
 async function getAdmins(TGbot, chatId)

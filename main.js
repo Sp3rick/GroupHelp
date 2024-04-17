@@ -30,6 +30,7 @@ async function main(config) {
     console.log("log db path");
     console.log(db.dir)
 
+    TR.load();
 
     //some simplified variables
     l = global.LGHLangs;
@@ -100,6 +101,30 @@ async function main(config) {
         
         var command = parseCommand(msg.text || "");
         msg.command = command;
+        msg.command.target = false;
+        var targetId = TR.getCommandTargetUserId(msg);
+        if(targetId)
+        {
+            msg.command.target = {
+                id:targetId,
+                name: TR.LGHUserNameByTarget(msg, targetId),
+                perms: RM.sumUserPerms(chat, targetId),
+            }
+            msg.command.target.user = msg.hasOwnProperty("reply_to_message") ? msg.reply_to_message.from : db.users.get(targetId);
+
+            //if target is got from args exclude that one responsable
+            if(!msg.hasOwnProperty("reply_to_message"))
+            {
+                if(msg.command.splitArgs.length >= 2)
+                    msg.command.args = msg.command.args.split(msg.command.splitArgs[0]+" ")[1];
+                else
+                    msg.command.args = "";
+                
+                msg.command.splitArgs.shift();   
+            }
+    
+        }
+            
 
         
         if ( msg.chat.type == "private" ){
@@ -231,7 +256,7 @@ async function main(config) {
         //add any new chat user
         if(chat.users && !chat.users.hasOwnProperty(user.id))
         {
-            chat.users[user.id] = RM.newUser(msg.from);
+            chat = RM.addUser(chat, msg.from);
             db.chats.update(chat);
         }
 
@@ -345,7 +370,7 @@ async function main(config) {
 
         }
 
-
+        //that's only to set user.perms
         if(isGroup || cb.data.includes(":"))
         {
             var selectedChat = isGroup ? chat : db.chats.get(cb.data.split(":")[1]);

@@ -207,12 +207,11 @@ function main(args)
 
         if(chat.type != "private"){(()=>{
             if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
-            var userPerms = RM.sumUserPerms(chat, user.id);
-            if(userPerms.flood == 1) return;
+            if(user.perms.flood == 1) return;
 
             if(!global.LGHFlood.hasOwnProperty(chat.id))
                 global.LGHFlood[chat.id] = {lastUse: 0, lastPunishment : 0, messages: {}};
-
+            
             var now = getUnixTime();
             global.LGHFlood[chat.id].lastUse = now;
             global.LGHFlood[chat.id].messages[msg.message_id] = now;
@@ -246,7 +245,8 @@ function main(args)
             {
                 global.LGHFlood[chat.id].lastPunishment = now;
                 var PTime = (chat.flood.PTime == 0) ? -1 : chat.flood.PTime;
-                punishUser(TGbot, chat, user, chat.flood.punishment, PTime, l[chat.lang].S_ANTIFLOOD_BUTTON)
+                var reason = l[chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",chat.flood.messages).replaceAll("{time}",chat.flood.time);
+                punishUser(TGbot, chat, user, chat.flood.punishment, PTime, reason)
             }
             if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
                 global.LGHFlood[chat.id].lastPunishment = now;

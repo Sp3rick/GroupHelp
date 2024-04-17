@@ -227,11 +227,6 @@ function getDatabase(config) {
 
                 }//for other langs extend with if else
 
-                //removing some data to anonymize
-                delete user.first_name;
-                if(user.hasOwnProperty("last_name")) delete user.last_name;
-                delete user.username;
-
                 //preparing object finish here//
 
                 var userFile = database.usersDir + "/" + user.id + ".json";

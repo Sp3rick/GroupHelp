@@ -60,7 +60,6 @@ const TelegramBot = require("node-telegram-bot-api");
  * @property {LGHPerms} adminPerms - LGHPerms object for user permissions if admin
  * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
  * @property {Number} warnCount - number of user warns
- * @property {String} fullName - result of usernameOrFullName(user)
  * @property {String} title - user administrator title
  */
 
@@ -154,8 +153,21 @@ testObject()
  */
 
 /**
+ * @typedef {Object} TargetUser - Object that refers to a target user
+ * @property {string|number} id - Telegram user Id
+ * @property {string} name - Full LGH name identifier: "fullName [id]"
+ * @property {LGHPerms} perms - LGHPerms with perms of target
+ * @property {TelegramBot.usersDir|false} user - If avaiable, target basic user object
+ */
+
+/**
+ * @typedef {Object} CustomCommand - Additional items to command for LGH
+ * @property {TargetUser|false} target - Optional temporary object with data about a target LGH user in the command, false if no target found
+ */
+
+/**
  * @typedef {Object} CustomMessage
- * @property {ParsedCommand} command - result of message text parsed with parseCommand()
+ * @property {ParsedCommand & CustomCommand} command - result of message text parsed with parseCommand()
  */
 
 /**

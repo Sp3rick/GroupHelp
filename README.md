@@ -13,16 +13,18 @@ TODO:
 
 -short term:
 
-    implement /admin command
-    allow to set roles for user that's not in the group
-    add admin commands and error checking
-    add plugin punishments.js to handle punish cancel and punish set/unset commands (/ban /warn etc...)
+    buttons handling in punishment.js and punish.js plugin 
+    error handling of punishments
+    ban for users still not in group
+    add optionally the possibility to redirect warn permission instead of COMMAND_WARN to the command of punishment (?active by default?)
     ask double confirm to give an user the "settings" and "roles" (roles management) permission
     handle "chat_member" event adding/removing automatically from admin list
     create a /reload command to refresh chat admins
+    implement /admin command
+    add admin commands and error checking
     move additional things of main.js on a plugin
     allow on /perms to change user perms and roles +add it in a button for /info or when a role is set (/free /mod etc..)
-    allow to see perms calculation trogh user perms, then roles by priority, then base group perms, going from left to right (or opposite)
+    allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
     add something to allow a group admin to identify all users with special perms
     create a panel to set who can use various commands: everyone, role, admin, founder (4 switch buttons for each, for role open another panel)
     commands help panel
@@ -31,6 +33,7 @@ TODO:
     create custom function for all needed native method of TelegramBot to handle errors or crash on fail
     add setting to allow/disallow adding bot from non-admin users
     add a /forgot command to delete from the group all data about an user
+    ?add an automatic leveling system for admins? (maybe?)
 
 -medium term:
 

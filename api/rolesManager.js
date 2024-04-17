@@ -69,6 +69,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
     quote = (quote === false) ? -1 : quote;
     porn = (porn === false) ? -1 : porn;
     night = (night === false) ? -1 : night;
+    media = (media === false) ? -1 : media;
     roles = (roles === false) ? -1 : roles;
     settings = (settings === false) ? -1 : settings;
 
@@ -137,16 +138,12 @@ function newPremadeRolesObject()
  * @return {userStatus}
  *      Get a default userStatus object
  */
-function newUser(user, perms, adminPerms, roles, warnCount, fullName, title)
-{
-    
-    if(user) fullName = usernameOrFullName(user);
-    
+function newUser(user, perms, adminPerms, roles, warnCount, title)
+{   
     perms = perms || newPerms();
     adminPerms = adminPerms || newPerms();
     roles = roles || [];
     warnCount = warnCount || 0;
-    fullName = fullName;
     title = title || "";
 
     var userData = {
@@ -155,7 +152,6 @@ function newUser(user, perms, adminPerms, roles, warnCount, fullName, title)
         adminPerms: adminPerms,
         roles: roles,
         warnCount: warnCount,
-        fullName : fullName,
         title: title,
     }
 
@@ -184,6 +180,7 @@ function getAdminPerms(chat, userId)
 
 function getUserLevel(chat, userId)
 {
+    if(!chat.users.hasOwnProperty(userId)) return 0;
     var roles = chat.users[userId].roles
 
     var level = 0;
@@ -281,6 +278,9 @@ function setRole(chat, userId, role)
     if(!chat.roles.hasOwnProperty(role)) //this if should run only if it is a pre-made role
         chat.roles[role] = {users:[]};
 
+    if(!chat.users.hasOwnProperty(userId))
+        chat.users[userId] = newUser();
+
     if(!chat.users[userId].roles.includes(role))
         chat.users[userId].roles.push(role);
 
@@ -302,13 +302,30 @@ function unsetRole(chat, userId, role)
     return chat;
 }
 
+//add user to the chat
+function addUser(chat, user)
+{
+    chat.users[user.id] = newUser(user);
+
+    //restore roles that user may already have
+    var userRoles = [];
+    getChatRoles(chat).forEach((role)=>{
+        var roleUsers = getRoleUsers(chat, role);     
+        if(roleUsers.includes(user.id))
+            userRoles.push(role);   
+    })
+    chat.users[user.id].roles = userRoles;
+
+    return chat;
+}
+
 //admin translation management
 function adminToPerms(admin)
 {
 
     var perms = newPerms();
     var restrictCommands = ["COMMAND_WARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_BAN"]
-    var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMIN", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMIN"]
+    var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMINISTRATOR", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMIN"]
     var promoteAndRestrictCommands = ["COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR"]
     var promoteAndDeleteCommands = ["COMMAND_CLEANER", "COMMAND_UNCLEANER"]
 
@@ -442,7 +459,7 @@ function sumUserPerms(chat, userId)
 /**
  * @param {LGHChat} chat
  */
-function genStaffListMessage(lang, chat)
+function genStaffListMessage(lang, chat, db)
 {
 
     var text = bold(l[lang].GROUP_STAFF.toUpperCase())+"\n\n";
@@ -457,7 +474,7 @@ function genStaffListMessage(lang, chat)
         text+="\n";
 
         var userIds = getRoleUsers(chat, roleKey);
-        text += genUserList(userIds, chat);
+        text += genUserList(userIds, chat, db);
 
         text+="\n";
         
@@ -470,7 +487,7 @@ function genStaffListMessage(lang, chat)
     if(adminIds.length != 0)
     {
         text+="👮🏼"+bold(l[lang].ADMINISTRATOR)+"\n";
-        text += genUserList(adminIds, chat);
+        text += genUserList(adminIds, chat, db);
     }
 
     return text;
@@ -481,7 +498,7 @@ module.exports = {
     newPerms, newRole, newUser, newPremadeRolesObject,
     getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
     deleteRole, deleteUser, renameRole, changeRoleEmoji,
-    setRole, unsetRole,
+    setRole, unsetRole, addUser,
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,
     genStaffListMessage,
 }

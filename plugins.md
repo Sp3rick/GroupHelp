@@ -49,7 +49,6 @@ perms: LGHPerms object for all user-specific permissions
 adminPerms: LGHPerms object for user permissions if admin
 roles: array of user roles, string for pre-made roles, number for custom roles (user-made)
 warnCount: number of user warns
-fullName: result of usernameOrFullName(user)
 title: user administrator title
 
 

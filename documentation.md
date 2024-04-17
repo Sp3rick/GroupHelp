@@ -95,8 +95,7 @@ Complete list of implemented commands:
 /perms - show permissions summary of a user (COMMAND_PERMS)
 /staff - show group staff with default and custom roles (COMMAND_STAFF)
 /info - show info about a group user and edit it (COMMAND_INFO)
-
-(Toimplement):
+-
 /free - give free role to user (COMMAND_FREE)
 /unfree - remove free role to user (COMMAND_UNFREE)
 /helper - set helper role to user (COMMAND_HELPER)
@@ -109,8 +108,10 @@ Complete list of implemented commands:
 /unmod - remove moderator role to user (COMMAND_UNMODERATOR)
 /cofounder - set cofounder role to user (COMMAND_COFOUNDER)
 /uncofounder - remove cofounder role to user (COMMAND_UNCOFOUNDER)
-/admin - make user admin (COMMAND_ADMIN)
-/unadmin - remove admin role to user (COMMAND_UNADMIN)
+-
+(Toimplement):
+/admin - make user admin (COMMAND_ADMINISTRATOR)
+/unadmin - remove admin role to user (COMMAND_UNADMINISTRATOR)
 
 (Toimplement):
 /del - delete a message (COMMAND_DELETE)

@@ -26,6 +26,9 @@ reserveLang:
 saveDatabaseSeconds:
     Number of seconds of how often loaded chats should be written on disk, useful to prevent data loss on crash
 
+preventSetUselessRoles:
+    Disallow from setting roles if it does not change the user status in the group
+
 
 <b>Plugin settings</b>
 
