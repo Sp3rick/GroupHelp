@@ -112,6 +112,9 @@ Complete list of implemented commands:
 (Toimplement):
 /admin - make user admin (COMMAND_ADMINISTRATOR)
 /unadmin - remove admin role to user (COMMAND_UNADMINISTRATOR)
+/title - set admin title (COMMAND_TITLE)
+/untitle - remove admin title (COMMAND_UNTITLE)
+-
 
 (Toimplement):
 /del - delete a message (COMMAND_DELETE)

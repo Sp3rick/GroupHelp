@@ -1,4 +1,4 @@
-const {usernameOrFullName, genUserList, bold, isString} = require("./utils.js");
+const {usernameOrFullName, genUserList, bold, isString, anonymizeAdmins, LGHUserName} = require("./utils.js");
 var l = global.LGHLangs;
 
 //Roles with string name is intended as a pre-made role
@@ -374,8 +374,14 @@ function reloadAdmins(chat, admins)
 
         if(member.custom_title)
             chat.users[userId].title = member.custom_title;
+        else if(chat.users[userId].hasOwnProperty("title"))
+            delete chat.users[userId].title;
 
     })
+
+    //store basic object
+    var anonAdminList = anonymizeAdmins(admins)
+    chat.admins = anonAdminList;
 
     return chat;
 }
@@ -494,11 +500,20 @@ function genStaffListMessage(lang, chat, db)
 
 }
 
+function userToTarget(chat, user)
+{
+    var id = user.id;
+    var name = LGHUserName(user);
+    var perms = sumUserPerms(chat, user.id)
+
+    return {id, name, perms, user};
+}
+
 module.exports = {
     newPerms, newRole, newUser, newPremadeRolesObject,
     getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
     deleteRole, deleteUser, renameRole, changeRoleEmoji,
     setRole, unsetRole, addUser,
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,
-    genStaffListMessage,
+    genStaffListMessage, userToTarget,
 }

@@ -5,6 +5,10 @@ If event comes from a group the "chat" object will contain the full Custom Chat 
 user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: if chat.isGroup is true, if callback.data contains a groupId, or on message if user.waitingReply is true and user.waitingReplyType contains a groupId
 NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
 Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
+--Targets--
+Any msg.command object may contain an msg.command.target object if a command target user is found
+Also cb.target may exhist, builded up from user id after "#" in cb.data
+user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "#")
 
 NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database
 

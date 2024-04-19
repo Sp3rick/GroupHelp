@@ -246,7 +246,7 @@ function main(args)
                 global.LGHFlood[chat.id].lastPunishment = now;
                 var PTime = (chat.flood.PTime == 0) ? -1 : chat.flood.PTime;
                 var reason = l[chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",chat.flood.messages).replaceAll("{time}",chat.flood.time);
-                punishUser(TGbot, chat, user, chat.flood.punishment, PTime, reason)
+                punishUser(TGbot, chat, RM.userToTarget(chat, user), chat.flood.punishment, PTime, reason)
             }
             if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
                 global.LGHFlood[chat.id].lastPunishment = now;

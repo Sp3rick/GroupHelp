@@ -1,14 +1,23 @@
 const chrono = require('chrono-node');
 const TelegramBot = require('node-telegram-bot-api');
-var l = global.LGHLangs;
+l = global.LGHLangs;
 
+function cleanHTML(text)
+{
+    text = String(text).replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+    return text;
+}
 function bold(text)
 {
-    return "<b>"+text+"</b>";
+    return "<b>"+cleanHTML(text)+"</b>";
+}
+function code(text)
+{
+    return "<code>"+cleanHTML(text)+"</code>";
 }
 function tag(text, userId)
 {
-    return "<a href=\"tg://user?id="+userId+"\">"+text+"</a>";
+    return "<a href=\"tg://user?id="+userId+"\">"+cleanHTML(text)+"</a>";
 }
 
 let isObject = function(a) {
@@ -261,6 +270,75 @@ function genSetNumKeyboard(cb_prefix, settingsChatId)
 
 }
 
+function genGroupAdminPermsKeyboard(lang, admin, topicsAvaiable)
+{
+    var prefix = "ADMINPERM_";
+    var userId = admin.user.id;
+
+    var deletion = admin.can_delete_messages ? "✅" : "❌";
+    var videochat = admin.can_manage_video_chats ? "✅" : "❌";
+    var restrict = admin.can_restrict_members ? "✅" : "❌";
+    var promote = admin.can_promote_members ? "✅" : "❌";
+    var modify = admin.can_change_info ? "✅" : "❌";
+    var invite = admin.can_invite_users ? "✅" : "❌";
+    var stories = admin.can_post_stories ? "✅" : "❌";
+    var storyedit = admin.can_edit_stories ? "✅" : "❌";
+    var storydel = admin.can_delete_stories ? "✅" : "❌";
+    var pin = admin.can_pin_messages ? "✅" : "❌";
+    var topics = admin.can_manage_topics ? "✅" : "❌";
+
+    var line1 =
+    [
+        {text: deletion+" "+l[lang].DELETE_MESSAGES, callback_data: prefix+"DELETE#"+userId},
+    ]
+    
+    var line2 =
+    [
+        {text: videochat+" "+l[lang].MANAGE_VIDEOCHAT, callback_data: prefix+"VIDEOCHAT#"+userId},
+        {text: restrict+" "+l[lang].RESTRICT_MEMBERS, callback_data: prefix+"RESTRICT#"+userId},
+    ]
+    var line3 =
+    [
+        {text: promote+" "+l[lang].PROMOTE_MEMBERS, callback_data: prefix+"PROMOTE#"+userId},
+        {text: modify+" "+l[lang].MODIFY_GROUP, callback_data: prefix+"MODIFY#"+userId},
+    ]
+    var line4 =
+    [
+        {text: invite+" "+l[lang].INVITE_MEMBERS, callback_data: prefix+"INVITE#"+userId},
+        {text: stories+" "+l[lang].MANAGE_STORIES, callback_data: prefix+"STORIES#"+userId},
+    ]
+
+    var line5 =
+    [
+        {text: storyedit+" "+l[lang].EDIT_STORIES, callback_data: prefix+"STORYEDIT#"+userId},
+        {text: storydel+" "+l[lang].DELETE_STORIES, callback_data: prefix+"STORYDEL#"+userId},
+    ]
+
+    var line6 =
+    [
+        {text: pin+" "+l[lang].CAN_PIN, callback_data: prefix+"PIN#"+userId},
+    ]
+
+    var line7 =
+    [
+        {text: l[lang].EDIT_ADMIN_TITLE_BUTTON, callback_data: "ADMINTITLE#"+userId},
+    ]
+
+    if(topicsAvaiable)
+        line6.push({text: topics+" "+l[lang].MANAGE_TOPICS, callback_data: prefix+"TOPICS#"+userId})
+
+    return [line1, line2, line3, line4, line5, line6, line7];
+}
+
+function genGroupAdminPermsText(lang, chat, userId)
+{
+    var text = 
+    (chat.users[userId].title ? ("\n"+bold(l[lang].ADMIN_TITLE)+": "+code(chat.users[userId].title)) : "")+"\n\n"+
+    l[lang].PROMOTED_DESCRIPTION;
+
+    return text;
+}
+
 function genUserList(userIds, chat, db)
 {
     var text = "";
@@ -341,7 +419,7 @@ function genMemberInfoText(lang, chat, user, member)
     var warns = chat.users[user.id] ? chat.users[user.id].warnCount : 0;
     var joinDate = chat.users[user.id] ? chat.users[user.id].firtJoin : false; //TODO: translate to date based on group UTC data
 
-    text+=bold("🆔 ID: ")+"<code>"+user.id+"</code>\n";
+    text+=bold("🆔 ID: ")+code(user.id)+"\n";
     text+=bold("👱 "+l[lang].NAME+": ")+tag(user.first_name, user.id)+"\n";
     if(user.hasOwnProperty("last_name"))
         text+=bold("👪 "+l[lang].SURNAME+": ")+tag(user.last_name, user.id)+"\n";
@@ -400,18 +478,34 @@ function genPermsReport(lang, perms)
 
 }
 
-function isAdminOfChat(chat, userId)
-{if(chat.hasOwnProperty("admins")){
-
-    for(var i=0; i < chat.admins.length; i++)
+function isAdmin(admins, userId)
+{
+    for(var i=0; i < admins.length; i++)
     {
-        var admin = chat.admins[i];
+        var admin = admins[i];
         if(admin.user.id == userId) return true;
     }
 
     return false;
+}
 
+function isAdminOfChat(chat, userId)
+{if(chat.hasOwnProperty("admins")){
+    return isAdmin(chat.admins, userId);
 }else return false;}
+
+function hasAdminPermission(admins, userId, perm)
+{
+    if(!isAdmin(admins, userId)) return false;
+
+    var hasPermission = false;
+    admins.forEach((admin)=>{
+        if(admin.user.id == userId && admin.hasOwnProperty(perm) && admin[perm])
+            hasPermission = true;
+    })
+
+    return hasPermission;
+}
 
 function isValidChat(chat){
 
@@ -464,6 +558,7 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
     langKeys = Object.keys(l);
     loadedLangs = Object.keys(l).length;
 
+    if(!text) return false;
 
     for( var langIndex = 0; langIndex < loadedLangs; langIndex++ )
     {
@@ -666,12 +761,19 @@ function usernameOrFullName(user)
     return text;
 }
 
-//return @UsernameOrName [Id923295] html formatted, needs at least user.id
-function LGHUserName(user)
+//return @UsernameOrName [Id923295] html formatted, needs at least user.id, db to allow take things from database if not avaiable
+function LGHUserName(user, db)
 {
+    db = db || false;
+
     var fullName = usernameOrFullName(user);
+    if(!fullName && db)
+    {
+        var tookUser = db.users.get(user.id);
+        if(tookUser) fullName = usernameOrFullName(tookUser);
+    }
     fullName = fullName ? fullName+" " : "";
-    return fullName+"[<code>"+user.id+"</code>] ";
+    return fullName+"["+code(user.id)+"] ";
 }
 
 async function getAdmins(TGbot, chatId)
@@ -710,11 +812,54 @@ function checkCommandPerms(command, commandKey, perms, literalNames)
     else return false;
 }
 
+function telegramErrorToText(lang, error)
+{
+    if(error.code != "ETELEGRAM")
+    {
+        console.log(error);
+        return;
+    }
+
+    var l = global.LGHLangs;
+
+    var text = l[lang].UNKNOWN_ERROR;
+    var errDescription = error.response.body.description;
+    if(errDescription.includes("user not found"))
+        text = l[lang].USER_NOT_FOUND;
+    else if(errDescription.includes("PARTICIPANT_ID_INVALID"))
+        text = l[lang].USER_NOT_MEMBER;
+    else if(errDescription.includes("user is an administrator"))
+        text = l[lang].USER_IS_ADMIN;
+    else if(errDescription.includes("not enough rights"))
+        text = l[lang].MISSING_RIGHTS;
+    else if(errDescription.includes("user is not an administrator"))
+        text = l[lang].USER_NOT_ADMIN
+    else if(errDescription.includes("ADMIN_RANK_EMOJI_NOT_ALLOWED"))
+        text = l[lang].ADMIN_TITLE_EMOJI_FOUND
+    else if(errDescription.includes("Too Many Requests"))
+        text = "⚠️ "+errDescription;
+    else
+    {
+        console.log("unknown error in telegramErrorToText(), logging it's description...")
+        console.log(errDescription)
+    }
+
+    return text;
+}
+
+function handleTelegramGroupError(TGbot, chatId, lang, error)
+{
+    var text = telegramErrorToText(lang, error);
+    TGbot.sendMessage(chatId, text);
+}
+
 module.exports = 
 {
 
     bold : bold,
+    code : code,
     isObject : isObject,
+    cleanHTML : cleanHTML,
     isArray : isArray,
     isString :isString,
     replaceLast : replaceLast,
@@ -725,11 +870,14 @@ module.exports =
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     genSetNumKeyboard : genSetNumKeyboard,
+    genGroupAdminPermsKeyboard : genGroupAdminPermsKeyboard,
+    genGroupAdminPermsText : genGroupAdminPermsText,
     genUserList : genUserList,
     genMemberInfoText : genMemberInfoText,
     stateToEmoji : stateToEmoji,
     genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,
+    hasAdminPermission : hasAdminPermission,
     exhistInsideAnyLanguage : exhistInsideAnyLanguage,
     IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage,
     sendParsingError : sendParsingError,
@@ -746,4 +894,6 @@ module.exports =
     getAdmins : getAdmins,
     anonymizeAdmins : anonymizeAdmins,
     checkCommandPerms : checkCommandPerms,
+    telegramErrorToText : telegramErrorToText,
+    handleTelegramGroupError : handleTelegramGroupError,
 }

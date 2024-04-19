@@ -11,6 +11,16 @@ const TelegramBot = require("node-telegram-bot-api");
  */
 
 
+//TARGETUSER
+/**
+ * @typedef {Object} TargetUser - Object that refers to a target user
+ * @property {string|number} id - Telegram user Id
+ * @property {string} name - Full LGH name identifier: "fullName [id]"
+ * @property {LGHPerms} perms - LGHPerms with perms of target
+ * @property {TelegramBot.usersDir|false} user - If avaiable, target basic user object
+ */
+
+
 //PERMISSIONS
 /**
  * @typedef {Object} LGHPerms - LGHPerms Object.
@@ -47,8 +57,7 @@ const TelegramBot = require("node-telegram-bot-api");
  * @property {Array.<TelegramBot.KeyboardButton>} buttonsParsed - already parsed buttons ready to use for inline_keyboard
  */
 
-
-//CUSTOMCHAT DECLARATIONS
+//CUSTOM CHAT DECLARATIONS
 /**
  * @typedef {Array.<TelegramBot.ChatAdministratorRights & {user: AnonTGUser} & {status: TelegramBot.ChatMemberStatus}>} LGHAdminList
  */
@@ -60,7 +69,7 @@ const TelegramBot = require("node-telegram-bot-api");
  * @property {LGHPerms} adminPerms - LGHPerms object for user permissions if admin
  * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
  * @property {Number} warnCount - number of user warns
- * @property {String} title - user administrator title
+ * @property {String|undefined} title - user administrator title
  */
 
 /**
@@ -133,7 +142,7 @@ testObject()
  * @property {String} lang - current user lang
  * @property {Boolean} waitingReply - set to true if the bot is expecting a message from the user
  * @property {any} waitingReplyType - additional data related to waitingReply
- */
+ * @property {TargetUser} waitingReplyTarget - Optional temporary object with data about a target LGH user, false if no target found
 
 /**
  * @typedef {TelegramBot.User & CustomUser} LGHUser - Custom chat object given by LGHBot events, custom items avaiable if working about a group
@@ -153,14 +162,6 @@ testObject()
  */
 
 /**
- * @typedef {Object} TargetUser - Object that refers to a target user
- * @property {string|number} id - Telegram user Id
- * @property {string} name - Full LGH name identifier: "fullName [id]"
- * @property {LGHPerms} perms - LGHPerms with perms of target
- * @property {TelegramBot.usersDir|false} user - If avaiable, target basic user object
- */
-
-/**
  * @typedef {Object} CustomCommand - Additional items to command for LGH
  * @property {TargetUser|false} target - Optional temporary object with data about a target LGH user in the command, false if no target found
  */
@@ -172,6 +173,17 @@ testObject()
 
 /**
  * @typedef {TelegramBot.Message & CustomMessage} LGHMessage - Custom chat object given by LGHBot events, custom items avaiable if working about a group
+ */
+
+
+//CUSTOM CALLBACK DECLARTIONS
+/**
+ * @typedef {Object} CustomCallback
+ * @property {TargetUser} target - Optional temporary object with data about a target LGH user in the command, false if no target found
+ */
+
+/**
+ * @typedef {TelegramBot.CallbackQuery & CustomCallback} LGHCallback - Custom callback object given by LGHBot events, custom items may be avaiable
  */
 
 
@@ -322,7 +334,7 @@ class main {
 
     /**
      * LGHbot callback event handler
-     * @param {(arg1: TelegramBot.CallbackQuery, arg2: LGHChat, arg3: LGHUser) => void} handler - handler function
+     * @param {(arg1: LGHCallback, arg2: LGHChat, arg3: LGHUser) => void} handler - handler function
      */
     onCallback(handler) {
         this.GHbot.on("callback_query", handler);

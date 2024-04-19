@@ -3,7 +3,8 @@ const EventEmitter = require("node:events");
 const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js");
 const TR = require("./api/tagResolver.js")
-const { anonymizeAdmins, removeBotAdmins } = require("./api/utils.js");
+const { anonymizeAdmins, removeBotAdmins, code, usernameOrFullName } = require("./api/utils.js");
+const { table } = require("node:console");
   
   
 
@@ -21,8 +22,9 @@ async function main(config) {
     const TelegramBot = require('node-telegram-bot-api');
     
     // Create a bot that uses 'polling' to fetch new updates
-    const TGbot = new TelegramBot(config.botToken, {polling: true});
-    const bot = await TGbot.getMe()
+    var TGbot = new TelegramBot(config.botToken, {polling: true});
+    const bot = await TGbot.getMe();
+    TGbot.me = bot;
 
 
     //load database
@@ -62,8 +64,6 @@ async function main(config) {
             msg.chat = db.chats.get(msg.chat.id)
 
             var adminList = await getAdmins(TGbot, msg.chat.id);
-            var anonAdminList = anonymizeAdmins(JSON.parse(JSON.stringify(adminList)))
-            msg.chat.admins = anonAdminList;
             msg.chat = RM.reloadAdmins(msg.chat, adminList);
             db.chats.update(msg.chat);
             
@@ -99,6 +99,7 @@ async function main(config) {
         }
         var chat = Object.assign( {}, ((msg.chat.isGroup ? db.chats.get( msg.chat.id ) : {})), msg.chat );
         
+        //configuring msg.command and msg.command.target
         var command = parseCommand(msg.text || "");
         msg.command = command;
         msg.command.target = false;
@@ -125,7 +126,28 @@ async function main(config) {
     
         }
             
+        //if no-one is expecting a message from user
+        if( user.waitingReply == false )
+        {
 
+            TGbot.sendMessage(user.id, l[user.lang].PRESENTATION.replace("{name}",user.first_name+" "+(user.last_name||"")),
+                {
+                    parse_mode : "HTML",
+                    reply_markup :
+                    {
+                        inline_keyboard :
+                        [
+                            [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
+                            [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
+                            [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
+                            [{text: l[user.lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
+                        ] 
+                    } 
+                }
+            )
+
+        }
+        else console.log("message from waitingReply user: " + user.waitingReplyType);
         
         if ( msg.chat.type == "private" ){
 
@@ -137,30 +159,6 @@ async function main(config) {
              * @fires private
              */
             GHbot.emit( "private", msg, chat, user );
-
-
-            //if no-one is expecting a message from user
-            if( user.waitingReply == false )
-            {
-
-                TGbot.sendMessage(user.id, l[user.lang].PRESENTATION.replace("{name}",user.first_name+" "+(user.last_name||"")),
-                    {
-                        parse_mode : "HTML",
-                        reply_markup :
-                        {
-                            inline_keyboard :
-                            [
-                                [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + bot.username + "?startgroup=true"}],
-                                [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
-                                [{text: l[user.lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[user.lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
-                                [{text: l[user.lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
-                            ] 
-                        } 
-                    }
-                )
-
-            }
-            else console.log("message from waitingReply user: " + user.waitingReplyType);
 
             //if is a message directed to support
             if( (user.waitingReply == true && user.waitingReplyType == "SUPPORT") ||
@@ -230,8 +228,8 @@ async function main(config) {
                 //let know all other staffers that a staffer replyed the user
                 config.botStaff.forEach( (stafferId) => { if( stafferId != from.id ){
 
-                    var text = from.first_name + " " + (from.last_name || "") + " [<code>" + from.id + "</code>] has answered to\n" +
-                    fullNameUser + " [<code>" + toReplyUserId + "</code>] with:\n\n" +
+                    var text = from.first_name + " " + (from.last_name || "") + " ["+code(from.id)+"] has answered to\n" +
+                    fullNameUser + " ["+code(toReplyUserId)+"] with:\n\n" +
                     "<i>" + msg.text + "</i>";
 
                     TGbot.sendMessage(stafferId, text,
@@ -247,9 +245,10 @@ async function main(config) {
 
         }
 
+        //configuring user.perms
         if( isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
         {
-            var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1]);
+            var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("#")[0]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
 
@@ -258,6 +257,25 @@ async function main(config) {
         {
             chat = RM.addUser(chat, msg.from);
             db.chats.update(chat);
+        }
+
+        //configuring user.waitingReplyTarget 
+        if( user.waitingReplyType.includes("#") )
+        {
+            var wrTargetId = user.waitingReplyType.split("#")[1];
+
+            var fullName;
+            var tookUser = db.users.get(wrTargetId);
+            if(tookUser) fullName = usernameOrFullName(tookUser);
+            fullName = fullName ? fullName+" " : "";
+            fullName = fullName+"["+code(wrTargetId)+"] ";
+
+            var wrTargetName = fullName;
+            var wrTargetPerms = RM.sumUserPerms(chat, wrTargetId);
+            user.waitingReplyTarget = {id:wrTargetId, name: wrTargetName, perms: wrTargetPerms};
+
+            if(tookUser)
+                user.waitingReplyTarget.user = tookUser;
         }
 
         GHbot.emit( "message", msg, chat, user );
@@ -373,25 +391,30 @@ async function main(config) {
         //that's only to set user.perms
         if(isGroup || cb.data.includes(":"))
         {
-            var selectedChat = isGroup ? chat : db.chats.get(cb.data.split(":")[1]);
+            var selectedChat = isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("#")[0]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
+
+        if(cb.data.includes("#"))
+        {
+            cb.target = {id:cb.data.split("#")[1]};
+
+            var fullName;
+            var tookUser = db.users.get(cb.target.id);
+            if(tookUser) fullName = usernameOrFullName(tookUser);
+            fullName = fullName ? fullName+" " : "";
+            fullName = fullName+"["+code(cb.target.id)+"] ";
+
+            cb.target.name = fullName;
+            cb.target.perms = RM.sumUserPerms(chat, cb.target.id);
+            if(tookUser) cb.target.user = tookUser;
+        }
+
         GHbot.emit( "callback_query", cb, chat, user );
 
         //todo: commands help panel
 
     } )
-
-
-    
-    TGbot.on( "new_chat_members", async (msg) => {
-
-        var chat = msg.chat;
-        var from = msg.from;
-
-    } )
-
-
 
     TGbot.on( "left_chat_member", (msg) => {
 

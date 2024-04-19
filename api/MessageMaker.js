@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod} = require("./utils.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code} = require("./utils.js");
 
 /** 
  * @typedef {Object} simpleMedia
@@ -325,7 +325,7 @@ function callbackEvent(TGbot, customMessage, cb, chat, user, cb_prefix, returnBu
 
         options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}])
 
-        TGbot.editMessageText("<code>"+customMessage.buttons+"</code>", options)
+        TGbot.editMessageText(code(customMessage.buttons), options)
         TGbot.answerCallbackQuery(cb.id);
 
 

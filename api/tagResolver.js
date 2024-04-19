@@ -1,5 +1,5 @@
 const fs = require( "fs" );
-const { usernameOrFullName, isNumber } = require("./utils");
+const { usernameOrFullName, isNumber, code } = require("./utils");
 
 if(!global.LGHTagToId) global.LGHTagToId = {};
 if(!global.LGHIdToTag) global.LGHIdToTag = {};
@@ -95,9 +95,9 @@ var tagResolver = {
     {
         var LGHUserName = msg.hasOwnProperty("reply_to_message") ?
                 usernameOrFullName(msg.reply_to_message.from)+" " : (this.getTag(userId) ? "@"+this.getTag(userId)+" " : "");
-        LGHUserName += "[<code>"+userId+"</code>] ";
+        LGHUserName += "["+code(userId)+"] ";
         return LGHUserName;
-    }
+    },
 
 }
 

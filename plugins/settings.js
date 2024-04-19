@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 const RM = require("../api/rolesManager.js");
-const {genSettingsKeyboard, IsEqualInsideAnyLanguage, checkCommandPerms} = require( "../api/utils.js" );
+const {genSettingsKeyboard, IsEqualInsideAnyLanguage, checkCommandPerms, code} = require( "../api/utils.js" );
 
 function main(args)
 {
@@ -98,9 +98,9 @@ function main(args)
             }
 
             var text =
-            "<b>"+l[user.lang].SETTINGS.toUpperCase()+"</b>\n"+
-            "<b>"+l[user.lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n"+
-            "<b>"+l[user.lang].GROUP_LANGUAGE+":</b> <i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
+            bold(l[user.lang].SETTINGS.toUpperCase())+"\n"+
+            bold(l[user.lang].GROUP+": ")+code(settingsChat.title)+"\n"+
+            bold(l[user.lang].GROUP_LANGUAGE+": ")+"<i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
             l[user.lang].SETTINGS_SELECT;
 
             TGbot.editMessageText(text, options)
@@ -117,9 +117,9 @@ function main(args)
             }
 
             var text =
-            "<b>"+l[user.lang].SETTINGS.toUpperCase()+"</b>\n"+
-            "<b>"+l[user.lang].GROUP+":</b> <code>"+settingsChat.title+"</code>\n"+
-            "<b>"+l[user.lang].GROUP_LANGUAGE+":</b> <i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
+            bold(l[user.lang].SETTINGS.toUpperCase())+"\n"+
+            bold(l[user.lang].GROUP+": ")+code(settingsChat.title)+"\n"+
+            bold(l[user.lang].GROUP_LANGUAGE+": ")+"<i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
             l[user.lang].SETTINGS_SELECT;
 
             try {

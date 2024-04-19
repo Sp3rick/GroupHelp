@@ -1,4 +1,4 @@
-const { getUnixTime, secondsToHumanTime, bold, LGHUserName } = require("./utils");
+const { getUnixTime, secondsToHumanTime, bold, handleTelegramGroupError } = require("./utils");
 
 l = global.LGHLangs;
 var year = 31536000;
@@ -26,27 +26,69 @@ function clearExpiredUserWarns(chat, userId)
     return chat;
 }
 
-async function punishUser(TGbot, chat, user, punishment, time, reason)
+function genRevokePunishButton(lang, userId, punishment)
 {
+    //warn
+    if(punishment == 1)
+        return [{text: l[lang].CANCEL_BUTTON, callback_data: "PUNISH_REVOKE_WARN#"+userId}];
 
-    console.log("Punishing user " + punishment)
+    //mute
+    if(punishment == 3)
+        return [{text: l[lang].UNMUTE_BUTTON, callback_data: "PUNISH_REVOKE_MUTE#"+userId}];
 
-    var lang = chat.lang;
-    var userId = user.id;
-    var now = getUnixTime();
+    //ban
+    if(punishment == 4)
+        return [{text: l[lang].UNBAN_BUTTON, callback_data: "PUNISH_REVOKE_BAN#"+userId}];
+}
+function genPunishText(lang, chat, targetUser, punishment, time, reason, db)
+{
+    console.log("dentro genPunishText: " + chat.users[targetUser.id].warnCount)
     time = time || -1;
     reason = reason || false;
     var validTime = time != -1 && time >= 30 && time < year+1;
+    var userId = targetUser.id;
+    var text = targetUser.name;
 
-    if(punishment == 0) return;
-
-    var text = LGHUserName(user);
-    var buttons = [];
-    var options = {};
-    if(validTime) options.until_date = now+time+5;
     //warn
     if(punishment == 1)
     {
+        if(!chat.users.hasOwnProperty(userId))
+            return false;
+        text+=l[lang].HAS_BEEN_WARNED.replace("{emoji}","❕")+" ("+chat.users[userId].warnCount+" "+l[lang].OF+" "+chat.warns.limit+")";
+    }
+
+    //kick
+    if(punishment == 2)
+        text+=l[lang].HAS_BEEN_KICKED.replace("{emoji}","❗️");
+
+    //mute
+    if(punishment == 3)
+        text+=l[lang].HAS_BEEN_MUTED.replace("{emoji}","🔇");
+
+    //ban
+    if(punishment == 4)
+        text+=l[lang].HAS_BEEN_BANNED.replace("{emoji}","🚷");
+
+    if(validTime) text+=" "+l[lang].FOR_HOW_MUCH+" "+secondsToHumanTime(lang, time);
+    text+=".";
+
+    if(reason)
+        text+="\n"+bold(l[lang].REASON+": ")+reason+".";
+
+    return text;
+}
+//resolves in the applyed punishment number
+async function silentPunish(TGbot, chat, userId, punishment, time)
+{return new Promise(async (resolve, reject)=>{try{
+
+    time = time || -1;
+    var options = {};
+
+    //warn
+    if(punishment == 1)
+    {
+        if(!chat.users.hasOwnProperty(userId))
+            return;
 
         chat = clearExpiredUserWarns(chat, userId);
 
@@ -62,101 +104,166 @@ async function punishUser(TGbot, chat, user, punishment, time, reason)
         //re-punish if limit is hit
         if(chat.users[userId].warnCount >= chat.warns.limit)
         {
-            var repunishReason = reason || "";repunishReason+=" ("+l[lang].REACHED_WARN_LIMIT+")"
-            punishUser(TGbot, chat, user, chat.warns.punishment, chat.warns.PTime, repunishReason);
+            punishment = await silentPunish(TGbot, chat, userId, chat.warns.punishment, chat.warns.PTime);
             chat.users[userId].warnCount = 0;
             if(chat.warns.timed.hasOwnProperty(userId));
                 delete chat.warns.timed[userId];
-            updateChat = true;
+            resolve(punishment);
             return;
-        }
-        else{
-            text+=l[lang].HAS_BEEN_WARNED.replace("{emoji}","❕")+" ("+chat.users[userId].warnCount+" "+l[lang].OF+" "+chat.warns.limit+")";
-            buttons.push([{text: l[lang].CANCEL_BUTTON, callback_data: "WARN_REVOKE#"+userId}]);
         }
 
     }
 
     //kick
     if(punishment == 2)
-    {
-        text+=l[lang].HAS_BEEN_KICKED.replace("{emoji}","❗️");
         await TGbot.unbanChatMember(chat.id, userId);
-    }
 
     //mute
     if(punishment == 3)
     {
-        text+=l[lang].HAS_BEEN_MUTED.replace("{emoji}","🔇");
-        buttons.push([{text: l[lang].CANCEL_BUTTON, callback_data: "MUTE_REVOKE#"+userId}]);
         options.can_send_messages = false;
         await TGbot.restrictChatMember(chat.id, userId, options);
     }
 
     //ban
     if(punishment == 4)
-    {
-        text+=l[lang].HAS_BEEN_BANNED.replace("{emoji}","🚷");
-        buttons.push([{text: l[lang].CANCEL_BUTTON, callback_data: "BAN_REVOKE#"+userId}]);
         await TGbot.banChatMember(chat.id, userId, options);
+
+    resolve(punishment);
+
+}catch(error){reject(error);}})
+}
+async function punishUser(TGbot, chat, targetUser, punishment, time, reason)
+{
+
+    console.log("Punishing user " + punishment)
+
+    var lang = chat.lang;
+    var userId = targetUser.id;
+    time = time || -1;
+    reason = reason || false;
+
+    if(punishment == 0) return;
+
+    try {
+        //warn
+        if(punishment == 1)
+        {
+            if(!chat.users.hasOwnProperty(userId))
+            {
+                TGbot.sendMessage(chat.id, l[lang].USER_NEVER_BEEN_MEMBER);
+                return;
+            }
+
+            //check if has been applyed a repunish
+            punishment = await silentPunish(TGbot, chat, userId, punishment);
+            if(punishment != 1)
+            {
+                var repunishReason = reason || "";repunishReason+=" ("+l[lang].REACHED_WARN_LIMIT+")";
+                var text = genPunishText(lang, chat, targetUser, punishment, time, repunishReason);
+                var buttons = [genRevokePunishButton(lang, userId, punishment)];
+                var options = {parse_mode: "HTML", reply_markup: {inline_keyboard: buttons}};
+                TGbot.sendMessage(chat.id, text, options);
+                return;
+            }
+
+        }
+
+        //kick
+        if(punishment == 2)
+            await silentPunish(TGbot, chat, userId, punishment);
+
+        //mute
+        if(punishment == 3)
+            await silentPunish(TGbot, chat, userId, punishment);
+
+
+        //ban
+        if(punishment == 4)
+            await silentPunish(TGbot, chat, userId, punishment);
+
+        var text = genPunishText(lang, chat, targetUser, punishment, time, reason);
+        var buttons = [genRevokePunishButton(lang, userId, punishment)];
+        var options = {parse_mode: "HTML", reply_markup: {inline_keyboard: buttons}};
+        TGbot.sendMessage(chat.id, text, options);
+    } catch (error) {
+        handleTelegramGroupError(TGbot, chat.id, lang, error);
     }
 
-    if(validTime) text+=" "+l[lang].FOR_HOW_MUCH+" "+secondsToHumanTime(lang, time);
+}
+
+function genUnpunishButtons(lang, chat, userId, punishment)
+{
+    if(punishment == 1)
+    {
+        if(!chat.users.hasOwnProperty(userId))
+            return [];
+
+        if(chat.users[userId].warnCount == 0)
+            return [[{text: "+1", callback_data: "PUNISH_WARN_INC#"+userId}]];
+
+        if(chat.users[userId].warnCount > 0)
+            return [
+                [{text: "-1", callback_data: "PUNISH_WARN_DEC#"+userId}, {text: "+1", callback_data: "PUNISH_WARN_INC#"+userId}],
+                [{text: l[lang].RESET_WARNS_BUTTON, callback_data: "PUNISH_WARN_ZERO#"+userId}],
+            ];
+    }
+    return [];
+}
+function genUnpunishText(lang, chat, targetUser, punishment, reason, db)
+{
+    var text = targetUser.name;
+    var userId = targetUser.id;
+
+    //unwarn
+    if(punishment == 1)
+    {
+        if(!chat.users.hasOwnProperty(userId))
+            return false;
+
+        if(chat.users[userId].warnCount == 0)
+            text+=l[lang].NO_MORE_WARNS;
+        if(chat.users[userId].warnCount > 0)
+            text+=l[lang].HAS_WARNS_OF.replaceAll("{number}",chat.users[userId].warnCount).replaceAll("{max}",chat.warns.limit);
+    }
+
+    //unmute
+    if(punishment == 3)
+        text+=l[lang].UNMUTED;
+
+    //unban
+    if(punishment == 4)
+        text+=l[lang].UNBANNED;
+
     text+=".";
 
     if(reason)
         text+="\n"+bold(l[lang].REASON+": ")+reason+".";
 
-    TGbot.sendMessage(chat.id, text, {parse_mode: "HTML", reply_markup: {inline_keyboard: buttons}});
-
-    //TODO: plugin that manages punishment commands and their cancel buttons
+    return text;
 
 }
+//resolves true on success
+async function silentUnpunish(TGbot, chat, userId, punishment)
+{return new Promise(async (resolve, reject)=>{try{
 
-async function unpunishUser(TGbot, chat, user, punishment, reason)
-{
-
-    console.log("Unpunishing user " + punishment)
-
-    var lang = chat.lang;
-    var userId = user.id;
-    var now = getUnixTime();
-    reason = reason || false;
-
-    if(punishment == 0) return;
-
-    var text = LGHUserName(user);
     var options = {};
-    var buttons = [];
     //unwarn
     if(punishment == 1)
     {
+        if(!chat.users.hasOwnProperty(userId))
+            return;
+
         chat = clearExpiredUserWarns(chat, userId);
 
         //apply unwarn
         if(chat.users[userId].warnCount > 0)
             chat.users[userId].warnCount -= 1;
-
-        if(chat.users[userId].warnCount == 0)
-        {
-            text+=l[lang].NO_MORE_WARNS;
-            buttons = [[{text: "+1", callback_data: "WARN_INC#"+userId}]];
-        }
-        if(chat.users[userId].warnCount > 0)
-        {
-            text+=l[lang].HAS_WARNS_OF.replaceAll("{number}",chat.users[userId].warnCount).replaceAll("{max}",chat.warns.limit);
-            buttons = [
-                [{text: "-1", callback_data: "WARN_DEC#"+userId}, {text: "+1", callback_data: "WARN_INC#"+userId}],
-                [{text: l[lang].RESET_WARNS_BUTTON, callback_data: "WARN_ZERO#"+userId}],
-            ];
-        }
- 
     }
 
     //unmute
     if(punishment == 3)
     {
-        text+=l[lang].UNMUTED;
         options = unrestrictOpts;
         await TGbot.restrictChatMember(chat.id, userId, options);
     }
@@ -164,20 +271,56 @@ async function unpunishUser(TGbot, chat, user, punishment, reason)
     //unban
     if(punishment == 4)
     {
-        text+=l[lang].UNBANNED;
         options.only_if_banned = true;
         await TGbot.unbanChatMember(chat.id, userId, options);
     }
 
-    text+=".";
+    resolve(true);
 
-    if(reason)
-        text+="\n"+bold(l[lang].REASON+": ")+reason+".";
+}catch(error){reject(error);}})
+}
+async function unpunishUser(TGbot, chat, targetUser, punishment, reason)
+{
 
-    options.parse_mode = "HTML";
-    options.reply_markup = {inline_keyboard:buttons};
-    TGbot.sendMessage(chat.id, text, options);
+    console.log("Unpunishing user " + punishment)
+
+    var lang = chat.lang;
+    var userId = targetUser.id;
+    reason = reason || false;
+
+    if(punishment == 0) return;
+
+    var options = {};
+
+    try {
+        //unwarn
+        if(punishment == 1)
+        {
+            if(!chat.users.hasOwnProperty(userId))
+            {
+                TGbot.sendMessage(chat.id, l[lang].USER_NEVER_BEEN_MEMBER);
+                return;
+            }
+            await silentUnpunish(TGbot, chat, userId, punishment);
+        }
+
+        //unmute
+        if(punishment == 3)
+            await silentUnpunish(TGbot, chat, userId, punishment);
+
+        //unban
+        if(punishment == 4)
+            await silentUnpunish(TGbot, chat, userId, punishment);
+
+        var text = genUnpunishText(lang, chat, targetUser, punishment, reason);
+        var buttons = genUnpunishButtons(lang, chat, targetUser.id, punishment);
+        options.reply_markup = {inline_keyboard:buttons};
+        options.parse_mode = "HTML";
+        TGbot.sendMessage(chat.id, text, options);
+    } catch (error) {
+        handleTelegramGroupError(TGbot, chat.id, lang, error);
+    }
 
 }
 
-module.exports = {punishUser, unpunishUser}
+module.exports = {genRevokePunishButton, genPunishText, silentPunish, punishUser, genUnpunishButtons, genUnpunishText, silentUnpunish, unpunishUser}

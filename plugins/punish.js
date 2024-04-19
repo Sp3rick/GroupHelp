@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { punishUser, unpunishUser } = require("../api/punishment.js");
-const { checkCommandPerms, parseHumanTime } = require("../api/utils.js");
+const { punishUser, unpunishUser, silentPunish, silentUnpunish, genPunishText, genUnpunishButtons, genUnpunishText, genRevokePunishButton } = require("../api/punishment.js");
+const { checkCommandPerms, parseHumanTime, telegramErrorToText } = require("../api/utils.js");
 
 function main(args)
 {
@@ -42,13 +42,11 @@ function main(args)
         if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNBAN", user.perms))
             removePunishment = 4;
 
-        var targetUser = false;
         if((punishment || removePunishment) && !target)
         {
             TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
             return;
         }
-        if(punishment || removePunishment) targetUser = target.user ? target.user : {id:target.id};
         if(punishment)
         {
             var time = false;
@@ -60,10 +58,125 @@ function main(args)
                 if(!time) reason = command.args;
             }
             //TODO: send an error if user enter a time higher than 1 year
-            punishUser(TGbot, chat, targetUser, punishment, time, reason)
+            punishUser(TGbot, chat, target, punishment, time, reason)
         }
         if(removePunishment)
-            unpunishUser(TGbot, chat, targetUser, removePunishment, command.args)
+            unpunishUser(TGbot, chat, target, removePunishment, command.args)
+
+    } )
+
+    GHbot.onCallback( async (cb, chat, user) => {
+
+        //security guards
+        if(!chat.isGroup) return;
+        if(!cb.data.startsWith("PUNISH_")) return;
+        if(!cb.target)
+        {
+            console.log("LGH Error: PUNISH_ target has not been identified");
+            return;
+        }
+
+        var lang = chat.lang;
+        var target = cb.target;
+        
+        if(cb.data.startsWith("PUNISH_REVOKE_"))
+        {
+            var punishment;
+            var revokeText = cb.data.split("PUNISH_REVOKE_")[1].split("#")[0];
+            var neededCommand;
+            switch (revokeText) {
+                case "WARN":{punishment = 1;neededCommand = "COMMAND_UNWARN";break;}
+                case "MUTE":{punishment = 3;neededCommand = "COMMAND_UNMUTE";break;}
+                case "BAN":{punishment = 4;neededCommand = "COMMAND_UNBAN";break;}
+            }
+
+            if(!user.perms.commands.includes(neededCommand))
+            {
+                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:l[user.lang].MISSING_PERMISSION});
+                return;
+            }
+
+            try {
+                await silentUnpunish(TGbot, chat, target.id, punishment);
+
+                var text;
+                var buttons;
+                var options = {};
+                if(revokeText == "WARN")
+                {
+                    text = genUnpunishText(lang, chat, target, punishment);
+                    buttons = genUnpunishButtons(lang, chat, target.id, punishment);
+                    options.parse_mode = "HTML";
+                }
+                if(revokeText == "MUTE")
+                    text = cb.message.text+"\n\n ~ "+l[lang].USER_UNMUTED;
+                if(revokeText == "BAN")
+                    text = cb.message.text+"\n\n ~ "+l[lang].USER_UNBANNED;
+                if(revokeText == "MUTE" || revokeText == "BAN")
+                {
+                    buttons = genUnpunishButtons(lang, chat, target.id, punishment);
+                    if(cb.message.hasOwnProperty("entities")) options.entities = cb.message.entities;
+
+                    //bold the additional text
+                    options.entities.push({type:"bold", offset:cb.message.text.length, length:text.length-cb.message.text.length})
+                }
+
+                options.reply_markup = {inline_keyboard:buttons};
+                options.message_id = cb.message.message_id;
+                options.chat_id = chat.id;
+                TGbot.editMessageText(text, options);
+            } catch (error) {
+                var errorText = telegramErrorToText(lang, error); 
+                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:errorText});
+            }
+
+        }
+
+        if(cb.data.startsWith("PUNISH_WARN_"))
+        {
+            var punishment = 1;
+            var action = cb.data.split("PUNISH_WARN_")[1].split("#")[0];
+            var neededCommand;
+            var options = {parse_mode:"HTML"};
+            switch (action) {
+                case "INC":{neededCommand = "COMMAND_WARN";break;}
+                case "DEC":{neededCommand = "COMMAND_UNWARN";break;}
+                case "ZERO":{neededCommand = "COMMAND_UNWARN";break;}
+            }
+
+            if(!user.perms.commands.includes(neededCommand))
+            {
+                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:l[user.lang].MISSING_PERMISSION});
+                return;
+            }
+
+            try {
+                if(action == "DEC")
+                    chat.users[target.id].warnCount -= 1;
+                if(action == "ZERO")
+                    chat.users[target.id].warnCount = 0;
+                if(action == "INC")
+                    punishment = await silentPunish(TGbot, chat, target.id, punishment);
+
+                var text = genUnpunishText(lang, chat, target, punishment, undefined, db);
+                var buttons = genUnpunishButtons(lang, chat, target.id, punishment);
+
+                if(punishment != 1)
+                {
+                    text = genPunishText(lang, chat, target, punishment, undefined, undefined, db);
+                    buttons = [genRevokePunishButton(lang, target.id, punishment)];
+                }
+
+                options.reply_markup = {inline_keyboard:buttons};
+                options.message_id = cb.message.message_id;
+                options.chat_id = chat.id;
+                TGbot.editMessageText(text, options);
+            } catch (error) {
+                var errorText = telegramErrorToText(lang, error); 
+                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:errorText});
+            }
+
+        }
 
     } )
 
