@@ -10,7 +10,7 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  */
 
 /** 
- * @param  {TelegramBot} TGbot
+ * @param  {import("../GHbot.js")} GHbot
  * @param  {customMessage} currentNumber
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -22,7 +22,7 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  * 
  * @return {Number}
  */
-function callbackEvent(TGbot, currentTime, cb, chat, user, cb_prefix, returnButtons, title, min, max)
+function callbackEvent(GHbot, currentTime, cb, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -69,8 +69,8 @@ function callbackEvent(TGbot, currentTime, cb, chat, user, cb_prefix, returnButt
         text = (title+l[lang].STIME_DESCRIPTION).replaceAll("{time}", secondsToHumanTime(lang, time) + " ("+time+" seconds)") 
         .replaceAll("{minimum}",secondsToHumanTime(lang, min)).replaceAll("{maximum}",secondsToHumanTime(lang, max)); //TODO : translate to human readable time
 
-        TGbot.editMessageText(text, options)
-        TGbot.answerCallbackQuery(cb.id);
+        GHbot.editMessageText(user.id, text, options)
+        GHbot.answerCallbackQuery(user.id, cb.id);
 
     }
 
@@ -79,7 +79,7 @@ function callbackEvent(TGbot, currentTime, cb, chat, user, cb_prefix, returnButt
 }
 
 /** 
- * @param  {TelegramBot} TGbot
+ * @param  {import("../GHbot.js")} GHbot
  * @param  {customMessage} customMessage
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
@@ -89,7 +89,7 @@ function callbackEvent(TGbot, currentTime, cb, chat, user, cb_prefix, returnButt
  * 
  * @return {Number}
  */
-function messageEvent(TGbot, oldTime, msg, chat, user, cb_prefix, returnButtons, title, min, max)
+function messageEvent(GHbot, oldTime, msg, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -142,14 +142,14 @@ function messageEvent(TGbot, oldTime, msg, chat, user, cb_prefix, returnButtons,
             errorMessage = l[user.lang].SNUM_TOOSMALL.replace("{number}",minTimeHuman)
         if(errorMessage != -1)
         {
-            TGbot.sendMessage(chat.id, errorMessage, errorOpts);
+            GHbot.sendMessage(user.id, chat.id, errorMessage, errorOpts);
             return oldTime;
         }
 
         text = (title+l[user.lang].STIME_DESCRIPTION).replaceAll("{time}", secondsToHumanTime(user.lang, time) + " ("+time+" seconds)")
         .replaceAll("{minimum}",minTimeHuman).replaceAll("{maximum}",maxTimeHuman); //TODO : translate to human readable time
 
-        TGbot.sendMessage(chat.id, text, options);
+        GHbot.sendMessage(user.id, chat.id, text, options);
     }
 
     return time;

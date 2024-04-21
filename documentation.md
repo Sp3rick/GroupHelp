@@ -90,12 +90,19 @@ Separate language selection and management for groups and users fully implemente
 Note: COMMAND_ prefix means that command can be solved in multiple languages
 Complete list of implemented commands:
 
+-General
 /settings - open group settings (COMMAND_SETTINGS)
 /rules - show group rules (COMMAND_RULES)
 /perms - show permissions summary of a user (COMMAND_PERMS)
 /staff - show group staff with default and custom roles (COMMAND_STAFF)
 /info - show info about a group user and edit it (COMMAND_INFO)
--
+-Punishments
+/del - delete a message (COMMAND_DELETE)
+/warn - warn user and punish if reach group warn limit (COMMAND_WARN)
+/kick - kick an user out from the group (COMMAND_KICK)
+/mute - disable messages to a user (COMMAND_MUTE)
+/ban - permanently remove an user from the group (COMMAND_BAN)
+-Roles
 /free - give free role to user (COMMAND_FREE)
 /unfree - remove free role to user (COMMAND_UNFREE)
 /helper - set helper role to user (COMMAND_HELPER)
@@ -108,17 +115,10 @@ Complete list of implemented commands:
 /unmod - remove moderator role to user (COMMAND_UNMODERATOR)
 /cofounder - set cofounder role to user (COMMAND_COFOUNDER)
 /uncofounder - remove cofounder role to user (COMMAND_UNCOFOUNDER)
--
-(Toimplement):
+-Admins
 /admin - make user admin (COMMAND_ADMINISTRATOR)
 /unadmin - remove admin role to user (COMMAND_UNADMINISTRATOR)
 /title - set admin title (COMMAND_TITLE)
 /untitle - remove admin title (COMMAND_UNTITLE)
--
-
-(Toimplement):
-/del - delete a message (COMMAND_DELETE)
-/warn - warn user and punish if reach group warn limit (COMMAND_WARN)
-/kick - kick an user out from the group (COMMAND_KICK)
-/mute - disable messages to a user (COMMAND_MUTE)
-/ban - permanently remove an user from the group (COMMAND_BAN)
+-Privacy
+/forgot - remove every data on the group about an user (COMMAND_FORGOT)

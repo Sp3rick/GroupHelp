@@ -44,7 +44,7 @@ function main(args)
 
         if((punishment || removePunishment) && !target)
         {
-            TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+            GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
             return;
         }
         if(punishment)
@@ -58,10 +58,10 @@ function main(args)
                 if(!time) reason = command.args;
             }
             //TODO: send an error if user enter a time higher than 1 year
-            punishUser(TGbot, chat, target, punishment, time, reason)
+            punishUser(GHbot, user.id, chat, target, punishment, time, reason)
         }
         if(removePunishment)
-            unpunishUser(TGbot, chat, target, removePunishment, command.args)
+            unpunishUser(GHbot, user.id, chat, target, removePunishment, command.args)
 
     } )
 
@@ -92,12 +92,12 @@ function main(args)
 
             if(!user.perms.commands.includes(neededCommand))
             {
-                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:l[user.lang].MISSING_PERMISSION});
+                GHbot.answerCallbackQuery(user.id, cb.id, {show_alert:true, text:l[user.lang].MISSING_PERMISSION});
                 return;
             }
 
             try {
-                await silentUnpunish(TGbot, chat, target.id, punishment);
+                await silentUnpunish(GHbot, user.id, chat, target.id, punishment);
 
                 var text;
                 var buttons;
@@ -124,10 +124,10 @@ function main(args)
                 options.reply_markup = {inline_keyboard:buttons};
                 options.message_id = cb.message.message_id;
                 options.chat_id = chat.id;
-                TGbot.editMessageText(text, options);
+                GHbot.editMessageText(user.id, text, options);
             } catch (error) {
                 var errorText = telegramErrorToText(lang, error); 
-                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:errorText});
+                GHbot.answerCallbackQuery(user.id, cb.id, {show_alert:true, text:errorText});
             }
 
         }
@@ -146,7 +146,7 @@ function main(args)
 
             if(!user.perms.commands.includes(neededCommand))
             {
-                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:l[user.lang].MISSING_PERMISSION});
+                GHbot.answerCallbackQuery(user.id, cb.id, {show_alert:true, text:l[user.lang].MISSING_PERMISSION});
                 return;
             }
 
@@ -156,7 +156,7 @@ function main(args)
                 if(action == "ZERO")
                     chat.users[target.id].warnCount = 0;
                 if(action == "INC")
-                    punishment = await silentPunish(TGbot, chat, target.id, punishment);
+                    punishment = await silentPunish(GHbot, user.id, chat, target.id, punishment);
 
                 var text = genUnpunishText(lang, chat, target, punishment, undefined, db);
                 var buttons = genUnpunishButtons(lang, chat, target.id, punishment);
@@ -170,10 +170,10 @@ function main(args)
                 options.reply_markup = {inline_keyboard:buttons};
                 options.message_id = cb.message.message_id;
                 options.chat_id = chat.id;
-                TGbot.editMessageText(text, options);
+                GHbot.editMessageText(user.id, text, options);
             } catch (error) {
                 var errorText = telegramErrorToText(lang, error); 
-                TGbot.answerCallbackQuery(cb.id, {show_alert:true, text:errorText});
+                GHbot.answerCallbackQuery(user.id, cb.id, {show_alert:true, text:errorText});
             }
 
         }

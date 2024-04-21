@@ -1,4 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
+const { pushUserRequest } = require("./api/SafeTelegram");
 /**
  * @typedef {import("node-telegram-bot-api")} TelegramBot
  */
@@ -340,11 +341,122 @@ class main {
         this.GHbot.on("callback_query", handler);
     }
 
-
     //undocumented for retrocompatibility
     on(eventName, handler) {
         this.GHbot.on(eventName, handler);
     }
+
+    /**
+     * LGHbot safely send message under user request limit
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {number|string} chatId - chat where message should be sent
+     * @param {String} text - text of message
+     * @param {TelegramBot.SendMessageOptions} options - additional telegram options
+     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     */
+    sendMessage(userId, chatId, text, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "sendMessage", userId, chatId, text, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * LGHbot safely edit message under user request limit
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {String} text - text of message
+     * @param {TelegramBot.EditMessageTextOptions} options - additional telegram options
+     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     */
+    editMessageText(userId, text, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "editMessageText", userId, text, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * LGHbot safely answerCallbackQuert under user request limit
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {number|string} callbackId - id of user that's the cause of your request
+     * @param {TelegramBot.AnswerCallbackQueryOptions} options - additional telegram options
+     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     */
+    answerCallbackQuery(userId, callbackId, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "answerCallbackQuery", userId, callbackId, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * LGHbot safely answerCallbackQuert under user request limit
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {number|string} chatId - - chat where message should be sent
+     * @param {number|string} targetId - id of user that should be banned
+     * @param {TelegramBot.BanOptions} options - additional telegram options
+     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     */
+    banChatMember(userId, chatId, targetId, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "banChatMember", userId, chatId, targetId, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * LGHbot safely answerCallbackQuert under user request limit
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {number|string} chatId - - chat where message should be sent
+     * @param {number|string} targetId - id of user that should be unbanned
+     * @param {TelegramBot.UnbanOptions} options - additional telegram options
+     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     */
+    unbanChatMember(userId, chatId, targetId, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "unbanChatMember", userId, chatId, targetId, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * LGHbot safely answerCallbackQuert under user request limit
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {number|string} chatId - - chat where message should be sent
+     * @param {number|string} targetId - id of user to restrict
+     * @param {TelegramBot.RestrictChatMemberOptions} options - additional telegram options
+     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     */
+    restrictChatMember(userId, chatId, targetId, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "restrictChatMember", userId, chatId, targetId, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
 }
 
 module.exports = main;

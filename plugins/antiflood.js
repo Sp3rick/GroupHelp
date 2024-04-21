@@ -87,7 +87,7 @@ function main(args)
         {
             if(settingsChat.flood.punishment == toSetPunishment)
             {
-                TGbot.answerCallbackQuery(cb.id);
+                GHbot.answerCallbackQuery(user.id, cb.id);
                 return;
             }
             settingsChat.flood.punishment = toSetPunishment;
@@ -135,8 +135,8 @@ function main(args)
             }
             options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}])
 
-            TGbot.editMessageText(text, options)
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.editMessageText(user.id, text, options)
+            GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 
@@ -147,13 +147,13 @@ function main(args)
         if( cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            setNumReturn = SN.callbackEvent(TGbot, settingsChat.flood.messages, cb, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
+            setNumReturn = SN.callbackEvent(GHbot, settingsChat.flood.messages, cb, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
             cb_prefix = "S_FLOOD_MESSAGES";
         }
         if( cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            setNumReturn = SN.callbackEvent(TGbot, settingsChat.flood.time, cb, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
+            setNumReturn = SN.callbackEvent(GHbot, settingsChat.flood.time, cb, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
             cb_prefix = "S_FLOOD_TIME";
         }
 
@@ -166,7 +166,7 @@ function main(args)
             cb_prefix = "S_FLOOD_PTIME_"+PString;
             var oldPTime = settingsChat.flood.PTime;
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.flood.punishment));
-            var setTimeReturn = ST.callbackEvent(TGbot, oldPTime, cb, chat, user, cb_prefix, returnButtons, title)
+            var setTimeReturn = ST.callbackEvent(GHbot, oldPTime, cb, chat, user, cb_prefix, returnButtons, title)
 
             if(oldPTime != setTimeReturn.time)
             {
@@ -197,7 +197,7 @@ function main(args)
 
             db.chats.update(settingsChat);
 
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.answerCallbackQuery(user.id, cb.id);
         }
 
     })
@@ -246,7 +246,7 @@ function main(args)
                 global.LGHFlood[chat.id].lastPunishment = now;
                 var PTime = (chat.flood.PTime == 0) ? -1 : chat.flood.PTime;
                 var reason = l[chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",chat.flood.messages).replaceAll("{time}",chat.flood.time);
-                punishUser(TGbot, chat, RM.userToTarget(chat, user), chat.flood.punishment, PTime, reason)
+                punishUser(GHbot, user.id,  chat, RM.userToTarget(chat, user), chat.flood.punishment, PTime, reason)
             }
             if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
                 global.LGHFlood[chat.id].lastPunishment = now;
@@ -271,7 +271,7 @@ function main(args)
             cb_prefix = "S_FLOOD_PTIME_"+PString
             var oldPTime = settingsChat.flood.PTime;
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
-            newTime = ST.messageEvent(TGbot, oldPTime, msg, chat, user, cb_prefix, returnButtons, title);
+            newTime = ST.messageEvent(GHbot, oldPTime, msg, chat, user, cb_prefix, returnButtons, title);
         }
 
         if(newTime != -1 && settingsChat.flood.PTime != newTime)
@@ -287,13 +287,13 @@ function main(args)
         if( user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM")  )
         {
             var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            newValue = SN.messageEvent(TGbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
+            newValue = SN.messageEvent(GHbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
         }
     
         if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM")  )
         {
             var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            newValue = SN.messageEvent(TGbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
+            newValue = SN.messageEvent(GHbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
         }
 
         if(newValue != -1)

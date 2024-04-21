@@ -17,7 +17,7 @@ function main(args)
         if ( chat.isGroup ){
 
             if( command && checkCommandPerms(command, "COMMAND_RULES", user.perms) )
-                MSGMK.sendMessage(TGbot, chat.id, chat.rules, l[chat.lang].RULES_TITLE);
+                MSGMK.sendMessage(GHbot, user.id, chat.id, chat.rules, l[chat.lang].RULES_TITLE);
 
         }
 
@@ -29,7 +29,7 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId)
 
-        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(TGbot, settingsChat.rules, msg, chat, user, "S_RULES");
+        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(GHbot, settingsChat.rules, msg, chat, user, "S_RULES");
 
         settingsChat.rules = customMessage;
         if(updateMSGMK) db.chats.update(settingsChat);
@@ -62,7 +62,7 @@ function main(args)
         if( cb.data.startsWith("S_RULES_BUTTON:") )
         {
         
-            TGbot.editMessageText( l[lang].RULES_SETTING, 
+            GHbot.editMessageText( user.id, l[lang].RULES_SETTING, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -78,16 +78,16 @@ function main(args)
                     } 
                 }
             )
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 
         if( cb.data.startsWith("S_RULES#MSGMK") )
         {
-
+            
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+settingsChatId}]];
             var {customMessage, user, updateMSGMK, updateUser} =
-            MSGMK.callbackEvent(TGbot, settingsChat.rules, cb, chat, user, "S_RULES", returnButtons, l[lang].REGULATION, l[lang].RULES_TITLE)
+            MSGMK.callbackEvent(GHbot, settingsChat.rules, cb, chat, user, "S_RULES", returnButtons, l[lang].REGULATION, l[lang].RULES_TITLE)
 
             settingsChat.rules = customMessage;
             if(updateMSGMK) db.chats.update(settingsChat);

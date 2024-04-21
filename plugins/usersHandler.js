@@ -1,4 +1,3 @@
-const { prototype } = require("node-telegram-bot-api");
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
 var TR = require("../api/tagResolver.js");
@@ -20,7 +19,8 @@ function main(args)
     "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE",
     "COMMAND_UNBAN", "COMMAND_UNMUTE", "COMMAND_UNWARN",
     "COMMAND_FREE", "COMMAND_HELPER", "COMMAND_CLEANER", "COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_COFOUNDER", "COMMAND_ADMINISTRATOR",
-    "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNCLEANER", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR", "COMMAND_UNCOFOUNDER", "COMMAND_UNADMINISTRATOR", "COMMAND_TITLE", "COMMAND_UNTITLE"]
+    "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNCLEANER", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR", "COMMAND_UNCOFOUNDER", "COMMAND_UNADMINISTRATOR",
+    "COMMAND_TITLE", "COMMAND_UNTITLE", "COMMAND_FORGOT"]
     var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     var modCommands = ["COMMAND_RULES", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN",
     "COMMAND_DELETE","COMMAND_UNBAN", "COMMAND_UNMUTE", "COMMAND_UNWARN",]
@@ -83,17 +83,18 @@ function main(args)
 
             text+="✅ "+l[lang].ADMINS_UPDATED;
 
-            TGbot.sendMessage(chat.id, text, options);
+            GHbot.sendMessage(user.id, chat.id, text, options);
         }
 
         if(checkCommandPerms(command, "COMMAND_STAFF", user.perms, ["staff"]))
         {
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {message_id:msg.message_id}
+                reply_parameters: {message_id:msg.message_id},
+                disable_notification : true
             }
 
-            TGbot.sendMessage(chat.id, RM.genStaffListMessage(chat.lang, chat, db), options);
+            GHbot.sendMessage(user.id, chat.id, RM.genStaffListMessage(chat.lang, chat, db), options);
         }
 
         if(checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]))
@@ -106,7 +107,7 @@ function main(args)
 
             var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
-                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU#"+target.id}])
+                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU?"+target.id}])
 
             if(msg.reply_to_message)
             {
@@ -116,7 +117,7 @@ function main(args)
             try {
                 var member = await TGbot.getChatMember(chat.id, target.id);
                 var memberAndUser = Object.assign({}, member.user, chat.users[target.id]);
-                TGbot.sendMessage(chat.id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options);
+                GHbot.sendMessage(user.id, chat.id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options);
             } catch (error) {
                 handleTelegramGroupError(TGbot, chat.id, lang, error);
             }
@@ -126,7 +127,7 @@ function main(args)
         {
             if(!target)
             {
-                TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
@@ -138,13 +139,35 @@ function main(args)
 
             var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
-                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU#"+target.id}])
+                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU?"+target.id}])
 
             var text = target.name+" "+l[lang].PERMISSIONS+": \n"+
             genPermsReport(chat.lang, target.perms)+"\n\n"+
             "🫧"+l[lang].USER_LEVEL+": "+RM.getUserLevel(chat, target.id);
 
-            TGbot.sendMessage(chat.id, text, options);
+            GHbot.sendMessage(user.id, chat.id, text, options);
+        }
+
+        if(checkCommandPerms(command, "COMMAND_FORGOT", user.perms))
+        {
+            if(!target)
+            {
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                return;
+            }
+
+            var options = {
+                parse_mode : "HTML",
+                reply_parameters: {message_id:msg.message_id},
+                reply_markup: {inline_keyboard:[[
+                    {text:l[lang].CANCEL_BUTTON,callback_data:"S_CLOSE_BUTTON"},
+                    {text:l[lang].CONFIRM_BUTTON,callback_data:"FORGOT?"+target.id}
+                ]]}
+            }
+
+            var text = l[lang].CONFIRM_FORGOT.replaceAll("{user}",target.name)
+
+            GHbot.sendMessage(user.id, chat.id, text, options);
         }
 
         var text = false;
@@ -186,7 +209,12 @@ function main(args)
         {
             if(!target)
             {
-                TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                return;
+            }
+            if(target.id == user.id)
+            {
+                GHbot.sendMessage(user.id, chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
                 return;
             }
 
@@ -208,8 +236,8 @@ function main(args)
                 db.chats.update(chat);
 
                 var text = target.name+" "+bold(l[lang].HAS_BEEN_PROMOTED+"!");
-                var buttons = [[{text:l[lang].ADMIN_PERMS_BUTTON, callback_data: "ADMINPERM_MENU#"+target.id}]];
-                TGbot.sendMessage(chat.id, text, {parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
+                var buttons = [[{text:l[lang].ADMIN_PERMS_BUTTON, callback_data: "ADMINPERM_MENU?"+target.id}]];
+                GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
 
             } catch (error) {
                 handleTelegramGroupError(TGbot, chat.id, lang, error);
@@ -220,7 +248,12 @@ function main(args)
         {
             if(!target)
             {
-                TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                return;
+            }
+            if(target.id == user.id)
+            {
+                GHbot.sendMessage(user.id, chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
                 return;
             }
 
@@ -232,7 +265,7 @@ function main(args)
                 db.chats.update(chat);
 
                 var text = target.name+" "+l[lang].IS_NO_LONGER+" 👮"+l[lang].ADMINISTRATOR;
-                TGbot.sendMessage(chat.id, text, {parse_mode:"HTML"});
+                GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML"});
             } catch (error) {
                 handleTelegramGroupError(TGbot, chat.id, lang, error);
             }
@@ -242,7 +275,7 @@ function main(args)
         {
             if(!target)
             {
-                TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
@@ -256,8 +289,8 @@ function main(args)
 
                 var newTitle = chat.users[target.id].title;
                 var text = target.name+bold(l[lang].TITLE_CHANGED_TO)+" "+code(newTitle);
-                var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU#"+target.id}]]}};
-                TGbot.sendMessage(chat.id, text, changeTitleOpts)
+                var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU?"+target.id}]]}};
+                GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts)
             } catch (error) {
                 handleTelegramGroupError(TGbot, chat.id, lang, error);
             }
@@ -267,7 +300,7 @@ function main(args)
         {
             if(!target)
             {
-                TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
@@ -279,7 +312,7 @@ function main(args)
                 db.chats.update(chat);
 
                 var text = target.name+bold(l[lang].TITLE_REMOVED);
-                TGbot.sendMessage(chat.id, text, {parse_mode:"HTML"});
+                GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML"});
             } catch (error) {
                 handleTelegramGroupError(TGbot, chat.id, lang, error);
             }
@@ -291,12 +324,17 @@ function main(args)
         {
             if(!user.perms.roles)
             {
-                TGbot.sendMessage(chat.id, l[lang].MISSING_ROLE_PERM)
+                GHbot.sendMessage(user.id, chat.id, l[lang].MISSING_ROLE_PERM)
                 return;
             }
             if(!target)
             {
-                TGbot.sendMessage(chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                return;
+            }
+            if(target.id == user.id)
+            {
+                GHbot.sendMessage(user.id, chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
                 return;
             }
 
@@ -308,12 +346,12 @@ function main(args)
 
             if(userLevel < roleLevel+1)
             {
-                TGbot.sendMessage(chat.id, l[lang].TOO_LOW_LEVEL_SET_ROLE)
+                GHbot.sendMessage(user.id, chat.id, l[lang].TOO_LOW_LEVEL_SET_ROLE)
                 return;
             }
             if(userLevel < targetLevel)
             {
-                TGbot.sendMessage(chat.id, l[lang].TOO_LOW_LEVEL_SET_USER)
+                GHbot.sendMessage(user.id, chat.id, l[lang].TOO_LOW_LEVEL_SET_USER)
                 return;
             }
 
@@ -322,7 +360,7 @@ function main(args)
         {
             if(RM.getUserRoles(chat, user.id).includes(toSetRole))
             {
-                TGbot.sendMessage(chat.id, l[lang].ALREADY_IN_ROLE, options);
+                GHbot.sendMessage(user.id, chat.id, l[lang].ALREADY_IN_ROLE, options);
                 return;
             }
 
@@ -336,24 +374,24 @@ function main(args)
             if(config.preventSetUselessRoles && oldPerms == newPerms && oldUserLevel == newUserLevel)
             {
                 RM.unsetRole(chat, target.id, toSetRole);
-                TGbot.sendMessage(chat.id, l[lang].USELESS_ROLE);
+                GHbot.sendMessage(user.id, chat.id, l[lang].USELESS_ROLE);
                 return;
             }
 
             text=target.name+" "+l[lang].HAS_BEEN_MADE+" "+RM.getFullRoleName(toSetRole, lang, chat);
-            TGbot.sendMessage(chat.id, text, options);
+            GHbot.sendMessage(user.id, chat.id, text, options);
         }
         if(toUnsetRole)
         {
             if(!RM.getUserRoles(chat, target.id).includes(toUnsetRole))
             {
-                TGbot.sendMessage(chat.id, l[lang].NOT_IN_ROLE, options);
+                GHbot.sendMessage(user.id, chat.id, l[lang].NOT_IN_ROLE, options);
                 return;
             }
 
             RM.unsetRole(chat, target.id, toUnsetRole);
             text=target.name+" "+l[lang].IS_NO_LONGER+" "+RM.getFullRoleName(toUnsetRole, lang, chat);
-            TGbot.sendMessage(chat.id, text, options);
+            GHbot.sendMessage(user.id, chat.id, text, options);
         }
 
 
@@ -361,10 +399,10 @@ function main(args)
 
         //security guards
         if( !(user.waitingReply && user.waitingReplyType.startsWith("ADMINTITLE")) ) return;
-        var targetUserId = user.waitingReplyType.split("#")[1];
         if( !user.perms.commands.includes("COMMAND_ADMINISTRATOR") && !user.perms.commands.includes("COMMAND_TITLE") ) return;
 
         var title = msg.text.length > 0 ? msg.text.substring(0,16) : "";
+        var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].CANCEL_BUTTON,callback_data:"ADMINPERM_MENU?"+user.waitingReplyTarget.id}]]}};
         try {
             await TGbot.setChatAdministratorCustomTitle(chat.id, user.waitingReplyTarget.id, title);
 
@@ -372,20 +410,44 @@ function main(args)
             chat = RM.reloadAdmins(chat, adminList);
             db.chats.update(chat);
 
-            var newTitle = chat.users[targetUserId].title;
+            var newTitle = chat.users[target.id].title;
             var text = user.waitingReplyTarget.name+bold(l[lang].TITLE_CHANGED_TO)+" "+code(newTitle);
-            var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU#"+user.waitingReplyTarget.id}]]}};
-            TGbot.sendMessage(chat.id, text, changeTitleOpts)
+            
+            GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts)
 
             user.waitingReply = false;
             db.users.update(user);
         } catch (error) {
-            handleTelegramGroupError(TGbot, chat.id, lang, error);
+            var text = telegramErrorToText(lang, error);
+            GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts);
         }
 
     } )
 
     GHbot.onCallback( async (cb, chat, user) => {
+
+        var lang = chat.lang;
+        var target = cb.target;
+        var msg = cb.message;
+
+        if(cb.data.startsWith("FORGOT") && target)
+        {
+            if(!user.perms.commands.includes("COMMAND_FORGOT"))
+            {
+                GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].MISSING_PERMISSION, show_alert:true})
+                return;
+            }
+            if(isAdminOfChat(chat, target.id))
+            {
+                GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].USER_IS_ADMIN, show_alert:true})
+                return;
+            }
+
+            chat = RM.forgotUser(chat, target.id);
+            db.chats.update(chat);
+
+            GHbot.sendMessage(user.id, chat.id, l[lang].SUCCESSFULL_FORGOT)
+        }
 
         //security guards
         if( !cb.data.startsWith("ADMINPERM_") && !cb.data.startsWith("ADMINTITLE")) return;
@@ -394,10 +456,6 @@ function main(args)
             console.log("LGH Error: ADMINPERM_ target has not been identified");
             return;
         }
-
-        var lang = chat.lang;
-        var target = cb.target;
-        var msg = cb.message;
 
         var perm = false;
         if(cb.data.startsWith("ADMINPERM_ANONYMOUS"))
@@ -426,11 +484,17 @@ function main(args)
             perm = "can_manage_topics";
         if(cb.data.startsWith("ADMINPERM_"))
         {
+            if(user.waitingReply)
+            {
+                user.waitingReply = false;
+                db.users.update(user);
+            }
+
             //user still admin check
             var admin = chat.admins.filter((admin)=>{return admin.user.id == target.id})[0];
             if(!admin)
             {
-                TGbot.editMessageText(l[lang].USER_NO_MORE_ADMIN, {chat_id:chat.id, message_id:cb.message.message_id});
+                GHbot.editMessageText(user.id, l[lang].USER_NO_MORE_ADMIN, {chat_id:chat.id, message_id:cb.message.message_id});
                 return;
             }
 
@@ -439,18 +503,23 @@ function main(args)
             var permIsActiveByDefault = perm ? Object.keys(chatPerms).some((gPerm)=>{return gPerm == perm && chatPerms[gPerm]}) : false;
             if(permIsActiveByDefault)
             {
-                TGbot.answerCallbackQuery(cb.id, {text: l[lang].PERM_ACTIVE_BY_DEFAULT,show_alert:true});
+                GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].PERM_ACTIVE_BY_DEFAULT,show_alert:true});
                 return;
             }
 
             if(perm)
             {
-                var oldPermState = (admin.hasOwnProperty(perm) && admin[perm]);
+                if(target.id == user.id)
+                {
+                    GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].CANT_CHANGE_YOUR_PERMS,show_alert:true});
+                    return;
+                }
 
+                var oldPermState = (admin.hasOwnProperty(perm) && admin[perm]);
                 //check if the user that's setting as active this permission has this permission
                 if(!oldPermState == true && !hasAdminPermission(chat.admins, user.id, perm))
                 {
-                    TGbot.answerCallbackQuery(cb.id, {text:l[lang].MISSING_ADMIN_PERMISSION, show_alert:true});
+                    GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].MISSING_ADMIN_PERMISSION, show_alert:true});
                     return;
                 }
 
@@ -467,7 +536,7 @@ function main(args)
                 } catch (error) {
                     admin[perm] = oldPermState;
                     var text = telegramErrorToText(lang, error);
-                    TGbot.answerCallbackQuery(cb.id, {text:text, show_alert:true});
+                    GHbot.answerCallbackQuery(user.id, cb.id, {text:text, show_alert:true});
                 }
             }
 
@@ -482,16 +551,17 @@ function main(args)
                 reply_markup : {inline_keyboard:genGroupAdminPermsKeyboard(lang, displayAdmin, chat.is_forum)}
             }
             var text = genGroupAdminPermsText(lang, chat, target.id);
-            TGbot.editMessageText(text, options);
+            GHbot.editMessageText(user.id, text, options);
         }
 
         if(cb.data.startsWith("ADMINTITLE"))
         {
+            //here allowing an user to change his own title is wanted
             user.waitingReply = true;
-            user.waitingReplyType = "ADMINTITLE#"+target.id;
+            user.waitingReplyType = "ADMINTITLE?"+target.id;
             db.users.update(user);
-            TGbot.editMessageText( l[lang].SEND_NEW_TITLE, {message_id : msg.message_id, chat_id : chat.id, parse_mode : "HTML",
-                reply_markup : {inline_keyboard :[[{text: l[lang].CANCEL_BUTTON, callback_data: "ADMINPERM_MENU#"+target.id}]]} }
+            GHbot.editMessageText(user.id,  l[lang].SEND_NEW_TITLE, {message_id : msg.message_id, chat_id : chat.id, parse_mode : "HTML",
+                reply_markup : {inline_keyboard :[[{text: l[lang].CANCEL_BUTTON, callback_data: "ADMINPERM_MENU?"+target.id}]]} }
             )
         }
 

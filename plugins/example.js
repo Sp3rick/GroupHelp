@@ -13,7 +13,7 @@ function main(args)
     GHbot.onMessage( (msg, chat, user) => {
 
         if( chat.type == "private" && msg.text == "/test999" )
-            TGbot.sendMessage( chat.id, "Hello, i send this because im a plugin\n"+l[user.lang].flag );
+            GHbot.sendMessage( user.id, chat.id, "Hello, i send this because im a plugin\n"+l[user.lang].flag );
 
     } )
 

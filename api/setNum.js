@@ -10,7 +10,7 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  */
 
 /** 
- * @param  {TelegramBot} TGbot
+ * @param  {import("../GHbot.js")} GHbot
  * @param  {customMessage} currentNumber
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -22,8 +22,7 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  * 
  * @return {Number}
  */
-//TODO: add a minimum and maximum option in this function and messageEvent
-function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnButtons, title, min, max)
+function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -52,7 +51,7 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
         var newNumber = Number(cb.data.split(cb_prefix+"#SNUM_MENU_N_")[1].split(":")[0]);
         if(newNumber == number)
         {
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.answerCallbackQuery(user.id, cb.id);
             return {number, user, updateUser};
         }
         number = newNumber;
@@ -64,7 +63,7 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
 
     if( cb.data.startsWith(cb_prefix+"#SNUM_MENU_WRITE") )
     {
-        TGbot.answerCallbackQuery(cb.id, {text: l[user.lang].ASK_WRITE, show_alert:true});
+        GHbot.answerCallbackQuery(user.id, cb.id, {text: l[user.lang].ASK_WRITE, show_alert:true});
         return {number, user, updateUser};
     }
         
@@ -92,18 +91,18 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
         {
             number = currentNumber;
             errorCb.text = l[user.lang].SNUM_CB_TOOBIG.replace("{number}",max)
-            TGbot.answerCallbackQuery(cb.id, errorCb);
+            GHbot.answerCallbackQuery(user.id, cb.id, errorCb);
         }
         else if(number < min && number != currentNumber)
         {
             number = currentNumber;
             errorCb.text = l[user.lang].SNUM_CB_TOOSMALL.replace("{number}",min)
-            TGbot.answerCallbackQuery(cb.id, errorCb);
+            GHbot.answerCallbackQuery(user.id, cb.id, errorCb);
         }
         else
         {
-            TGbot.editMessageText(title, options);
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.editMessageText(user.id, title, options);
+            GHbot.answerCallbackQuery(user.id, cb.id);
         }
 
     }
@@ -113,7 +112,7 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
 }
 
 /** 
- * @param  {TelegramBot} TGbot
+ * @param  {import("../GHbot.js")} GHbot
  * @param  {customMessage} customMessage
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
@@ -123,7 +122,7 @@ function callbackEvent(TGbot, currentNumber, cb, chat, user, cb_prefix, returnBu
  * 
  * @return {Number}
  */
-function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnButtons, title, min, max)
+function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -160,7 +159,7 @@ function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnBu
             number = Math.trunc(Number(text));
         else
         {
-            TGbot.sendMessage(chat.id, l[user.lang].SNUM_INVALID_NUMBER, errorOpts);
+            GHbot.sendMessage(user.id, chat.id, l[user.lang].SNUM_INVALID_NUMBER, errorOpts);
             return number;
         }
 
@@ -169,18 +168,18 @@ function messageEvent(TGbot, currentNumber, msg, chat, user, cb_prefix, returnBu
         {
             number = currentNumber;
             var errorText = l[user.lang].SNUM_TOOBIG.replace("{number}",max)
-            TGbot.sendMessage(chat.id, errorText, errorOpts);
+            GHbot.sendMessage(user.id, chat.id, errorText, errorOpts);
         }
         else if(number < min && number != currentNumber)
         {
             number = currentNumber;
             var errorText = l[user.lang].SNUM_TOOSMALL.replace("{number}",min)
-            TGbot.sendMessage(chat.id, errorText, errorOpts);
+            GHbot.sendMessage(user.id, chat.id, errorText, errorOpts);
         }
         else
         {
             title = title.replaceAll("{number}", number);
-            TGbot.sendMessage(chat.id, title, options);
+            GHbot.sendMessage(user.id, chat.id, title, options);
         }
 
         

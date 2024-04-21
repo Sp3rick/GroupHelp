@@ -22,9 +22,9 @@ function main(args)
                 if(chat.welcome.once && chat.welcome.joinList.includes(user.id)) return;
 
                 if(chat.welcome.clean && chat.welcome.lastWelcomeId != false)
-                    TGbot.deleteMessage(chat.id, chat.welcome.lastWelcomeId);
+                    TGbot.deleteMessages(chat.id, [chat.welcome.lastWelcomeId]);
 
-                var sentMessage = await MSGMK.sendMessage(TGbot, chat.id, chat.welcome.message, false, options);
+                var sentMessage = await MSGMK.sendMessage(GHbot, user.id, chat.id, chat.welcome.message, false, options);
                 if(sentMessage)
                 {
                     chat.welcome.joinList.push(user.id);
@@ -43,7 +43,7 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId);
 
-        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(TGbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
+        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(GHbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
 
         settingsChat.welcome.message = customMessage;
         if(updateMSGMK) db.chats.update(settingsChat);
@@ -77,7 +77,7 @@ function main(args)
         {
             if(settingsChat.welcome.state == false)
             {
-                TGbot.answerCallbackQuery(cb.id);
+                GHbot.answerCallbackQuery(user.id, cb.id);
                 return;
             }
             settingsChat.welcome.state = false;
@@ -88,7 +88,7 @@ function main(args)
         {
             if(settingsChat.welcome.state == true)
             {
-                TGbot.answerCallbackQuery(cb.id);
+                GHbot.answerCallbackQuery(user.id, cb.id);
                 return;
             }
             settingsChat.welcome.state = true;
@@ -98,7 +98,7 @@ function main(args)
         {
             if(settingsChat.welcome.once == false)
             {
-                TGbot.answerCallbackQuery(cb.id);
+                GHbot.answerCallbackQuery(user.id, cb.id);
                 return;
             }
             settingsChat.welcome.once = false;
@@ -108,7 +108,7 @@ function main(args)
         {
             if(settingsChat.welcome.once == true)
             {
-                TGbot.answerCallbackQuery(cb.id);
+                GHbot.answerCallbackQuery(user.id, cb.id);
                 return;
             }
             settingsChat.welcome.once = true;
@@ -129,7 +129,7 @@ function main(args)
             text += settingsChat.welcome.once ? l[lang].W_SEND_ONCE : l[lang].W_SEND_EVERYTIME;
         
             var deleteSwitchButtonName = l[lang].DELETE_LAST_MESSAGE_BUTTON+" "+(settingsChat.welcome.clean?"✔️":"✖️");
-            TGbot.editMessageText( text, 
+            GHbot.editMessageText(user.id, text, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -147,7 +147,7 @@ function main(args)
                     } 
                 }
             )
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 
@@ -156,7 +156,7 @@ function main(args)
 
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_WELCOME_BUTTON:"+settingsChatId}]];
             var {customMessage, user, updateMSGMK, updateUser} =
-            MSGMK.callbackEvent(TGbot, settingsChat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME)
+            MSGMK.callbackEvent(GHbot, settingsChat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME)
 
             settingsChat.welcome.message = customMessage;
             if(updateMSGMK) db.chats.update(settingsChat);

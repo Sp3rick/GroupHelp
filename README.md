@@ -13,29 +13,25 @@ TODO:
 
 -short term:
 
-    set msg.command.target to sender user if no-other is found
-    exclude founder from admin list
-    move additional things of main.js on a plugin
-    allow on /perms to change user perms and roles +add it in a button for /info or when a role is set (/free /mod etc..)
-    allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
-    add something to allow a group admin to identify all users with special perms
     create a panel to set who can use various commands: everyone, role, admin, founder (4 switch buttons for each, for role open another panel)
     commands help panel
     notify founder and admins when bot get added in the group in thanksgiving message
-    implement photo preview-mode in MessageMaker.js
-    create custom function for all needed native method of TelegramBot to handle errors or crash on fail
     add setting to allow/disallow adding bot from non-admin users
-    add a /forgot command to delete from the group all data about an user
+    add a whitelist configuration to let bot work only on some groups
     --below low priority--
-    /title command
+    allow on /perms to change user perms and roles +add it in a button for /info or when a role is set (/free /mod etc..)
+    allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
+    add something to allow a group admin to identify all users with special perms
+    exclude founder from admin list
     ?add target object also for callback?
     ?add an automatic leveling system for admins? (maybe?)
     add optionally the possibility to redirect warn permission instead of COMMAND_WARN to the command of punishment (?active by default?)
     ask double confirm to give an user the "settings" and "roles" (roles management) permission
+    implement photo preview-mode in MessageMaker.js
 
 -medium term:
 
-    create an api to run safely telegram bot methods
+    create a privacy setting where users can ask to esclude themself from tagResolver and replace his's first name in database with "Anonymous"
     allow to mute only media, or specific media type or extras
     once bot will be declared ready to use, add code versioning system to update database when user update it
     create a privacy option to allow a user deleting his data from the bot

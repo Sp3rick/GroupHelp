@@ -88,7 +88,7 @@ var tagResolver = {
             return this.getId(username);
         }
 
-        return false;
+        return msg.from.id;
     },
 
     LGHUserNameByTarget : function(msg, userId)

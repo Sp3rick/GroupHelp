@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 const RM = require("../api/rolesManager.js");
-const {genSettingsKeyboard, IsEqualInsideAnyLanguage, checkCommandPerms, code} = require( "../api/utils.js" );
+const {genSettingsKeyboard, bold, checkCommandPerms, code} = require( "../api/utils.js" );
 
 function main(args)
 {
@@ -22,7 +22,7 @@ function main(args)
         if( chat.isGroup && checkCommandPerms(msg.command, "COMMAND_SETTINGS", user.perms ) )
         {
 
-            TGbot.sendMessage( chat.id, l[lang].SETTINGS_WHERE_OPEN, 
+            GHbot.sendMessage( user.id, chat.id, l[lang].SETTINGS_WHERE_OPEN, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -56,7 +56,7 @@ function main(args)
 
         if(!isSettingsAdmin && isGroup )
         {
-            TGbot.answerCallbackQuery(cb.id, {text: l[lang].MISSING_PERMISSION, show_alert:true});
+            GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION, show_alert:true});
             return;
         }
 
@@ -68,7 +68,7 @@ function main(args)
         if( cb.data.startsWith("SETTINGS_SELECT:") )
         {
 
-            TGbot.editMessageText( l[user.lang].SETTINGS_WHERE_OPEN, 
+            GHbot.editMessageText(user.id, l[user.lang].SETTINGS_WHERE_OPEN, 
                 {
                     message_id : msg.message_id,
                     chat_id : chat.id,
@@ -83,7 +83,7 @@ function main(args)
                     } 
                 }
             )
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.answerCallbackQuery(user.id, cb.id);
         }
 
         if( cb.data.startsWith("SETTINGS_HERE:") )
@@ -103,7 +103,7 @@ function main(args)
             bold(l[user.lang].GROUP_LANGUAGE+": ")+"<i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
             l[user.lang].SETTINGS_SELECT;
 
-            TGbot.editMessageText(text, options)
+            GHbot.editMessageText(user.id,text, options)
 
         }
         if( cb.data.startsWith("SETTINGS_PRIVATE:") )
@@ -124,9 +124,9 @@ function main(args)
 
             try {
                 var sentMessage = await TGbot.sendMessage(user.id, text, options);
-                TGbot.answerCallbackQuery(cb.id);
+                GHbot.answerCallbackQuery(user.id, cb.id);
             } catch (err) {
-                await TGbot.answerCallbackQuery(cb.id, { text: l[lang].SETTINGS_PRIVATE_ERROR, show_alert: true });
+                await GHbot.answerCallbackQuery(user.id, cb.id, { text: l[lang].SETTINGS_PRIVATE_ERROR, show_alert: true });
             }
 
         }
@@ -206,13 +206,13 @@ function main(args)
             
             //if( config.reserveLang != user.lang ) text += "\n" + l[lang].LANG_CHOOSE;
 
-            TGbot.editMessageText( text, options )
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.editMessageText(user.id, text, options )
+            GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 
         if( cb.data.startsWith("S_CLOSE_BUTTON") )
-            TGbot.deleteMessage(chat.id, msg.message_id);
+            TGbot.deleteMessages(chat.id, [msg.message_id]);
 
         if( cb.data.startsWith( "LANGSET=" ) ) //expected "LANGSET=en_en:settingsChatId" or "LANGSET=en_en" 
         {
@@ -246,8 +246,8 @@ function main(args)
                 options.reply_markup.inline_keyboard.push( [{text: l[lang].BACK_BUTTON, callback_data: "MENU"}] )
             }
 
-            TGbot.editMessageText( text, options)
-            TGbot.answerCallbackQuery(cb.id);
+            GHbot.editMessageText(user.id, text, options)
+            GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 

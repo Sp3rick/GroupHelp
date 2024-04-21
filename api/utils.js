@@ -289,45 +289,50 @@ function genGroupAdminPermsKeyboard(lang, admin, topicsAvaiable)
 
     var line1 =
     [
-        {text: deletion+" "+l[lang].DELETE_MESSAGES, callback_data: prefix+"DELETE#"+userId},
+        {text: deletion+" "+l[lang].DELETE_MESSAGES, callback_data: prefix+"DELETE?"+userId},
     ]
     
     var line2 =
     [
-        {text: videochat+" "+l[lang].MANAGE_VIDEOCHAT, callback_data: prefix+"VIDEOCHAT#"+userId},
-        {text: restrict+" "+l[lang].RESTRICT_MEMBERS, callback_data: prefix+"RESTRICT#"+userId},
+        {text: videochat+" "+l[lang].MANAGE_VIDEOCHAT, callback_data: prefix+"VIDEOCHAT?"+userId},
+        {text: restrict+" "+l[lang].RESTRICT_MEMBERS, callback_data: prefix+"RESTRICT?"+userId},
     ]
     var line3 =
     [
-        {text: promote+" "+l[lang].PROMOTE_MEMBERS, callback_data: prefix+"PROMOTE#"+userId},
-        {text: modify+" "+l[lang].MODIFY_GROUP, callback_data: prefix+"MODIFY#"+userId},
+        {text: promote+" "+l[lang].PROMOTE_MEMBERS, callback_data: prefix+"PROMOTE?"+userId},
+        {text: modify+" "+l[lang].MODIFY_GROUP, callback_data: prefix+"MODIFY?"+userId},
     ]
     var line4 =
     [
-        {text: invite+" "+l[lang].INVITE_MEMBERS, callback_data: prefix+"INVITE#"+userId},
-        {text: stories+" "+l[lang].MANAGE_STORIES, callback_data: prefix+"STORIES#"+userId},
+        {text: invite+" "+l[lang].INVITE_MEMBERS, callback_data: prefix+"INVITE?"+userId},
+        {text: stories+" "+l[lang].MANAGE_STORIES, callback_data: prefix+"STORIES?"+userId},
     ]
 
     var line5 =
     [
-        {text: storyedit+" "+l[lang].EDIT_STORIES, callback_data: prefix+"STORYEDIT#"+userId},
-        {text: storydel+" "+l[lang].DELETE_STORIES, callback_data: prefix+"STORYDEL#"+userId},
+        {text: storyedit+" "+l[lang].EDIT_STORIES, callback_data: prefix+"STORYEDIT?"+userId},
+        {text: storydel+" "+l[lang].DELETE_STORIES, callback_data: prefix+"STORYDEL?"+userId},
     ]
 
     var line6 =
     [
-        {text: pin+" "+l[lang].CAN_PIN, callback_data: prefix+"PIN#"+userId},
+        {text: pin+" "+l[lang].CAN_PIN, callback_data: prefix+"PIN?"+userId},
     ]
 
     var line7 =
     [
-        {text: l[lang].EDIT_ADMIN_TITLE_BUTTON, callback_data: "ADMINTITLE#"+userId},
+        {text: l[lang].EDIT_ADMIN_TITLE_BUTTON, callback_data: "ADMINTITLE?"+userId},
+    ]
+
+    var line8 =
+    [
+        {text: l[lang].CLOSE_MENU_BUTTON, callback_data: "S_CLOSE_BUTTON"},
     ]
 
     if(topicsAvaiable)
-        line6.push({text: topics+" "+l[lang].MANAGE_TOPICS, callback_data: prefix+"TOPICS#"+userId})
+        line6.push({text: topics+" "+l[lang].MANAGE_TOPICS, callback_data: prefix+"TOPICS?"+userId})
 
-    return [line1, line2, line3, line4, line5, line6, line7];
+    return [line1, line2, line3, line4, line5, line6, line7, line8];
 }
 
 function genGroupAdminPermsText(lang, chat, userId)
@@ -578,23 +583,6 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 
 }
 
-function sendParsingError(TGbot, chatId, lang, callback_data)
-{
-    var l = global.LGHLangs;
-
-    TGbot.sendMessage( chatId, l[lang].PARSING_ERROR, {
-        parse_mode : "HTML",
-        reply_markup : 
-        {
-            inline_keyboard :
-            [
-                [{text: l[lang].CANCEL_BUTTON, callback_data: callback_data}],
-            ] 
-        } 
-    } )
-
-}
-
 function parseTextToInlineKeyboard(text)
 {
 
@@ -776,6 +764,7 @@ function LGHUserName(user, db)
     return fullName+"["+code(user.id)+"] ";
 }
 
+//currently not use GHbot, getAdmins seems to be already safe
 async function getAdmins(TGbot, chatId)
 {
     var adminList = await TGbot.getChatAdministrators( chatId );
@@ -880,7 +869,6 @@ module.exports =
     hasAdminPermission : hasAdminPermission,
     exhistInsideAnyLanguage : exhistInsideAnyLanguage,
     IsEqualInsideAnyLanguage : IsEqualInsideAnyLanguage,
-    sendParsingError : sendParsingError,
     parseTextToInlineKeyboard : parseTextToInlineKeyboard,
     extractMedia : extractMedia,
     mediaTypeToMethod : mediaTypeToMethod,

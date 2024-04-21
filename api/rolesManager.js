@@ -261,6 +261,22 @@ function deleteUser(chat, userId)
     return chat;
 }
 
+function forgotUser(chat, userId)
+{
+    getChatRoles(chat).forEach((role)=>{
+        if(getRoleUsers(chat, role).includes(userId)) unsetRole(chat, userId, role);
+    })
+
+    Object.keys(chat.users).forEach((curUserId)=>{if(curUserId == userId) delete chat.users[userId]});
+    chat.admins.forEach((admin, index)=>{if(admin.user.id == userId) delete chat.admins[index]});
+
+    var WJIndex = chat.welcome.joinList.indexOf(Number(userId));
+    if(WJIndex == -1) chat.welcome.joinList.indexOf(String(userId));
+    chat.welcome.joinList.splice(WJIndex, 1);
+
+    return chat;
+}
+
 function renameRole(role, chat, newName) //Premade roles can't be renamed
 {
 
@@ -512,7 +528,7 @@ function userToTarget(chat, user)
 module.exports = {
     newPerms, newRole, newUser, newPremadeRolesObject,
     getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
-    deleteRole, deleteUser, renameRole, changeRoleEmoji,
+    deleteRole, deleteUser, forgotUser, renameRole, changeRoleEmoji,
     setRole, unsetRole, addUser,
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,
     genStaffListMessage, userToTarget,
