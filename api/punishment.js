@@ -44,7 +44,6 @@ function genRevokePunishButton(lang, targetId, punishment)
 }
 function genPunishText(lang, chat, targetUser, punishment, time, reason, db)
 {
-    console.log("dentro genPunishText: " + chat.users[targetUser.id].warnCount)
     time = time || -1;
     reason = reason || false;
     var validTime = time != -1 && time >= 30 && time < year+1;
@@ -189,7 +188,7 @@ async function punishUser(GHbot, userId, chat, targetUser, punishment, time, rea
         var options = {parse_mode: "HTML", reply_markup: {inline_keyboard: buttons}};
         GHbot.sendMessage(userId, chat.id, text, options);
     } catch (error) {
-        handleTelegramGroupError(TGbot, chat.id, lang, error);
+        handleTelegramGroupError(GHbot, userId, chat.id, lang, error);
     }
 
 }
@@ -322,7 +321,7 @@ async function unpunishUser(GHbot, userId, chat, targetUser, punishment, reason)
         options.parse_mode = "HTML";
         GHbot.sendMessage(userId, chat.id, text, options);
     } catch (error) {
-        handleTelegramGroupError(TGbot, chat.id, lang, error);
+        handleTelegramGroupError(GHbot, userId, chat.id, lang, error);
     }
 
 }

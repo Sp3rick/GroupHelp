@@ -119,7 +119,7 @@ function main(args)
                 var memberAndUser = Object.assign({}, member.user, chat.users[target.id]);
                 GHbot.sendMessage(user.id, chat.id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options);
             } catch (error) {
-                handleTelegramGroupError(TGbot, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
         }
 
@@ -227,7 +227,7 @@ function main(args)
                     try {
                         await TGbot.setChatAdministratorCustomTitle(chat.id, target.id, title);
                     } catch (error) {
-                        handleTelegramGroupError(TGbot, chat.id, lang, error);
+                        handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
                     }
                 }
 
@@ -240,7 +240,7 @@ function main(args)
                 GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
 
             } catch (error) {
-                handleTelegramGroupError(TGbot, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, user.id, chat.id, lang, error);
             }
 
         }
@@ -267,7 +267,7 @@ function main(args)
                 var text = target.name+" "+l[lang].IS_NO_LONGER+" 👮"+l[lang].ADMINISTRATOR;
                 GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML"});
             } catch (error) {
-                handleTelegramGroupError(TGbot, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
 
         }
@@ -292,7 +292,7 @@ function main(args)
                 var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU?"+target.id}]]}};
                 GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts)
             } catch (error) {
-                handleTelegramGroupError(TGbot, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
 
         }
@@ -314,7 +314,7 @@ function main(args)
                 var text = target.name+bold(l[lang].TITLE_REMOVED);
                 GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML"});
             } catch (error) {
-                handleTelegramGroupError(TGbot, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
 
         }

@@ -836,10 +836,10 @@ function telegramErrorToText(lang, error)
     return text;
 }
 
-function handleTelegramGroupError(TGbot, chatId, lang, error)
+function handleTelegramGroupError(GHbot, userId, chatId, lang, error)
 {
     var text = telegramErrorToText(lang, error);
-    TGbot.sendMessage(chatId, text);
+    GHbot.sendMessage(userId, chatId, text);
 }
 
 module.exports = 
