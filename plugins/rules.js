@@ -17,7 +17,7 @@ function main(args)
         if ( chat.isGroup ){
 
             if( command && checkCommandPerms(command, "COMMAND_RULES", user.perms) )
-                MSGMK.sendMessage(GHbot, user.id, chat.id, chat.rules, l[chat.lang].RULES_TITLE);
+                MSGMK.sendMessage(GHbot, user, chat, chat.rules, l[chat.lang].RULES_TITLE);
 
         }
 

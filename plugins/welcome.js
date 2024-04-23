@@ -24,7 +24,7 @@ function main(args)
                 if(chat.welcome.clean && chat.welcome.lastWelcomeId != false)
                     TGbot.deleteMessages(chat.id, [chat.welcome.lastWelcomeId]);
 
-                var sentMessage = await MSGMK.sendMessage(GHbot, user.id, chat.id, chat.welcome.message, false, options);
+                var sentMessage = await MSGMK.sendMessage(GHbot, user, chat, chat.welcome.message, false, options);
                 if(sentMessage)
                 {
                     chat.welcome.joinList.push(user.id);

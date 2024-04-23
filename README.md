@@ -13,7 +13,6 @@ TODO:
 
 -short term:
 
-    add warns settings plugin
     create a panel to set who can use various commands: noone, everyone, everyone DM, custom role, admins, admins DM  (4 switch buttons for each, for role open another panel)
     commands help panel
     notify owner when bot get added in the group in thanksgiving message

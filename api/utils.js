@@ -917,6 +917,7 @@ module.exports =
 
     bold : bold,
     code : code,
+    tag : tag,
     isObject : isObject,
     cleanHTML : cleanHTML,
     isArray : isArray,

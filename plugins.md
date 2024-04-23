@@ -95,6 +95,38 @@ Callback_data order:
 CallerPrefix#MSGMK:settingsChatId
 CallerPrefix is useful to allow the caller to identify it's own callback (ex. if( cb.data.startsWith(myPrefix) ... ))
 
+text avaiable substitutions:
+• {ID} = user ID
+• {NAME} = first name of user
+• {SURNAME} = user surname
+• {NAMESURNAME} = name and surname
+• {GHNAME} = name in LGH format
+• {USERNAME} = user @username
+• {MENTION} = link to the user profile
+• {LANG} = user language
+• {FLAG} = user language flag
+• {GROUPNAME} = group name
+• {GROUPUSERNAME} = group username
+• {GROUPID} = group id
+(TO IMPLEMENT)
+• {RULES} = group regulation text
+• {DATE} = current date
+• {TIME} = current time
+• {WEEKDAY} = week day
+• {MONTH} = current month
+• {YEAR} = current year
+• {UNIX} = seconds since 1970/1/1
+
+(TO IMPLEMENT)
+optional if configuration allow external api:
+• {HALVING} = remaining time for bitcoin halving
+• {BTC} {ETH} {BNB} {SOL} {XRP} {DOGE} {TON} {ADA} ... {XMR} = avaiable any top100 crypto symbol
+• {TOP1} {TOP2} ... {TOP100} = get crypto symbol specific classific height (max 100)
+-Crypto prefixes: CAP(capitalization), VOL(24h volume), RANK(cap classific), SUPPLY, NAME, EXPLORER. (example: {CAPBITCOIN})
+-Currency crypto prefixes: $, €, £, CHF or ₣. (default on group currency)
+-Examples: {BNB}, {€BTC}, {CHFETH}, {£CAPBTC}, {SUPPLYXMR}, {€{TOP15}} {£VOL{TOP3}}
+-Api: https://api.coincap.io/v2/assets (https://docs.coincap.io/)
+
 
 
 

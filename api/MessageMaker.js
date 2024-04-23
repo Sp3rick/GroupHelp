@@ -1,6 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
 const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code} = require("./utils.js");
 const { pushUserRequest } = require("./SafeTelegram.js");
+const { substitute } = require("./substitutor.js");
 
 /** 
  * @typedef {Object} simpleMedia
@@ -338,7 +339,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
     {
 
         TGbot.deleteMessages(chat.id, [msg.message_id]);
-        sendMessage(GHbot, user.id, chat.id, customMessage, messageTitle).then( () => {
+        sendMessage(GHbot, user, chat, customMessage, messageTitle).then( () => {
 
             GHbot.sendMessage(user.id, chat.id, "➖➖➖➖➖➖➖➖➖➖", {
                 reply_markup: {inline_keyboard: [[{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}]]}
@@ -510,8 +511,11 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
  * @return {Promise<TelegramBot.Message>}
  *         Telegram message object, false is message is not sent
  */
-function sendMessage(GHbot, userId, chatId, customMessage, messageTitle, additionalOptions)
+function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalOptions)
 {
+
+    var userId = user.id;
+    var chatId = chat.id;
 
     additionalOptions=additionalOptions||{};
 
@@ -557,6 +561,7 @@ function sendMessage(GHbot, userId, chatId, customMessage, messageTitle, additio
 
     if(!customMessage.hasOwnProperty("text"))
         return false;
+    text = substitute(text, user, chat);
     return GHbot.sendMessage( userId, chatId, text, options );
 
 }
