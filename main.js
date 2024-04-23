@@ -97,8 +97,8 @@ async function main(config) {
             msg.command.target = {
                 id:targetId,
                 name: TR.LGHUserNameByTarget(msg, targetId),
-                perms: RM.sumUserPerms(chat, targetId),
             }
+            if(isGroup) msg.command.target.perms = RM.sumUserPerms(chat, targetId);
             msg.command.target.user = msg.hasOwnProperty("reply_to_message") ? msg.reply_to_message.from : db.users.get(targetId);
 
             //if target is got from args exclude that one responsable

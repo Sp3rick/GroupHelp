@@ -13,7 +13,7 @@
     "LANGS_BUTTON2" : "🇬🇧 Languages",
     "NEW_GROUP" : "<b>Thanks</b> for adding me to your group!\n• Don't forget to <b>make me Admin of the group</b> (see how), or i cant work correctly\n• Use /reload to verify that's all ok",
     "ADV_JOIN_CHANNEL" : "📢 Join LibreGroupHelp Channel",
-    "PRESENTATION" : "👋🏻 Hello {name}!\n@LibreGroupHelpBot is the <b>free, open source and privacy respecting</b> Bot alternative to Group Help to better manage your <b>groups</b>!\n\n👉🏻<b>Add me in a supergroup</b> and set me as an <b>Administrator</b> to get me right into the action!\n\n❓ <b>What are the commands?</b>\nCurrently commands are in https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md \n\nNOTE: currently this bot is at a developement initial stage, we do not advise to use that for serious activities, come back some time later!\nIf you are a JavaScript developer you can contribute on https://github.com/Sp3rick/GroupHelp",
+    "PRESENTATION" : "👋🏻 Hello {name}!\n@LibreGroupHelpBot is the <b>free, open source and privacy respecting</b> Bot alternative to Group Help to better manage your <b>groups</b>!\n\n👉🏻<b>Add me in a supergroup</b> and set me as an <b>Administrator</b> to get me right into the action!\n\n❓ <b>What are the commands?</b>\nCurrently commands are in https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md \n\nNOTE: currently this bot is at a developement initial stage, your group settings is going to get deleted often, come back some time later!\nIf you are a JavaScript developer you can contribute on https://github.com/Sp3rick/GroupHelp",
     "ADD_ME_TO_A_GROUP_BUTTON": "➕ Add me to a Group ➕",
     "GROUP_BUTTON": "👥Group",
     "SUPPORT_BUTTON" : "🔧Support",
