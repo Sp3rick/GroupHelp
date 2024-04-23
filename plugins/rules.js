@@ -72,7 +72,7 @@ function main(args)
                         inline_keyboard :
                         [
                             [{text: l[lang].RULES_CHANGE_BUTTON, callback_data: "S_RULES#MSGMK:"+settingsChatId}],
-                            //TODO: when it's done, add button to edit /rules command permission
+                            [{text: l[lang].COMMAND_PERMS_BUTTON, callback_data: "S_RULES#CMDPERMS-COMMAND_RULES:"+settingsChatId}],
                             [{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}],
                         ] 
                     } 

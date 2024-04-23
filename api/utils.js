@@ -216,7 +216,7 @@ function genSettingsKeyboard(lang, chatId)
         [{text: l[lang].S_MEDIA_BUTTON, callback_data: "S_MEDIA_BUTTON:"+chatId},
         {text: l[lang].S_PORN_BUTTON, callback_data: "S_PORN_BUTTON:"+chatId}],
 
-        [{text: l[lang].S_WARN_BUTTON, callback_data: "S_RULESS_WARN_BUTTONBUTTON:"+chatId},
+        [{text: l[lang].S_WARN_BUTTON, callback_data: "S_WARN_BUTTON:"+chatId},
         {text: l[lang].S_NIGHT_BUTTON, callback_data: "S_NIGHT_BUTTON:"+chatId}],
 
         [{text: l[lang].S_TAG_BUTTON, callback_data: "S_TAG_BUTTON:"+chatId},
@@ -421,7 +421,7 @@ function genMemberInfoText(lang, chat, user, member)
     var text = "";
 
     var status = memberToChatStatus(lang, member);
-    var warns = chat.users[user.id] ? chat.users[user.id].warnCount : 0;
+    var warns = getUserWarns(chat, user.id);
     var joinDate = chat.users[user.id] ? chat.users[user.id].firtJoin : false; //TODO: translate to date based on group UTC data
 
     text+=bold("🆔 ID: ")+code(user.id)+"\n";
@@ -468,6 +468,7 @@ function genPermsReport(lang, perms)
     });
 
     text+="\n\n"+
+    bold(l[lang].IMMUNE+": ")+stateToEmoji(perms.immune)+"\n"+
     bold(l[lang].FLOOD+": ")+stateToEmoji(perms.flood)+"\n"+
     bold(l[lang].LINKS+": ")+stateToEmoji(perms.link)+"\n"+
     bold(l[lang].TGLINKS+": ")+stateToEmoji(perms.tgLink)+"\n"+
@@ -737,6 +738,47 @@ function punishmentToText(lang, punishment)
     }
 }
 
+function punishmentToTextAndTime(lang, punishment, time)
+{
+    var l = global.LGHLangs;
+    time = time || 0;
+
+    var punishmentText = punishmentToText(lang, punishment);
+
+    var text = bold(l[lang].PUNISHMENT)+": "+punishmentText;
+    if((punishment == 1 || punishment == 3 || punishment == 4) && time != 0)
+        text+=" "+l[lang].FOR_HOW_MUCH+" "+secondsToHumanTime(lang, time);
+    return text;
+}
+
+function punishmentToSetTimeButtonText(lang, punishment)
+{
+    var l = global.LGHLangs;
+
+    var punishmentText = punishmentToText(lang, punishment);
+
+    switch(punishment)
+    {
+        case 1: return "❕"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText);
+        case 3: return "🔇"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText);
+        case 4: return "🚷"+l[lang].SET_PUNISHMENT_TIME.replace("{punishment}",punishmentText);
+    }
+}
+
+function genPunishmentTimeSetButton(lang, punishment, prefix, chatId)
+{
+    var l = global.LGHLangs;
+
+    var timeButtonText = punishmentToSetTimeButtonText(lang, punishment);
+    switch(punishment)
+    {
+        case 1: return [{text: timeButtonText, callback_data: prefix+"#STIME:"+chatId}];
+        case 3: return [{text: timeButtonText, callback_data: prefix+"#STIME:"+chatId}];
+        case 4: return [{text: timeButtonText, callback_data: prefix+"#STIME:"+chatId}];
+    }
+    return false;
+}
+
 function usernameOrFullName(user)
 {
     if(user.hasOwnProperty("username"))
@@ -842,6 +884,34 @@ function handleTelegramGroupError(GHbot, userId, chatId, lang, error)
     GHbot.sendMessage(userId, chatId, text);
 }
 
+function getUserWarns(chat, userId)
+{
+    if(!chat.warns.count.hasOwnProperty(userId)) return 0;
+    else return chat.warns.count[userId];
+}
+
+function warnUser(chat, userId)
+{
+    if(!chat.warns.count.hasOwnProperty(userId)) chat.warns.count[userId] = 0;
+    ++chat.warns.count[userId];
+    return chat;
+}
+
+function unwarnUser(chat, userId)
+{
+    if(!chat.warns.count.hasOwnProperty(userId)) chat.warns.count[userId] = 0;
+    if(chat.warns.count[userId] > 0)
+        --chat.warns.count[userId];
+    
+    return chat;
+}
+
+function clearWarns(chat, userId)
+{
+    chat.warns.count[userId] = 0;
+    return chat;
+}
+
 module.exports = 
 {
 
@@ -872,7 +942,10 @@ module.exports =
     parseTextToInlineKeyboard : parseTextToInlineKeyboard,
     extractMedia : extractMedia,
     mediaTypeToMethod : mediaTypeToMethod,
+    punishmentToSetTimeButtonText :punishmentToSetTimeButtonText,
+    genPunishmentTimeSetButton :genPunishmentTimeSetButton,
     punishmentToText : punishmentToText,
+    punishmentToTextAndTime : punishmentToTextAndTime,
     parseHumanTime : parseHumanTime,
     secondsToTime : secondsToTime,
     secondsToHumanTime : secondsToHumanTime,
@@ -884,4 +957,8 @@ module.exports =
     checkCommandPerms : checkCommandPerms,
     telegramErrorToText : telegramErrorToText,
     handleTelegramGroupError : handleTelegramGroupError,
+    getUserWarns : getUserWarns,
+    warnUser : warnUser,
+    unwarnUser : unwarnUser,
+    clearWarns : clearWarns,
 }

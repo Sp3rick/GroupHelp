@@ -10,6 +10,7 @@ var l = global.LGHLangs;
 /** 
  * @typedef {Object} customPerms
  * @property {Array} commands - Array of allowed commands
+ * @property {1|0|-1} immune - disallow from punish this user
  * @property {1|0|-1} flood - permission to flood messages
  * @property {1|0|-1} link - permission to send link
  * @property {1|0|-1} tgLink - permission to send telegram links/usernamess
@@ -24,7 +25,6 @@ var l = global.LGHLangs;
 
 /** 
  * @typedef {Object} userStatus
- * @property {Number} warnCount - number of user warns
  * @property {customPerms} perms - customPerms object for all user-specific permissions
  * @property {Array<String|Number>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
  * @property {customPerms} adminPerms - customPerms object for user permissions if admin
@@ -48,9 +48,10 @@ var l = global.LGHLangs;
  * @return {customPerms}
  *      Get a default customPerms object
  */
-function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
+function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
 {
     commands = commands || [];
+    immune = immune || 0;
     flood = flood || 0;
     link = link || 0;
     tgLink = tgLink || 0;
@@ -62,6 +63,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
     roles = roles || 0;
     settings = settings || 0;
     
+    immune = (immune === false) ? -1 : immune;
     flood = (flood === false) ? -1 : flood;
     link = (link === false) ? -1 : link;
     tgLink = (tgLink === false) ? -1 : tgLink;
@@ -76,6 +78,7 @@ function newPerms(commands, flood, link, tgLink, forward, quote, porn, night, me
 
     var defaultPermissions = {
         commands: commands,
+        immune: immune,
         flood: flood,
         link: link,
         tgLink: tgLink,
@@ -138,12 +141,11 @@ function newPremadeRolesObject()
  * @return {userStatus}
  *      Get a default userStatus object
  */
-function newUser(user, perms, adminPerms, roles, warnCount, title)
+function newUser(user, perms, adminPerms, roles, title)
 {   
     perms = perms || newPerms();
     adminPerms = adminPerms || newPerms();
     roles = roles || [];
-    warnCount = warnCount || 0;
     title = title || "";
 
     var userData = {
@@ -151,7 +153,6 @@ function newUser(user, perms, adminPerms, roles, warnCount, title)
         perms: perms,
         adminPerms: adminPerms,
         roles: roles,
-        warnCount: warnCount,
         title: title,
     }
 
@@ -340,7 +341,7 @@ function adminToPerms(admin)
 {
 
     var perms = newPerms();
-    var restrictCommands = ["COMMAND_WARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_BAN"]
+    var restrictCommands = ["COMMAND_WARN","COMMAND_UNWARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_UNMUTE","COMMAND_BAN","COMMAND_UNBAN"]
     var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMINISTRATOR", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMIN"]
     var promoteAndRestrictCommands = ["COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR"]
     var promoteAndDeleteCommands = ["COMMAND_CLEANER", "COMMAND_UNCLEANER"]
@@ -348,7 +349,7 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
-        perms = newPerms(["COMMAND_PERMS", "COMMAND_INFO", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,0);
+        perms = newPerms(["COMMAND_PERMS", "COMMAND_INFO", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,1);
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -416,9 +417,10 @@ function sumPermsPriority(perms1, perms2)
     perms2.commands.forEach(command => {commands.push(command)});
     commands = commands.filter((item,pos)=>{return commands.indexOf(item)==pos}) //remove duplicates
 
-    var flood, link, tgLink, forward, quote, porn, night, media, roles, settings;
+    var immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings;
 
-    flood = (perms1.flood == 0) ? perms2.flood : perms1.flood; //if perms1 is neutral inherit from second
+    immune = (perms1.immune == 0) ? perms2.immune : perms1.immune; //if perms1 is neutral inherit from second
+    flood = (perms1.flood == 0) ? perms2.flood : perms1.flood;
     link = (perms1.link == 0) ? perms2.link : perms1.link;
     tgLink = (perms1.tgLink == 0) ? perms2.tgLink : perms1.tgLink;
     forward = (perms1.forward == 0) ? perms2.forward : perms1.forward;
@@ -429,7 +431,7 @@ function sumPermsPriority(perms1, perms2)
     roles = (perms1.roles == 0) ? perms2.roles : perms1.roles;
     settings = (perms1.settings == 0) ? perms2.settings : perms1.settings;
 
-    return newPerms(commands, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
+    return newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
 
 }
 function orderRolesByPriority(roles, chat) //Chat required only if role is number (custom role)

@@ -1,4 +1,4 @@
-const { getUnixTime, secondsToHumanTime, bold, handleTelegramGroupError } = require("./utils");
+const { getUnixTime, secondsToHumanTime, bold, handleTelegramGroupError, getUserWarns, unwarnUser, warnUser, clearWarns } = require("./utils");
 
 l = global.LGHLangs;
 var year = 31536000;
@@ -16,8 +16,7 @@ function clearExpiredUserWarns(chat, targetId)
             if((now - endTime) >= 0)
             {
                 chat.warns.timed[targetId].splice(index, 1);
-                if(chat.users[targetId].warnCount > 0)
-                    --chat.users[targetId].warnCount;
+                chat = unwarnUser(chat, targetId);
                 updateChat = true;
             }
         })
@@ -32,15 +31,15 @@ function genRevokePunishButton(lang, targetId, punishment)
 {
     //warn
     if(punishment == 1)
-        return [{text: l[lang].CANCEL_BUTTON, callback_data: "PUNISH_REVOKE_WARN#"+targetId}];
+        return [{text: l[lang].CANCEL_BUTTON, callback_data: "PUNISH_REVOKE_WARN?"+targetId}];
 
     //mute
     if(punishment == 3)
-        return [{text: l[lang].UNMUTE_BUTTON, callback_data: "PUNISH_REVOKE_MUTE#"+targetId}];
+        return [{text: l[lang].UNMUTE_BUTTON, callback_data: "PUNISH_REVOKE_MUTE?"+targetId}];
 
     //ban
     if(punishment == 4)
-        return [{text: l[lang].UNBAN_BUTTON, callback_data: "PUNISH_REVOKE_BAN#"+targetId}];
+        return [{text: l[lang].UNBAN_BUTTON, callback_data: "PUNISH_REVOKE_BAN?"+targetId}];
 }
 function genPunishText(lang, chat, targetUser, punishment, time, reason, db)
 {
@@ -52,11 +51,7 @@ function genPunishText(lang, chat, targetUser, punishment, time, reason, db)
 
     //warn
     if(punishment == 1)
-    {
-        if(!chat.users.hasOwnProperty(targetId))
-            return false;
-        text+=l[lang].HAS_BEEN_WARNED.replace("{emoji}","❕")+" ("+chat.users[targetId].warnCount+" "+l[lang].OF+" "+chat.warns.limit+")";
-    }
+        text+=l[lang].HAS_BEEN_WARNED.replace("{emoji}","❕")+" ("+getUserWarns(chat, targetId)+" "+l[lang].OF+" "+chat.warns.limit+")";
 
     //kick
     if(punishment == 2)
@@ -88,14 +83,12 @@ async function silentPunish(GHbot, userId, chat, targetId, punishment, time)
     //warn
     if(punishment == 1)
     {
-        if(!chat.users.hasOwnProperty(targetId))
-            return;
 
         chat = clearExpiredUserWarns(chat, targetId);
 
         //apply warn
-        chat.users[targetId].warnCount += 1;
-        if(time != -1)
+        chat = warnUser(chat, targetId);
+        if(time != -1)  
         {
             if(!chat.warns.timed.hasOwnProperty(targetId))
                 chat.warns.timed[targetId] = [];
@@ -103,10 +96,10 @@ async function silentPunish(GHbot, userId, chat, targetId, punishment, time)
         }
 
         //re-punish if limit is hit
-        if(chat.users[targetId].warnCount >= chat.warns.limit)
+        if(getUserWarns(chat, targetId) >= chat.warns.limit)
         {
             punishment = await silentPunish(GHbot, userId, chat, targetId, chat.warns.punishment, chat.warns.PTime);
-            chat.users[targetId].warnCount = 0;
+            chat = clearWarns(chat, targetId);
             if(chat.warns.timed.hasOwnProperty(targetId));
                 delete chat.warns.timed[targetId];
             resolve(punishment);
@@ -150,11 +143,6 @@ async function punishUser(GHbot, userId, chat, targetUser, punishment, time, rea
         //warn
         if(punishment == 1)
         {
-            if(!chat.users.hasOwnProperty(targetId))
-            {
-                GHbot.sendMessage(userId, chat.id, l[lang].USER_NEVER_BEEN_MEMBER);
-                return;
-            }
 
             //check if has been applyed a repunish
             punishment = await silentPunish(GHbot, userId, chat, targetId, punishment);
@@ -199,16 +187,13 @@ function genUnpunishButtons(lang, chat, targetId, punishment)
 {
     if(punishment == 1)
     {
-        if(!chat.users.hasOwnProperty(targetId))
-            return [];
+        if(getUserWarns(chat, targetId) == 0)
+            return [[{text: "+1", callback_data: "PUNISH_WARN_INC?"+targetId}]];
 
-        if(chat.users[targetId].warnCount == 0)
-            return [[{text: "+1", callback_data: "PUNISH_WARN_INC#"+targetId}]];
-
-        if(chat.users[targetId].warnCount > 0)
+        if(getUserWarns(chat, targetId) > 0)
             return [
-                [{text: "-1", callback_data: "PUNISH_WARN_DEC#"+targetId}, {text: "+1", callback_data: "PUNISH_WARN_INC#"+targetId}],
-                [{text: l[lang].RESET_WARNS_BUTTON, callback_data: "PUNISH_WARN_ZERO#"+targetId}],
+                [{text: "-1", callback_data: "PUNISH_WARN_DEC?"+targetId}, {text: "+1", callback_data: "PUNISH_WARN_INC?"+targetId}],
+                [{text: l[lang].RESET_WARNS_BUTTON, callback_data: "PUNISH_WARN_ZERO?"+targetId}],
             ];
     }
     return [];
@@ -221,13 +206,10 @@ function genUnpunishText(lang, chat, targetUser, punishment, reason, db)
     //unwarn
     if(punishment == 1)
     {
-        if(!chat.users.hasOwnProperty(targetId))
-            return false;
-
-        if(chat.users[targetId].warnCount == 0)
+        if(getUserWarns(chat, targetId) == 0)
             text+=l[lang].NO_MORE_WARNS;
-        if(chat.users[targetId].warnCount > 0)
-            text+=l[lang].HAS_WARNS_OF.replaceAll("{number}",chat.users[targetId].warnCount).replaceAll("{max}",chat.warns.limit);
+        if(getUserWarns(chat, targetId) > 0)
+            text+=l[lang].HAS_WARNS_OF.replaceAll("{number}",getUserWarns(chat, targetId)).replaceAll("{max}",chat.warns.limit);
     }
 
     //unmute
@@ -254,14 +236,10 @@ async function silentUnpunish(GHbot, userId, chat, targetId, punishment)
     //unwarn
     if(punishment == 1)
     {
-        if(!chat.users.hasOwnProperty(targetId))
-            return;
-
         chat = clearExpiredUserWarns(chat, targetId);
 
         //apply unwarn
-        if(chat.users[targetId].warnCount > 0)
-            chat.users[targetId].warnCount -= 1;
+        chat = unwarnUser(chat, targetId);
     }
 
     //unmute
@@ -298,14 +276,7 @@ async function unpunishUser(GHbot, userId, chat, targetUser, punishment, reason)
     try {
         //unwarn
         if(punishment == 1)
-        {
-            if(!chat.users.hasOwnProperty(targetId))
-            {
-                GHbot.sendMessage(userId, chat.id, l[lang].USER_NEVER_BEEN_MEMBER);
-                return;
-            }
             await silentUnpunish(GHbot, userId, chat, targetId, punishment);
-        }
 
         //unmute
         if(punishment == 3)

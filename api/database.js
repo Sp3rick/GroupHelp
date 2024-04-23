@@ -70,7 +70,7 @@ function getDatabase(config) {
                 chat.users = {};
                 chat.basePerms = RM.newPerms();
                 chat.roles = RM.newPremadeRolesObject();
-                chat.warns = { timed:{}, limit:3, punishment:3, PTime: -1 };
+                chat.warns = { timed:{}, count:{}, limit:3, punishment:3, PTime: 0 };
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
                 chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true }

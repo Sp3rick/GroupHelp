@@ -10,5 +10,7 @@
     "ANTIFLOOD_msgMin" : 2,
     "ANTIFLOOD_msgMax" : 100,
     "ANTIFLOOD_timeMin" : 2,
-    "ANTIFLOOD_timeMax" : 100
+    "ANTIFLOOD_timeMax" : 100,
+    "minWarns" : 2,
+    "maxWarns" : 12
 }

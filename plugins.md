@@ -7,10 +7,10 @@ NOTE: user.perms is a temporary item, it's not intended to be saved in the datab
 Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
 --Targets--
 Any msg.command object may contain an msg.command.target object if a command target user is found
-Also cb.target may exhist, builded up from user id after "#" in cb.data
+Also cb.target may exhist, builded up from user id after "?" in cb.data
 user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "#")
 
-NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database
+NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database (var settingsChatId = cb.data.split(":")[1]; var settingsChat = db.chats.get(settingsChatId))
 
 You can find a comment referring security guards that you can use too in plugins/welcome.js
 
@@ -28,7 +28,7 @@ This plugin manages users data and roles in the group
 LGHPerms Object:
 
 commands: array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command
-immune: active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1](TO IMPLEMENT)
+immune: active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1]
 flood: permission to flood messages [1/0/-1]
 link: permission to send links [1/0/-1]
 tgLink: permission to send telegram links/usernames [1/0/-1]
@@ -42,7 +42,7 @@ settings: permission to change bot group settings [1/0/-1]
 
 
 Intended permissions anarchy: (if a left-side permission is not neutral overwrites everything in the right side)
-chat.users[id].perms > chat.users[id].adminPerms > chat.roles[role].perms (higher role level has higher priority)
+chat.users[id].perms > chat.users[id].adminPerms > chat.roles[role].perms (higher role level has higher priority) > chat.basePerms
 
 
 
@@ -95,7 +95,54 @@ Callback_data order:
 CallerPrefix#MSGMK:settingsChatId
 CallerPrefix is useful to allow the caller to identify it's own callback (ex. if( cb.data.startsWith(myPrefix) ... ))
 
-TODO: allow photo preview-mode
+
+
+
+
+<b>usersHandler.js</b>
+
+>Depends on api/rolesManager.js
+>Depends on api/utils.js
+
+Adds on global.roles[roleName] data about pre-made roles: founder, moderator, muter, cleaner, helper, free.
+This plugin is made for automatic handling of secondary works about users on chats that's not needed to stay on main.js
+Added commands: /reload, /staff, /info, /perms, /forgot
+
+
+
+
+
+<b>promote.js</b>
+
+>Depends on api/rolesManager.js
+>Depends on api/utils.js
+
+Handle promotions and unpromotions commands, allow also to edit single admin perms
+Added commands: /free, /unfree, /helper, /unhelper, /cleaner, /uncleaner, /muter, /unmuter, /mod, /unmod, /cofounder, /uncofounder, /admin, /unadmin, /title, /untitle
+
+
+
+
+
+<b>punish.js</b>
+
+>Depends on api/punishments.js
+>Depends on api/utils.js
+
+Handle punish and unpunish commands
+Added commands: /delete, /warn, /unwarn, /kick, /mute, /unmute, /ban, /unban
+
+
+
+
+
+<b>Settings Plugin</b>
+
+>Depends on api/utils.js
+
+Manage settings for single users and settings panel for chats, lang setting is included
+Added commands: /settings
+
 
 
 
@@ -105,7 +152,8 @@ TODO: allow photo preview-mode
 >Depends on api/MessageMaker.js
 >Depends on api/utils.js
 
-Editable from /settings menù, creates the /rules command
+Module to add rules of the group and allow to edit these trough settings
+Added commands: /rules
 
 Adds on chat.rules a custom object "customMessage" (Message Maker)
 
@@ -114,10 +162,13 @@ Note: if format is false or entities unavaiable set message parse_mode to HTML (
 
 
 
+
 <b>Welcome Plugin</b>
 
 >Depends on api/MessageMaker.js
 >Depends on api/utils.js
+
+Module to allow set up a welcome message for new users in the group
 
 Adds on chat.welcome a custom object "LGHWelcome"
 
@@ -151,27 +202,22 @@ punishment: punishment to apply at the user that trigghers the Antiflood [0:off|
 PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of punishment 
 delete: true if flooded messages should be deleted
 
--
-
-
-
-
-<b>UsersHandler.js</b>
-
->Depends on api/rolesManager.js
->Depends on api/utils.js
-
-Adds on global.roles[roleName] data about pre-made roles: founder, moderator, muter, cleaner, helper, free.
-This plugin adds /perms command and handle any new user on the chat
 
 
 
 
 <b>warns.js</b>
 
+>Depends on api/utils.js
+>Depends on api/setNum.js
+>Depends on api/setTime.js
+
+Allow you to change warn settings on a group
+
 chat.warns Warns Object:
 
-timed: ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over
+timed: ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when time is over
+count: ([userId]: number) countains count of warns for each user
 limit: number of warns after wich should be applyed a punishment
 punishment: punishment when limit is hit [2:kick|3:mute|4:ban]
 PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of punishment

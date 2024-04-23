@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 const { punishUser, unpunishUser, silentPunish, silentUnpunish, genPunishText, genUnpunishButtons, genUnpunishText, genRevokePunishButton } = require("../api/punishment.js");
-const { checkCommandPerms, parseHumanTime, telegramErrorToText } = require("../api/utils.js");
+const { checkCommandPerms, parseHumanTime, telegramErrorToText, unwarnUser, clearWarns } = require("../api/utils.js");
 
 function main(args)
 {
@@ -51,13 +51,19 @@ function main(args)
         {
             var time = false;
             var reason = false;
-            if(command.args)
+            if(command.args) //TODO: send an error if user enter a time higher than 1 year
             {
                 var identifiedTime = parseHumanTime(command.args);
                 time = (punishment != 2 && identifiedTime >= 30) ? identifiedTime : false;
                 if(!time) reason = command.args;
             }
-            //TODO: send an error if user enter a time higher than 1 year
+            
+            if(target.perms.immune == 1)
+            {
+                GHbot.sendMessage(user.id, chat.id, l[lang].USER_IS_IMMUNE);
+                return;
+            }
+
             punishUser(GHbot, user.id, chat, target, punishment, time, reason)
         }
         if(removePunishment)
@@ -82,7 +88,7 @@ function main(args)
         if(cb.data.startsWith("PUNISH_REVOKE_"))
         {
             var punishment;
-            var revokeText = cb.data.split("PUNISH_REVOKE_")[1].split("#")[0];
+            var revokeText = cb.data.split("PUNISH_REVOKE_")[1].split("?")[0];
             var neededCommand;
             switch (revokeText) {
                 case "WARN":{punishment = 1;neededCommand = "COMMAND_UNWARN";break;}
@@ -135,7 +141,7 @@ function main(args)
         if(cb.data.startsWith("PUNISH_WARN_"))
         {
             var punishment = 1;
-            var action = cb.data.split("PUNISH_WARN_")[1].split("#")[0];
+            var action = cb.data.split("PUNISH_WARN_")[1].split("?")[0];
             var neededCommand;
             var options = {parse_mode:"HTML"};
             switch (action) {
@@ -152,9 +158,9 @@ function main(args)
 
             try {
                 if(action == "DEC")
-                    chat.users[target.id].warnCount -= 1;
+                    chat = unwarnUser(chat, target.id);
                 if(action == "ZERO")
-                    chat.users[target.id].warnCount = 0;
+                    chat = clearWarns(chat, target.id);
                 if(action == "INC")
                     punishment = await silentPunish(GHbot, user.id, chat, target.id, punishment);
 

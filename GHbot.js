@@ -26,7 +26,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
 /**
  * @typedef {Object} LGHPerms - LGHPerms Object.
  * @property {Array.<string>} commands - Array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command.
- * @property {1|0|-1} immune - Active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1](TO IMPLEMENT).
+ * @property {1|0|-1} immune - Active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1].
  * @property {1|0|-1} flood - Permission to flood messages [1/0/-1].
  * @property {1|0|-1} link - Permission to send links [1/0/-1].
  * @property {1|0|-1} tgLink - Permission to send telegram links/usernames [1/0/-1].
@@ -69,7 +69,6 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHPerms} perms - LGHPerms object for all user-specific permissions
  * @property {LGHPerms} adminPerms - LGHPerms object for user permissions if admin
  * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
- * @property {Number} warnCount - number of user warns
  * @property {String|undefined} title - user administrator title
  */
 
@@ -85,6 +84,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
 /**
  * @typedef {Object} LGHWarns - warns.js plugin related data
  * @property {Object.<string, Number>} timed - ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over
+ * @property {Object.<string, Number>} count - ([userId]: number) countains count of warns for each user
  * @property {Number} limit - number of warns after wich should be applyed a punishment
  * @property {2|3|4} punishment - punishment when limit is hit [2:kick|3:mute|4:ban]
  * @property {Number|null} PTime - avaiable if punishment is set to warn/mute/ban, contains seconds of punishment

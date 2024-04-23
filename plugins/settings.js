@@ -1,5 +1,4 @@
 var LGHelpTemplate = require("../GHbot.js");
-const RM = require("../api/rolesManager.js");
 const {genSettingsKeyboard, bold, checkCommandPerms, code} = require( "../api/utils.js" );
 
 function main(args)

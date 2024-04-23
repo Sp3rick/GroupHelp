@@ -44,4 +44,10 @@ ANTIFLOOD_timeMin:
 ANTIFLOOD_timeMax:
     maximum allowed time in which N messages should be sent to triggher the antiflood
 
+minWarns:
+    minimum allowed warns in settings
+
+maxWarns:
+    maximum allowed warns in settings
+
 
