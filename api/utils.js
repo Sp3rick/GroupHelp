@@ -59,6 +59,13 @@ function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function keysArrayToObj(array)
+{
+    var obj = {};
+    array.forEach(key=>{obj[key]=true});
+    return obj;
+}
+
 //TODO: add translation system that replaces any word to english (like dictionary translation)
 //ATTENTION HERE: for error he may return both 0 or 1
 function parseHumanTime(text) {
@@ -465,6 +472,7 @@ function genPermsReport(lang, perms)
             command = l[lang][commandName];
 
         text+="/"+command+" ";
+        if(command == undefined)console.log("LGH: Undefined command key " + commandName)
     });
 
     text+="\n\n"+
@@ -807,7 +815,7 @@ function LGHUserName(user, db)
 }
 
 //currently not use GHbot, getAdmins seems to be already safe
-async function getAdmins(TGbot, chatId)
+async function getAdmins(TGbot, chatId, db)
 {
     var adminList = await TGbot.getChatAdministrators( chatId );
 
@@ -815,6 +823,8 @@ async function getAdmins(TGbot, chatId)
     for(var i=0; i < adminList.length; ++i)
         if(adminList[i].user.first_name.length == 0)
             adminList.splice(i, 1)
+
+    if(db) storeMembers(adminList, db);
 
     return adminList
 }
@@ -912,6 +922,51 @@ function clearWarns(chat, userId)
     return chat;
 }
 
+async function loadChatUserId(TGbot, chatId, userId, db)
+{
+    try {
+        var user = await TGbot.getChatMember(chatId, userId).user;
+        db.users.add(user);
+        return user;
+    } catch (error) {
+        return false;
+    }
+}
+
+function storeMembers(members, db)
+{
+    members.forEach((member)=>{
+        if(!db.users.exhist(member.user.id))
+            db.users.add(member.user)
+    })
+}
+
+function getOwner(members)
+{
+    var creator = false;
+    members.forEach((member)=>{
+        if(member.status == "creator") creator = member;
+    })
+    return creator;
+}
+
+function isChatAllowed(config, chatId)
+{
+    var whitelist = config.chatWhitelist;
+    var blacklist = config.chatBlacklist;
+
+    var key = String(chatId);
+    if(!config.privateWhitelist && !key.startsWith("-")) return true; //if private chat true
+    
+    if(Object.keys(whitelist).length > 0 && !whitelist[chatId])
+        return false
+
+    if(blacklist[chatId])
+        return false
+
+    return true;
+}
+
 module.exports = 
 {
 
@@ -925,6 +980,7 @@ module.exports =
     replaceLast : replaceLast,
     isNumber : isNumber,
     randomInt : randomInt,
+    keysArrayToObj : keysArrayToObj,
     isValidChat : isValidChat,
     isValidUser : isValidUser,
     parseCommand : parseCommand,
@@ -962,4 +1018,8 @@ module.exports =
     warnUser : warnUser,
     unwarnUser : unwarnUser,
     clearWarns : clearWarns,
+    loadChatUserId :loadChatUserId,
+    storeMembers : storeMembers,
+    getOwner : getOwner,
+    isChatAllowed : isChatAllowed,
 }

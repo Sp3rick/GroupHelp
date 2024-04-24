@@ -229,7 +229,7 @@ testObject()
  * @typedef {Object} chatsDatabase - Object containing chat-related database functions.
  * @property {AddChatFunction} add - Function to add a new chat to the database.
  * @property {DeleteChatFunction} delete - Function to delete a chat from the database.
- * @property {ExistChatFunction} exist - Function to check if a chat exists in the database.
+ * @property {ExistChatFunction} exhist - Function to check if a chat exhists in the database.
  * @property {GetChatFunction} get - Function to retrieve a chat from the database.
  * @property {UpdateChatFunction} update - Function to update a chat in the database.
  * @property {SaveChatFunction} save - Function to save a chat to the database.
@@ -269,7 +269,7 @@ testObject()
  * @typedef {Object} usersDatabase - Object containing user-related database functions.
  * @property {Function} add - Function to add a new user to the database.
  * @property {Function} delete - Function to delete a user from the database.
- * @property {Function} exist - Function to check if a user exists in the database.
+ * @property {Function} exhist - Function to check if a user exhists in the database.
  * @property {Function} get - Function to retrieve a user from the database.
  * @property {Function} update - Function to update a user in the database.
  */

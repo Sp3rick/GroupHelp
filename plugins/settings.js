@@ -49,7 +49,7 @@ function main(args)
 
         var settingsChatId = chat.id;
         if(cb.data.includes(":")) settingsChatId = cb.data.split(":")[1];
-        var settingsChat = db.chats.get(settingsChatId);
+        var settingsChat = db.chats.exhist(settingsChatId) ? db.chats.get(settingsChatId) : false;
         var isSettingsAdmin = false;
         if(isGroup) isSettingsAdmin = user.perms.settings == 1;
 

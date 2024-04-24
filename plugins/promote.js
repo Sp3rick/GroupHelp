@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {checkCommandPerms, handleTelegramGroupError, getAdmins, code, genGroupAdminPermsKeyboard, bold, genGroupAdminPermsText, telegramErrorToText, hasAdminPermission} = require ("../api/utils.js");
+var {checkCommandPerms, handleTelegramGroupError, getAdmins, code, genGroupAdminPermsKeyboard, bold, genGroupAdminPermsText, telegramErrorToText, hasAdminPermission, isAdminOfChat} = require ("../api/utils.js");
 var removeAdminOpts = {can_manage_chat:false,can_delete_messages:false,can_manage_video_chats:false,can_restrict_members:false,
     can_promote_members:false,can_change_info:false,can_invite_users:false,can_post_stories:false,can_edit_stories:false,
     can_delete_stories:false,can_pin_messages:false,can_manage_topics:false};
@@ -321,11 +321,18 @@ function main(args)
                 db.users.update(user);
             }
 
-            //user still admin check
+            //target still admin check
             var admin = chat.admins.filter((admin)=>{return admin.user.id == target.id})[0];
             if(!admin)
             {
                 GHbot.editMessageText(user.id, l[lang].USER_NO_MORE_ADMIN, {chat_id:chat.id, message_id:cb.message.message_id});
+                return;
+            }
+
+            //check if caller is admin
+            if(!isAdminOfChat(chat, user.id))
+            {
+                GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION,show_alert:true});
                 return;
             }
 
@@ -338,6 +345,7 @@ function main(args)
                 return;
             }
 
+            //apply permission change
             if(perm)
             {
                 if(target.id == user.id)
@@ -387,7 +395,14 @@ function main(args)
 
         if(cb.data.startsWith("ADMINTITLE"))
         {
-            //here allowing an user to change his own title is wanted
+            //check if caller is admin
+            if(!isAdminOfChat(chat, user.id))
+            {
+                GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION,show_alert:true});
+                return;
+            }
+
+            //currently allowing to change title of any admin by other admins is wanted
             user.waitingReply = true;
             user.waitingReplyType = "ADMINTITLE?"+target.id;
             db.users.update(user);

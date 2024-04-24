@@ -1,4 +1,4 @@
-const {usernameOrFullName, genUserList, bold, isString, anonymizeAdmins, LGHUserName} = require("./utils.js");
+const {usernameOrFullName, genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId} = require("./utils.js");
 var l = global.LGHLangs;
 
 //Roles with string name is intended as a pre-made role
@@ -342,7 +342,7 @@ function adminToPerms(admin)
 
     var perms = newPerms();
     var restrictCommands = ["COMMAND_WARN","COMMAND_UNWARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_UNMUTE","COMMAND_BAN","COMMAND_UNBAN"]
-    var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMINISTRATOR", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMIN"]
+    var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMINISTRATOR", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMINISTRATOR"]
     var promoteAndRestrictCommands = ["COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR"]
     var promoteAndDeleteCommands = ["COMMAND_CLEANER", "COMMAND_UNCLEANER"]
 
@@ -506,6 +506,7 @@ function genStaffListMessage(lang, chat, db)
 
     var adminIds = [];
     chat.admins.forEach(admin=>{
+        if(admin.is_anonymous) return;
         adminIds.push(admin.user.id);
     })
     if(adminIds.length != 0)
@@ -527,11 +528,23 @@ function userToTarget(chat, user)
     return {id, name, perms, user};
 }
 
+function userIdToTarget(TGbot, chat, userId, db)
+{  
+    var tookUser = db.users.get(userId);
+    if(!tookUser) tookUser = loadChatUserId(TGbot, chat.id, userId, db);
+    if(!tookUser) tookUser = {id:userId};
+
+    targetName = LGHUserName(tookUser);
+    var targetPerms = sumUserPerms(chat, userId);
+
+    return {id:userId, name: targetName, perms: targetPerms, user: tookUser};
+}
+
 module.exports = {
     newPerms, newRole, newUser, newPremadeRolesObject,
     getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
     deleteRole, deleteUser, forgotUser, renameRole, changeRoleEmoji,
     setRole, unsetRole, addUser,
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,
-    genStaffListMessage, userToTarget,
+    genStaffListMessage, userToTarget, userIdToTarget
 }

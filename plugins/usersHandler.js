@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat} = require ("../api/utils.js");
+var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat, isChatAllowed} = require ("../api/utils.js");
 
 function main(args)
 {
@@ -60,7 +60,7 @@ function main(args)
 
             //TODO: add a token based bot complete restart
 
-            var adminList = await getAdmins(TGbot, chat.id);
+            var adminList = await getAdmins(TGbot, chat.id, db);
             chat = RM.reloadAdmins(chat, adminList);
             db.chats.update(chat);
 
@@ -196,6 +196,8 @@ function main(args)
 
     //handle promotions or unpromotions
     TGbot.on("chat_member", async (e) => {
+
+        if(!isChatAllowed(config, e.chat.id)) return;
         
         var wasAdmin = e.old_chat_member.status == "administrator";
         var wasFounder = e.old_chat_member.status == "creator";
@@ -203,10 +205,12 @@ function main(args)
         var isAdmin = e.new_chat_member.status == "administrator";
         var isFounder = e.new_chat_member.status == "creator";
 
-        if(!wasAdmin && !wasFounder && !isAdmin && !isFounder) return;
+        if(!wasAdmin && !wasFounder && !isAdmin && !isFounder && db.chats.exhist(e.chat.id)) return;
 
-        var adminList = await getAdmins(TGbot, chat.id);
-        var chat = RM.reloadAdmins(chat, adminList);
+        var chat = db.chats.get(e.chat.id);
+
+        var adminList = await getAdmins(TGbot, chat.id, db);
+        chat = RM.reloadAdmins(chat, adminList);
         db.chats.update(chat);
 
     })

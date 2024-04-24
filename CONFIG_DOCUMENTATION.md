@@ -29,6 +29,15 @@ saveDatabaseSeconds:
 preventSetUselessRoles:
     Disallow from setting roles if it does not change the user status in the group
 
+chatWhitelist:
+    Array, if there are at least one element the bot will work only on this chat ids
+
+privateWhitelist:
+    Boolean, true if chat whitelist includes private chats, useless if chatWhitelist has no elements
+
+chatBlacklist:
+    Bot wont more handle requests of chat ids in this array
+
 
 <b>Plugin settings</b>
 

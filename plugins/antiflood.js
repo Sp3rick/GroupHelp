@@ -204,7 +204,7 @@ function main(args)
             if(!global.LGHFlood.hasOwnProperty(chat.id))
                 global.LGHFlood[chat.id] = {lastUse: 0, lastPunishment : 0, messages: {}};
             
-            var now = getUnixTime();
+            var now = msg.date;
             global.LGHFlood[chat.id].lastUse = now;
             global.LGHFlood[chat.id].messages[msg.message_id] = now;
 

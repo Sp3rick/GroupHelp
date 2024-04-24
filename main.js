@@ -5,12 +5,15 @@ const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js");
 const TR = require("./api/tagResolver.js");
 const TelegramBot = require('node-telegram-bot-api');
-const {code, usernameOrFullName } = require("./api/utils.js");
+const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed } = require("./api/utils.js");
   
   
 
 async function main(config) {
 
+    config.chatWhitelist = keysArrayToObj(config.chatWhitelist);
+    config.chatBlacklist = keysArrayToObj(config.chatBlacklist);
+    
 
 
     const GroupHelpBot = new EventEmitter();
@@ -20,6 +23,7 @@ async function main(config) {
     console.log("Starting a bot...")
     
     var TGbot = new TelegramBot(config.botToken, {polling: true});
+    await TGbot.setWebHook("",{allowed_updates: JSON.stringify(["message", "edited_channel_post", "callback_query", "message_reaction", "message_reaction_count", "chat_member"])})
     const bot = await TGbot.getMe();
     TGbot.me = bot;
 
@@ -38,9 +42,10 @@ async function main(config) {
     l = global.LGHLangs;
 
 
-
     TGbot.on( "message", async (msg, metadata) => {
 
+        if(!isChatAllowed(config, msg.chat.id)) return;
+        
         TR.log(msg)
 
         var from = msg.from;
@@ -71,11 +76,15 @@ async function main(config) {
             chat = db.chats.get(chat.id)
 
             //add admins
-            var adminList = await getAdmins(TGbot, chat.id);
+            var adminList = await getAdmins(TGbot, chat.id, db);
             chat = RM.reloadAdmins(chat, adminList);
             db.chats.update(chat);
+
+            var creator = getOwner(adminList);
+            var newGroupText = l[chat.lang].NEW_GROUP;
+            newGroupText = (creator && !creator.is_anonymous) ? newGroupText.replace("{owner}",tag(".",creator.user.id)) : ".";
             
-            await GHbot.sendMessage(user.id, chat.id, l[chat.lang].NEW_GROUP,{parse_mode:"HTML",
+            await GHbot.sendMessage(user.id, chat.id, newGroupText,{parse_mode:"HTML",
                 reply_markup :{inline_keyboard:[[{text: l[chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"}]]}
             })
             GHbot.sendMessage(user.id, chat.id, l[chat.lang].SETUP_GUIDE,{parse_mode:"HTML",
@@ -100,6 +109,7 @@ async function main(config) {
             }
             if(isGroup) msg.command.target.perms = RM.sumUserPerms(chat, targetId);
             msg.command.target.user = msg.hasOwnProperty("reply_to_message") ? msg.reply_to_message.from : db.users.get(targetId);
+            if(!msg.command.target.user) msg.command.target.user = loadChatUserId(TGbot, chat.id, targetId, db);
 
             //if target is got from args exclude that one responsable
             if(!msg.hasOwnProperty("reply_to_message") && targetId != msg.from.id)
@@ -126,22 +136,10 @@ async function main(config) {
         }
 
         //configuring user.waitingReplyTarget 
-        if( user.waitingReplyType.includes("?") )
+        if( user.waitingReply == true && user.waitingReplyType.includes("?") )
         {
             var wrTargetId = user.waitingReplyType.split("?")[1];
-
-            var fullName;
-            var tookUser = db.users.get(wrTargetId);
-            if(tookUser) fullName = usernameOrFullName(tookUser);
-            fullName = fullName ? fullName+" " : "";
-            fullName = fullName+"["+code(wrTargetId)+"] ";
-
-            var wrTargetName = fullName;
-            var wrTargetPerms = RM.sumUserPerms(chat, wrTargetId);
-            user.waitingReplyTarget = {id:wrTargetId, name: wrTargetName, perms: wrTargetPerms};
-
-            if(tookUser)
-                user.waitingReplyTarget.user = tookUser;
+            user.waitingReplyTarget = RM.userIdToTarget(TGbot, chat, wrTargetId, db);
         }
 
         GroupHelpBot.emit( "message", msg, chat, user );
@@ -150,7 +148,9 @@ async function main(config) {
 
     } );
 
-    TGbot.on( "callback_query", (cb) => {
+    TGbot.on( "callback_query", async (cb) => {
+
+        if(!isChatAllowed(config, cb.message.chat.id)) return;
 
         console.log("Callback data: " + cb.data)
 
@@ -182,17 +182,8 @@ async function main(config) {
         //configure cb.target
         if(cb.data.includes("?"))
         {
-            cb.target = {id:cb.data.split("?")[1]};
-
-            var fullName;
-            var tookUser = db.users.get(cb.target.id);
-            if(tookUser) fullName = usernameOrFullName(tookUser);
-            fullName = fullName ? fullName+" " : "";
-            fullName = fullName+"["+code(cb.target.id)+"] ";
-
-            cb.target.name = fullName;
-            cb.target.perms = RM.sumUserPerms(chat, cb.target.id);
-            if(tookUser) cb.target.user = tookUser;
+            var targetId = cb.data.split("?")[1];
+            cb.target = RM.userIdToTarget(TGbot, chat, targetId, db);
         }
 
         GroupHelpBot.emit( "callback_query", cb, chat, user );
@@ -200,6 +191,8 @@ async function main(config) {
     } )
 
     TGbot.on( "left_chat_member", (msg) => {
+
+        if(!isChatAllowed(config, msg.chat.id)) return;
 
         var chat = msg.chat;
         var from = msg.from;
@@ -215,7 +208,25 @@ async function main(config) {
     } )
 
     TGbot.on( "polling_error", (err) => {
-        console.log(err)
+        if(err.code == "ETELEGRAM")
+        {
+            var errDescription = err.response.body.description;
+            if(errDescription.includes("Bad Gateway")) console.log("P ETELEGRAM: Bad gateway");
+        }
+        else if(err.code == "EFATAL")
+        {
+            console.log("P EFATAL");
+        }
+        else {console.log(err) + "P OBJ: " + JSON.stringify(err)}
+    } )
+
+    TGbot.on( "webhook_error", (err) => {
+        if(err.code == "ETELEGRAM")
+        {
+            var errDescription = err.response.body.description;
+            if(errDescription.includes("Forbidden: bot was kicked from the supergroup chat")) console.log("WB ETELEGRAM: "+errDescription);
+        }
+        else {console.log(err) + "WB OBJ: " + JSON.stringify(err)}
     } )
 
     return { GHbot: GroupHelpBot, TGbot, db };

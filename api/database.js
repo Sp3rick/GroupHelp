@@ -154,7 +154,6 @@ function getDatabase(config) {
              */
             update : async (chat) => {
                 var now = getUnixTime();
-                console.log("called update")
 
                 var oldChat = database.chats.get( chat.id ); //check if exhist and be sure to load it
                 if(oldChat == false)
