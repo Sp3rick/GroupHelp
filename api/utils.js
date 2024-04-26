@@ -19,6 +19,10 @@ function tag(text, userId)
 {
     return "<a href=\"tg://user?id="+userId+"\">"+cleanHTML(text)+"</a>";
 }
+function link(text, link)
+{
+    return "<a href=\""+link+"\">"+cleanHTML(text)+"</a>";
+}
 
 let isObject = function(a) {
     return (!!a) && (a.constructor === Object);
@@ -242,6 +246,14 @@ function genSettingsKeyboard(lang, chatId)
 
 }
 
+function genSettingsText(lang, chat)
+{
+    return bold(l[lang].SETTINGS.toUpperCase())+"\n"+
+    bold(l[lang].GROUP+": ")+code(chat.title)+"\n"+
+    bold(l[lang].GROUP_LANGUAGE+": ")+"<i>"+l[chat.lang].LANG_SELECTOR+"</i>\n\n"+
+    l[lang].SETTINGS_SELECT;
+}
+
 function genSetNumKeyboard(cb_prefix, settingsChatId)
 {
 
@@ -459,6 +471,17 @@ function stateToEmoji(perm)
     }
 }
 
+function tradCommand(lang, commandKey)
+{
+    var translated = "";
+    if(commandKey.startsWith("COMMAND_")) //if is language-depenent command translate it to the acutal command
+        translated = l[lang][commandKey];
+    if(commandKey.startsWith("@COMMAND_"))
+        translated = l[lang][commandKey.replace("@","")];
+
+    return translated;
+}
+
 //TODO due to code here, we should force every custom command alias to be characters/numbers only, or it may inflict with html formatting or "COMMAND_" could search for unexhisting command
 function genPermsReport(lang, perms)
 {
@@ -467,11 +490,14 @@ function genPermsReport(lang, perms)
 
     var text=bold(l[lang].COMMANDS+": ");
     perms.commands.forEach(commandName => {
-        var command = commandName;
-        if(commandName.startsWith("COMMAND_")) //if is language-depenent command translate it to the acutal command
-            command = l[lang][commandName];
+        var command = tradCommand(lang, commandName);
 
-        text+="/"+command+" ";
+        text+="/"+command;
+        if(commandName.startsWith("@"))
+            text+="(🔏) ";
+        else
+            text+=" ";
+
         if(command == undefined)console.log("LGH: Undefined command key " + commandName)
     });
 
@@ -563,7 +589,7 @@ function exhistInsideAnyLanguage(optionName)
     return false;
 }
 
-function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
+function getCommandMatchLang(text, optionName, caseSensitive)
 {
     var l = global.LGHLangs;
 
@@ -581,15 +607,19 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
         var curLangText = l[langKeys[langIndex]][optionName]
 
         if( caseSensitive && curLangText == text )
-            return true;
+            return langKeys[langIndex];
         else if( !caseSensitive && curLangText.toUpperCase() == text.toUpperCase() )
-            return true;
-
+            return langKeys[langIndex];
     }
 
     return false;
+}
 
-
+function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
+{
+    var match = getCommandMatchLang(text, optionName, caseSensitive);
+    if(match) return true;
+    return false;
 }
 
 function parseTextToInlineKeyboard(text)
@@ -848,10 +878,46 @@ function checkCommandPerms(command, commandKey, perms, literalNames)
 
     if(command &&
         ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == ln}))&&
-        ( perms.commands.includes(commandKey) || literalNames.some(ln=>{return perms.commands.includes(ln)}) )
+        ( perms.commands.includes(commandKey) || perms.commands.includes("@"+commandKey) || literalNames.some(ln=>{return perms.commands.includes(ln)}) )
     ) return true;
     else return false;
 }
+
+function replyCommandChat(commandPerm, chatId, userId)
+{
+    return commandPerm.startsWith("@") ? userId : chatId;
+}
+
+async function sendCommandReply(commandKey, lang, GHbot, user, chatId, func)
+{return new Promise(async (resolve, reject)=>{
+
+    var l = global.LGHLangs;
+    var userId = user.id;
+
+    var commandIndex = user.perms.commands.indexOf(commandKey);
+    if(commandIndex == -1) commandIndex = user.perms.commands.indexOf("@"+commandKey);
+
+    var commandPerm = user.perms.commands[commandIndex];
+
+    var sendId = replyCommandChat(commandPerm, chatId, userId);
+    var privateLink = "https://t.me/"+GHbot.TGbot.me.username;
+    if(sendId == chatId)
+        try{resolve(func(sendId))}catch(error){reject(error)}
+    else try {
+        await func(sendId);
+        var sentMsg = await GHbot.sendMessage(userId, chatId, link(l[lang].SENT_PRIVATE_CHAT, privateLink), {parse_mode:"HTML"});
+        resolve(sentMsg);
+    }catch(error) {
+        if(error.code != "ETELEGRAM"){reject(error); return;}
+        var errorDesc = error.response.body.description
+        if(!errorDesc.includes("blocked")){reject(error); return;}
+        try {
+            var sentMsg = await GHbot.sendMessage(userId, chatId, link(l[lang].START_BOT_FIRST, privateLink), {parse_mode:"HTML"})
+            resolve(sentMsg);
+        } catch (error) {reject(error)}   
+    }
+
+})}
 
 function telegramErrorToText(lang, error)
 {
@@ -985,12 +1051,14 @@ module.exports =
     isValidUser : isValidUser,
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
+    genSettingsText : genSettingsText,
     genSetNumKeyboard : genSetNumKeyboard,
     genGroupAdminPermsKeyboard : genGroupAdminPermsKeyboard,
     genGroupAdminPermsText : genGroupAdminPermsText,
     genUserList : genUserList,
     genMemberInfoText : genMemberInfoText,
     stateToEmoji : stateToEmoji,
+    tradCommand :tradCommand,
     genPermsReport : genPermsReport,
     isAdminOfChat : isAdminOfChat,
     hasAdminPermission : hasAdminPermission,
@@ -1012,6 +1080,8 @@ module.exports =
     getAdmins : getAdmins,
     anonymizeAdmins : anonymizeAdmins,
     checkCommandPerms : checkCommandPerms,
+    replyCommandChat : replyCommandChat,
+    sendCommandReply : sendCommandReply,
     telegramErrorToText : telegramErrorToText,
     handleTelegramGroupError : handleTelegramGroupError,
     getUserWarns : getUserWarns,

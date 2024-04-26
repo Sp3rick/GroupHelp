@@ -117,14 +117,12 @@ text avaiable substitutions:
 • {YEAR} = current year
 • {UNIX} = seconds since 1970/1/1
 
-(TO IMPLEMENT)
 optional if configuration allow external api:
-• {HALVING} = remaining time for bitcoin halving
-• {BTC} {ETH} {BNB} {SOL} {XRP} {DOGE} {TON} {ADA} ... {XMR} = avaiable any top100 crypto symbol
-• {TOP1} {TOP2} ... {TOP100} = get crypto symbol specific classific height (max 100)
--Crypto prefixes: CAP(capitalization), VOL(24h volume), RANK(cap classific), SUPPLY, NAME, EXPLORER. (example: {CAPBITCOIN})
--Currency crypto prefixes: $, €, £, CHF or ₣. (default on group currency)
--Examples: {BNB}, {€BTC}, {CHFETH}, {£CAPBTC}, {SUPPLYXMR}, {€{TOP15}} {£VOL{TOP3}}
+• {BTC} {ETH} {BNB} {SOL} {XRP} {DOGE} {TON} {ADA} ... {XMR} = crypto price, avaiable any top2000 crypto symbol
+• {TOP1} {TOP2} ... {TOP2000} = get crypto symbol at specific classific height (max 2000)
+-Crypto options: CAP(capitalization), VOL(24h volume), SUPPLY, RANK(cap classific), NAME, EXPLORER. (example: {CAPBITCOIN})
+-Convert from default to specific currency: ${number}, €{number}, £{number}, CHF{number} or ₣{number}.
+-Examples: {BNB}, €{BTC}, CHF{ETH}, £{BTC:CAP}, {XMR:SUPPLY}, €{{TOP15}} £{{TOP3}:VOL}
 -Api: https://api.coincap.io/v2/assets (https://docs.coincap.io/)
 
 

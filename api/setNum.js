@@ -1,16 +1,9 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKeyboard} = require("./utils.js");
-
-
-/** 
- * @typedef {Object} setNumberReturn
- * @property {customMessage} customMessage
- * @property {TelegramBot.User} user
- * @property {Boolean} updateNum - true if number has changed
- */
+const {isNumber, genSetNumKeyboard} = require("./utils.js");
 
 /** 
  * @param  {import("../GHbot.js")} GHbot
+ * @param {import("../GHbot.js").LGHDatabase} db - database
  * @param  {customMessage} currentNumber
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -18,11 +11,13 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  * @param  {String} cb_prefix
  * @param  {String} title
  * @param  {TelegramBot.KeyboardButton} returnButtons
- * 
+ * @param  {String} title - custom title avaiable editing the message
+ * @param  {Number} min - minimum allowed time in seconds
+ * @param  {Number} max - maximum allowed time in seconds
  * 
  * @return {Number}
  */
-function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnButtons, title, min, max)
+function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -34,8 +29,6 @@ function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnBu
     max = max || 100;
 
     var msg = cb.message;
-    var lang = user.lang;
-    var updateUser = false;
 
     var settingsChatId = cb.data.split(":")[1];
 
@@ -43,7 +36,7 @@ function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnBu
     {
         user.waitingReply = true;
         user.waitingReplyType = cb_prefix+"#SNUM:"+settingsChatId;
-        updateUser = true;
+        db.users.update(user);
     }
 
     if( cb.data.startsWith(cb_prefix+"#SNUM_MENU_N_") )
@@ -52,7 +45,7 @@ function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnBu
         if(newNumber == number)
         {
             GHbot.answerCallbackQuery(user.id, cb.id);
-            return {number, user, updateUser};
+            return -1;
         }
         number = newNumber;
     }
@@ -64,7 +57,7 @@ function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnBu
     if( cb.data.startsWith(cb_prefix+"#SNUM_MENU_WRITE") )
     {
         GHbot.answerCallbackQuery(user.id, cb.id, {text: l[user.lang].ASK_WRITE, show_alert:true});
-        return {number, user, updateUser};
+        return -1;
     }
         
     title = title.replaceAll("{number}", number)
@@ -107,7 +100,7 @@ function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnBu
 
     }
 
-    return {number, user, updateUser};
+    return number;
 
 }
 
@@ -118,7 +111,10 @@ function callbackEvent(GHbot, currentNumber, cb, chat, user, cb_prefix, returnBu
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
  * @param  {String} cb_prefix
- * 
+ * @param  {TelegramBot.KeyboardButton} returnButtons
+ * @param  {String} title - custom title avaiable editing the message
+ * @param  {Number} min - minimum allowed time in seconds
+ * @param  {Number} max - maximum allowed time in seconds
  * 
  * @return {Number}
  */
@@ -160,7 +156,7 @@ function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnBu
         else
         {
             GHbot.sendMessage(user.id, chat.id, l[user.lang].SNUM_INVALID_NUMBER, errorOpts);
-            return number;
+            return -1;
         }
 
 
@@ -190,8 +186,6 @@ function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnBu
 }
 
 module.exports = {
-
     callbackEvent : callbackEvent,
     messageEvent : messageEvent
-
 }

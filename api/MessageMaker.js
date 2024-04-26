@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code} = require("./utils.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold} = require("./utils.js");
 const { pushUserRequest } = require("./SafeTelegram.js");
 const { substitute } = require("./substitutor.js");
 
@@ -19,35 +19,28 @@ const { substitute } = require("./substitutor.js");
  * @property {String} buttons - Can me transformed in inline_keyboard with parseTextToInlineKeyboard()
  * @property {TelegramBot.KeyboardButton} buttonsParsed - Specified bot name (ex. "usernamebot")
  */
-/** 
- * @typedef {Object} MessageMakerReturn
- * @property {customMessage} customMessage
- * @property {TelegramBot.User} user
- * @property {Boolean} updateMSGMK - If true means that customMessage has changed
- * @property {Boolean} updateUser - If true means that user has changed
- */
 
 /** 
  * @param  {import("../GHbot.js")} GHbot
- * @param  {customMessage} customMessage
+ * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {customMessage} customMessage - MessageMaker object
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
  * @param  {String} cb_prefix
- * @param  {String} title
  * @param  {TelegramBot.KeyboardButton} returnButtons
+ * @param  {String} title - custom title avaiable editing the message
+ * @param  {String} messageTitle - title for when message is sent as entire (here for test)
  * 
- * 
- * @return {MessageMakerReturn}
+ * @return {customMessage|false} - returns new customMessage, false if unchanged
  */
-function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnButtons, title, messageTitle)
+function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, returnButtons, title, messageTitle)
 {
 
     var l = global.LGHLangs;
     var TGbot = GHbot.TGbot;
 
     var updateMSGMK=false;
-    var updateUser=false;
 
     title=title||"Message Maker";
     messageTitle=messageTitle||false;
@@ -91,7 +84,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
         if( user.waitingReply )
         {
             user.waitingReply = false;
-            updateUser=true;
+            db.users.update(user);
         }
 
         var hasText = customMessage.hasOwnProperty("text");
@@ -130,12 +123,13 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
             options.reply_markup.inline_keyboard.push( button );
         });
 
+        //this is to move from media -> text only panel
         if( cb.data.startsWith(cb_prefix+"#MSGMK_RESET-RETURN:") )
         {
             GHbot.sendMessage(user.id, chat.id, text, options);
             TGbot.deleteMessages(chat.id, [cb.message.message_id]);
 
-            return {customMessage, user, updateMSGMK, updateUser} 
+            return false;
         }
     
         GHbot.editMessageText(user.id, text, options)
@@ -149,7 +143,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
 
         user.waitingReply = true;
         user.waitingReplyType = cb_prefix+"#MSGMK_TEXT:"+settingsChatId;
-        updateUser=true;
+        db.users.update(user);
 
         GHbot.editMessageText(user.id, l[lang].SET_MESSAGE_ADV, 
             {
@@ -180,7 +174,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
         {
 
             GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_MESSAGE_ERROR, show_alert: true})
-            return {customMessage, user, updateMSGMK, updateUser};
+            return false;
 
         }
 
@@ -223,7 +217,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
 
         user.waitingReply = true;
         user.waitingReplyType = cb_prefix+"#MSGMK_MEDIA:"+settingsChatId;
-        updateUser=true;
+        db.users.update(user);
 
         GHbot.editMessageText(user.id, l[lang].SET_MEDIA_ADV, 
             {
@@ -250,7 +244,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
         {
 
             GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_MEDIA_ERROR, show_alert: true})
-            return {customMessage, user, updateMSGMK, updateUser};
+            return {customMessage, user, updateMSGMK};
 
         }
 
@@ -283,7 +277,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
 
         user.waitingReply = true;
         user.waitingReplyType = cb_prefix+"#MSGMK_BUTTONS:"+settingsChatId;
-        updateUser=true;
+        db.users.update(user);
 
         GHbot.editMessageText(user.id, l[lang].SET_BUTTONS_ADV, 
             {
@@ -310,7 +304,7 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
         {
 
             GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_BUTTONS_ERROR, show_alert: true})
-            return {customMessage, user, updateMSGMK, updateUser};;
+            return false;
 
         }
 
@@ -350,29 +344,28 @@ function callbackEvent(GHbot, customMessage, cb, chat, user, cb_prefix, returnBu
     }
 
 
-    return {customMessage, user, updateMSGMK, updateUser}
+    if(updateMSGMK) return customMessage;
+    return false;
 
 }
 
 /** 
  * @param  {import("../GHbot.js")} GHbot
- * @param  {customMessage} customMessage
+ * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {customMessage} customMessage - MessageMaker object
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
  * @param  {String} cb_prefix
  * 
- * 
- * @return {MessageMakerReturn}
+ * @return {customMessage|false}
  */
-function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
+function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix)
 {
 
     var l = global.LGHLangs;
-    var TGbot = GHbot.TGbot;
 
 
-    var updateUser=false;
     var updateMSGMK=false;
 
     var settingsChatId = user.waitingReplyType.split(":")[1];
@@ -395,7 +388,7 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
         {
 
             GHbot.sendMessage(user.id, chat.id, l[user.lang].PARSING_ERROR_TEXT, options)
-            return {customMessage, user, updateMSGMK, updateUser};
+            return false;
 
         }
 
@@ -406,7 +399,7 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
         updateMSGMK=true
 
         user.waitingReply = false;
-        updateUser=true;
+        db.users.update(user);
 
         GHbot.sendMessage(user.id, chat.id, l[user.lang].MESSAGE_SET_BUTTON, options )
 
@@ -420,7 +413,7 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
         if(!media.type)
         {
             GHbot.sendMessage(user.id, chat.id, l[user.lang].MEDIA_INCORRECT, options )
-            return {customMessage, user, updateMSGMK, updateUser};
+            return false;
         }
         
         if( msg.hasOwnProperty("caption") )
@@ -438,7 +431,7 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
         updateMSGMK=true
 
         user.waitingReply = false;
-        updateUser=true;
+        db.users.update(user);
 
         GHbot.sendMessage(user.id, chat.id, l[user.lang].MEDIA_SET_BUTTON, options )
 
@@ -451,7 +444,7 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
         {
 
             GHbot.sendMessage(user.id, chat.id, l[user.lang].PARSING_ERROR_TEXT, options )
-            return {customMessage, user, updateMSGMK, updateUser};
+            return false;
 
         }
 
@@ -481,7 +474,7 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
 
             options.disable_web_page_preview = true;
             GHbot.sendMessage(user.id, chat.id, text, options);
-            return {customMessage, user, updateMSGMK, updateUser};
+            return false;
 
         }
 
@@ -490,32 +483,34 @@ function messageEvent(GHbot, customMessage, msg, chat, user, cb_prefix)
         updateMSGMK=true;
 
         user.waitingReply = false;
-        updateUser=true;
+        db.users.update(user);
 
         GHbot.sendMessage(user.id, chat.id, l[user.lang].BUTTONS_SET_BUTTON, options)
 
     }
 
-    return {customMessage, user, updateMSGMK, updateUser};
+    if(customMessage) return customMessage
+    return false;
 
 }
 
 /** 
  * @param  {import("../GHbot.js")} GHbot
- * @param {number|string} userId - id of user that's the cause of your request
- * @param  {TelegramBot.ChatId} chatId
- * @param  {customMessage} customMessage
- * @param  {String} lang 
- * @param  {TelegramBot.SendMessageOptions} additionalOptions 
+ * @param {import("../GHbot.js").LGHChat} user - LGHUser object
+ * @param  {import("../GHbot.js").LGHUser} chat - LGHChat object
+ * @param  {customMessage} customMessage - MessageMaker object
+ * @param  {String} messageTitle - title for when message is sent as entire
+ * @param  {TelegramBot.SendMessageOptions} additionalOptions - Additional options for telegram
+ * @param  {TelegramBot.ChatId} sendId - set a specific chat to message (default on chat.id)
  * 
  * @return {Promise<TelegramBot.Message>}
  *         Telegram message object, false is message is not sent
  */
-function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalOptions)
+function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalOptions, sendId)
 {
-
     var userId = user.id;
     var chatId = chat.id;
+    var sendId = sendId || chatId;
 
     additionalOptions=additionalOptions||{};
 
@@ -556,13 +551,13 @@ function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalO
         if(text.length != 0) options.caption = text;
         if(options.hasOwnProperty("entities"))
             options.caption_entities = JSON.stringify(options.entities);
-        return pushUserRequest(TGbot, method, userId, chatId, customMessage.media.fileId, options);
+        return pushUserRequest(TGbot, method, userId, sendId, customMessage.media.fileId, options);
     }
 
     if(!customMessage.hasOwnProperty("text"))
-        return false;
+        return GHbot.sendMessage( userId, sendId, bold(messageTitle), {parse_mode:"HTML"} );;
     text = substitute(text, user, chat);
-    return GHbot.sendMessage( userId, chatId, text, options );
+    return GHbot.sendMessage( userId, sendId, text, options );
 
 }
 

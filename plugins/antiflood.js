@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, secondsToHumanTime, getUnixTime, punishmentToSetTimeButtonText, genPunishmentTimeSetButton, punishmentToTextAndTime } = require("../api/utils.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToTextAndTime } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 const RM = require("../api/rolesManager.js");
@@ -136,60 +136,49 @@ function main(args)
 
         }
 
+
         //Setnum variables
         var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        var setNumReturn = {};
         var cb_prefix = cb.data.split("#")[0];
         if( cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            setNumReturn = SN.callbackEvent(GHbot, settingsChat.flood.messages, cb, chat, user, cb_prefix, returnButtons, title, msgMin, msgMax);
+            var num = SN.callbackEvent(GHbot, db, settingsChat.flood.messages, cb, chat, user, cb_prefix, returnButtons, title, msgMin, msgMax);
+
+            if(num != -1 && num != settingsChat.flood.messages)
+            {
+                settingsChat.flood.messages = num;
+                db.chats.update(settingsChat);
+            }
+            else GHbot.answerCallbackQuery(user.id, cb.id);
         }
         if( cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            setNumReturn = SN.callbackEvent(GHbot, settingsChat.flood.time, cb, chat, user, cb_prefix, returnButtons, title, timeMin, timeMax);
+            var num = SN.callbackEvent(GHbot, db, settingsChat.flood.time, cb, chat, user, cb_prefix, returnButtons, title, timeMin, timeMax);
+
+            if(num != -1 && num != settingsChat.flood.time)
+            {
+                settingsChat.flood.time = num;
+                db.chats.update(settingsChat);
+            }
+            else GHbot.answerCallbackQuery(user.id, cb.id);
         }
+
 
         //Set punishment duration
         var returnButtons = [[{text: l[lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        var setTimeReturn =  {};
         if(cb.data.startsWith("S_FLOOD_PTIME#STIME") ) //example S_FLOOD_PTIME_WARN
         {
-            var oldPTime = settingsChat.flood.PTime;
+            var currentTime = settingsChat.flood.PTime;
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.flood.punishment));
-            var setTimeReturn = ST.callbackEvent(GHbot, oldPTime, cb, chat, user, cb_prefix, returnButtons, title)
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
 
-            if(oldPTime != setTimeReturn.time)
+            if(time != -1 && time != currentTime)
             {
-                settingsChat.flood.PTime = setTimeReturn.time;
+                settingsChat.flood.PTime = time;
                 db.chats.update(settingsChat);
             }
-        }
-
-        if(setNumReturn.updateUser)
-        {
-            user = setNumReturn.user;
-            db.users.update(user);
-        };
-        if(setTimeReturn.updateUser)
-        {
-            user = setTimeReturn.user;
-            db.users.update(user);
-        };
-
-        var newValue = setNumReturn.number;
-        if(cb.data.includes("#SNUM"))
-        {
-            if(cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") && settingsChat.flood.messages != newValue)
-                settingsChat.flood.messages = newValue;
-            else if(cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") && settingsChat.flood.time != newValue)
-                settingsChat.flood.time = newValue;
-            else return;
-
-            db.chats.update(settingsChat);
-
-            GHbot.answerCallbackQuery(user.id, cb.id);
         }
 
     })
@@ -255,20 +244,18 @@ function main(args)
         
         //punishment time setting
         var returnButtons = [[{text: l[user.lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        var newTime = -1;
         var cb_prefix = user.waitingReplyType.split("#")[0];
         if( user.waitingReplyType.startsWith("S_FLOOD_PTIME#STIME") )
         {
-            var oldPTime = settingsChat.flood.PTime;
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
-            newTime = ST.messageEvent(GHbot, oldPTime, msg, chat, user, cb_prefix, returnButtons, title);
-        }
-        if(newTime != -1 && settingsChat.flood.PTime != newTime)
-        {
-            settingsChat.flood.PTime = newTime;
-            db.chats.update(settingsChat);
-        }
+            var time = ST.messageEvent(GHbot, settingsChat.flood.PTime, msg, chat, user, cb_prefix, returnButtons, title);
 
+            if(time != -1 && time != settingsChat.flood.PTime)
+            {
+                settingsChat.flood.PTime = time;
+                db.chats.update(settingsChat);
+            }
+        }
 
         var newValue = -1;
         var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]

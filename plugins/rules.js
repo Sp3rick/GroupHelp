@@ -1,6 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {checkCommandPerms} = require( "../api/utils.js" );
+const {checkCommandPerms, sendCommandReply} = require( "../api/utils.js" );
 const MSGMK = require( "../api/MessageMaker.js" )
+const CMDPerms = require("../api/CommandsPerms.js")
 
 function main(args)
 {
@@ -14,11 +15,16 @@ function main(args)
 
         var command = msg.command;
 
-        if ( chat.isGroup ){
-
-            if( command && checkCommandPerms(command, "COMMAND_RULES", user.perms) )
-                MSGMK.sendMessage(GHbot, user, chat, chat.rules, l[chat.lang].RULES_TITLE);
-
+        if( chat.isGroup && command && checkCommandPerms(command, "COMMAND_RULES", user.perms) )
+        {
+            var options = {reply_parameters: {chat_id:chat.id, message_id: msg.message_id}};
+            if(msg.reply_to_message)
+            {
+                options.reply_parameters.message_id = msg.reply_to_message.message_id;
+                options.reply_parameters.chat_id = chat.id;
+            }
+            var func = (id) => {return MSGMK.sendMessage(GHbot, user, chat, chat.rules, l[chat.lang].RULES_TITLE, options, id)};
+            sendCommandReply("COMMAND_RULES", chat.lang, GHbot, user, chat.id, func);
         }
 
         //security guards
@@ -29,11 +35,13 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId)
 
-        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(GHbot, settingsChat.rules, msg, chat, user, "S_RULES");
+        var customMessage = MSGMK.messageEvent(GHbot, db, settingsChat.rules, msg, chat, user, "S_RULES");
 
-        settingsChat.rules = customMessage;
-        if(updateMSGMK) db.chats.update(settingsChat);
-        if(updateUser) db.users.update(user);
+        if(customMessage)
+        {
+            settingsChat.rules = customMessage;
+            db.chats.update(settingsChat);
+        }
 
     } )
 
@@ -62,37 +70,43 @@ function main(args)
         if( cb.data.startsWith("S_RULES_BUTTON:") )
         {
         
-            GHbot.editMessageText( user.id, l[lang].RULES_SETTING, 
+            GHbot.editMessageText( user.id, l[lang].RULES_SETTING, {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : 
                 {
-                    message_id : msg.message_id,
-                    chat_id : chat.id,
-                    parse_mode : "HTML",
-                    reply_markup : 
-                    {
-                        inline_keyboard :
-                        [
-                            [{text: l[lang].RULES_CHANGE_BUTTON, callback_data: "S_RULES#MSGMK:"+settingsChatId}],
-                            [{text: l[lang].COMMAND_PERMS_BUTTON, callback_data: "S_RULES#CMDPERMS-COMMAND_RULES:"+settingsChatId}],
-                            [{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}],
-                        ] 
-                    } 
-                }
-            )
+                    inline_keyboard :
+                    [
+                        [{text: l[lang].RULES_CHANGE_BUTTON, callback_data: "S_RULES#MSGMK:"+settingsChatId}],
+                        [{text: l[lang].COMMAND_PERMS_BUTTON, callback_data: "S_RULES#CMDPERMS_MENU:"+settingsChatId}],
+                        [{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}],
+                    ] 
+                } 
+            })
             GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 
         if( cb.data.startsWith("S_RULES#MSGMK") )
         {
-            
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+settingsChatId}]];
-            var {customMessage, user, updateMSGMK, updateUser} =
-            MSGMK.callbackEvent(GHbot, settingsChat.rules, cb, chat, user, "S_RULES", returnButtons, l[lang].REGULATION, l[lang].RULES_TITLE)
+            var title = l[lang].REGULATION;
+            var msgTitle = l[lang].RULES_TITLE;
+            var customMessage = MSGMK.callbackEvent(GHbot, db, settingsChat.rules, cb, chat, user, "S_RULES", returnButtons, title, msgTitle)
 
-            settingsChat.rules = customMessage;
-            if(updateMSGMK) db.chats.update(settingsChat);
-            if(updateUser) db.users.update(user);
+            if(customMessage)
+            {
+                settingsChat.rules = customMessage;
+                db.chats.update(settingsChat);
+            }
+        }
 
+        if( cb.data.startsWith("S_RULES#CMDPERMS") )
+        {
+            var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+settingsChatId}]];
+            var newChat = CMDPerms.callbackEvent(GHbot, db, settingsChat, cb, chat, user, "S_RULES", returnButtons)
+            if(newChat) db.chats.update(newChat);
         }
 
     })

@@ -1,16 +1,9 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKeyboard, parseHumanTime, secondsToHumanTime} = require("./utils.js");
-
-
-/** 
- * @typedef {Object} setNumberReturn
- * @property {customMessage} customMessage
- * @property {TelegramBot.User} user
- * @property {Boolean} updateNum - true if number has changed
- */
+const {parseHumanTime, secondsToHumanTime} = require("./utils.js");
 
 /** 
  * @param  {import("../GHbot.js")} GHbot
+ * @param {import("../GHbot.js").LGHDatabase} db - database
  * @param  {customMessage} currentNumber
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -18,11 +11,13 @@ const {parseTextToInlineKeyboard, isObject, extractMedia, isNumber, genSetNumKey
  * @param  {String} cb_prefix
  * @param  {String} title
  * @param  {TelegramBot.KeyboardButton} returnButtons
+ * @param  {String} title - custom title avaiable editing the message
+ * @param  {Number} min - minimum allowed time in seconds
+ * @param  {Number} max - maximum allowed time in seconds
  * 
- * 
- * @return {Number}
+ * @return {Number|-1} returns new set time
  */
-function callbackEvent(GHbot, currentTime, cb, chat, user, cb_prefix, returnButtons, title, min, max)
+function callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
@@ -40,17 +35,15 @@ function callbackEvent(GHbot, currentTime, cb, chat, user, cb_prefix, returnButt
 
     var msg = cb.message;
     var lang = user.lang;
-    var updateUser = false;
 
     var settingsChatId = cb.data.split(":")[1];
 
     if( cb.data.startsWith(cb_prefix+"#STIME_ZERO:") ) time = 0;
     if( cb.data.startsWith(cb_prefix+"#STIME") )
     {
-
         user.waitingReply = true;
         user.waitingReplyType = cb_prefix+"#STIME:"+settingsChatId;
-        updateUser = true;
+        db.users.update(user);
 
         var options = {
             message_id : msg.message_id,
@@ -62,37 +55,42 @@ function callbackEvent(GHbot, currentTime, cb, chat, user, cb_prefix, returnButt
         }
         if(time != 0)
             options.reply_markup.inline_keyboard.push([{text: l[user.lang].DISABLE_DURATION_BUTTON, callback_data: cb_prefix+"#STIME_ZERO:"+settingsChatId}])
+
+        text = (title+l[lang].STIME_DESCRIPTION)
+        .replaceAll("{time}", secondsToHumanTime(lang, time) + " ("+time+" seconds)") 
+        .replaceAll("{minimum}",secondsToHumanTime(lang, min))
+        .replaceAll("{maximum}",secondsToHumanTime(lang, max)); //TODO : translate to human readable time
+
         returnButtons.forEach(button => {
             options.reply_markup.inline_keyboard.push( button );
         })
-
-        text = (title+l[lang].STIME_DESCRIPTION).replaceAll("{time}", secondsToHumanTime(lang, time) + " ("+time+" seconds)") 
-        .replaceAll("{minimum}",secondsToHumanTime(lang, min)).replaceAll("{maximum}",secondsToHumanTime(lang, max)); //TODO : translate to human readable time
-
         GHbot.editMessageText(user.id, text, options)
         GHbot.answerCallbackQuery(user.id, cb.id);
-
     }
 
-    return {time, user, updateUser};
+    return time;
 
 }
 
 /** 
  * @param  {import("../GHbot.js")} GHbot
- * @param  {customMessage} customMessage
+ * @param  {TelegramBot.Message} currentTime
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
  * @param  {String} cb_prefix
+ * @param  {TelegramBot.KeyboardButton} returnButtons
+ * @param  {String} title - custom title avaiable editing the message
+ * @param  {Number} min - minimum allowed time in seconds
+ * @param  {Number} max - maximum allowed time in seconds
  * 
- * 
- * @return {Number}
+ * @return {Number|-1} - returns new set time, -1 if error
  */
-function messageEvent(GHbot, oldTime, msg, chat, user, cb_prefix, returnButtons, title, min, max)
+function messageEvent(GHbot, currentTime, msg, chat, user, cb_prefix, returnButtons, title, min, max)
 {
 
     var l = global.LGHLangs;
+    var time = currentTime;
 
     var settingsChatId = user.waitingReplyType.split(":")[1];
     var text = msg.text;
@@ -143,7 +141,7 @@ function messageEvent(GHbot, oldTime, msg, chat, user, cb_prefix, returnButtons,
         if(errorMessage != -1)
         {
             GHbot.sendMessage(user.id, chat.id, errorMessage, errorOpts);
-            return oldTime;
+            return -1;
         }
 
         text = (title+l[user.lang].STIME_DESCRIPTION).replaceAll("{time}", secondsToHumanTime(user.lang, time) + " ("+time+" seconds)")

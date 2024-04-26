@@ -51,6 +51,8 @@ function forceHandleRequest(bot, method, ...args)
                 return;
             if(errDescription.includes("query is too old"))
                 {resolve(false); return;}
+
+            reject(error);
         }
         await sleep(1000);
     }

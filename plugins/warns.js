@@ -2,7 +2,6 @@ var LGHelpTemplate = require("../GHbot.js");
 const { genPunishmentTimeSetButton, punishmentToText, punishmentToTextAndTime, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
-const { userToTarget } = require("../api/rolesManager.js");
 
 function main(args)
 {
@@ -24,31 +23,29 @@ function main(args)
 
         //punishment time setting
         var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_WARN_BUTTON:"+settingsChatId}]]
-        var newTime = -1;
         var cb_prefix = user.waitingReplyType.split("#")[0];
         if( user.waitingReplyType.startsWith("S_WARN_PTIME#STIME") )
         {
-            var oldPTime = settingsChat.warns.PTime;
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.warns.punishment));
-            newTime = ST.messageEvent(GHbot, oldPTime, msg, chat, user, cb_prefix, returnButtons, title);
-        }
-        if(newTime != -1 && settingsChat.warns.PTime != newTime)
-        {
-            settingsChat.warns.PTime = newTime;
-            db.chats.update(settingsChat);
+            var time = ST.messageEvent(GHbot, settingsChat.warns.PTime, msg, chat, user, cb_prefix, returnButtons, title);
+
+            if(time != -1 && time != settingsChat.warns.PTime)
+            {
+                settingsChat.warns.PTime = time;
+                db.chats.update(settingsChat);
+            } 
         }
 
-        var newValue = -1;
         if( user.waitingReplyType.startsWith("S_WARN_LIMIT#SNUM")  )
         {
             var punishmentText = punishmentToTextAndTime(user.lang, settingsChat.warns.punishment, settingsChat.warns.PTime);
             var title = l[user.lang].WARNS_DESCRIPTION.replaceAll("{punishmentText}",punishmentText).replaceAll("{limit}",bold("{number}"));
-            newValue = SN.messageEvent(GHbot, settingsChat.flood.messages, msg, chat, user, "S_WARN_LIMIT", returnButtons, title, config.minWarns, config.maxWarns);
-        }
-        if(newValue != -1)
-        {
-            settingsChat.warns.limit = newValue;
-            db.chats.update(settingsChat);
+            var num = SN.messageEvent(GHbot, settingsChat.flood.messages, msg, chat, user, "S_WARN_LIMIT", returnButtons, title, config.minWarns, config.maxWarns);
+            if(num != -1 && num != settingsChat.flood.messages)
+            {
+                settingsChat.warns.limit = num;
+                db.chats.update(settingsChat);
+            }
         }
 
     } )
@@ -166,39 +163,26 @@ function main(args)
         //set punishment time
         if(cb.data.startsWith("S_WARN_PTIME#STIME"))
         {
-            var oldPTime = settingsChat.warns.PTime;
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.warns.punishment));
-            var setTimeReturn = ST.callbackEvent(GHbot, oldPTime, cb, chat, user, cb_prefix, returnButtons, title);
+            var time = ST.callbackEvent(GHbot, db, settingsChat.warns.PTime, cb, chat, user, cb_prefix, returnButtons, title);
 
-            if(oldPTime != setTimeReturn.time)
+            if(time != -1 && time != settingsChat.warns.PTime)
             {
-                settingsChat.warns.PTime = setTimeReturn.time;
+                settingsChat.warns.PTime = time;
                 db.chats.update(settingsChat);
             }
-            if(setTimeReturn.updateUser)
-            {
-                user = setTimeReturn.user;
-                db.users.update(user);
-            };
         }
 
         //set warn limit
         if(cb.data.startsWith("S_WARN_LIMIT#SNUM_MENU"))
         {
             var title = l[user.lang].WARNS_DESCRIPTION.replaceAll("{punishmentText}",punishmentText).replaceAll("{limit}",bold("{number}"))
-            setNumReturn = SN.callbackEvent(GHbot, settingsChat.warns.limit, cb, chat, user, cb_prefix, returnButtons, title, config.minWarns, config.maxWarns);
-
-            var newValue = setNumReturn.number;
-            if(newValue != settingsChat.warns.limit)
+            var num = SN.callbackEvent(GHbot, db, settingsChat.warns.limit, cb, chat, user, cb_prefix, returnButtons, title, config.minWarns, config.maxWarns);
+            if(num != -1 && num != settingsChat.warns.limit)
             {
-                settingsChat.warns.limit = newValue;
+                settingsChat.warns.limit = num;
                 db.chats.update(settingsChat);
             }
-            if(setNumReturn.updateUser)
-            {
-                user = setNumReturn.user;
-                db.users.update(user);
-            };
         }
 
     })

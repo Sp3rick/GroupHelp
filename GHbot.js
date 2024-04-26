@@ -113,10 +113,12 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @typedef {Object} CustomChat - Additional chat elements for chat object by LibreGroupHelp
  * @property {LGHAdminList|null} admins - array with known admins objects (user data anonymized)
  * @property {String|null} lang - current chat lang
+ * @property {String|null} currency - currency of chat, default to USD
  * @property {Boolean} isGroup - result of (chat.type == "supergroup" || chat.type == "group")
  * @property {Object.<string, userStatus>|null} users - Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
  * @property {Object.<string, LGHRole>|null} roles - data about a specific role, full role Object if it's a custom role (key with a number)
  * @property {LGHPerms} basePerms - base permissions applyed to every user
+ * @property {LGHPerms} adminPerms - base permissions applyed to admin
  * @property {LGHWarns|null} warns - warns.js plugin related data
  * @property {customMessage|null} rules - rules.js plugin related data
  * @property {LGHWelcome|null} welcome - welcome.js plugin related data

@@ -43,11 +43,13 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId);
 
-        var {customMessage, user, updateMSGMK, updateUser} = MSGMK.messageEvent(GHbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
+        var customMessage = MSGMK.messageEvent(GHbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
 
-        settingsChat.welcome.message = customMessage;
-        if(updateMSGMK) db.chats.update(settingsChat);
-        if(updateUser) db.users.update(user);
+        if(customMessage)
+        {
+            settingsChat.welcome.message = customMessage;
+            db.chats.update(settingsChat);
+        }
 
     } )
 
@@ -83,7 +85,6 @@ function main(args)
             settingsChat.welcome.state = false;
             db.chats.update(settingsChat)
         }
-
         if( cb.data.startsWith("S_WELCOME_ON:") )
         {
             if(settingsChat.welcome.state == true)
@@ -153,20 +154,16 @@ function main(args)
 
         if( cb.data.startsWith("S_WELCOME#MSGMK") )
         {
-
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_WELCOME_BUTTON:"+settingsChatId}]];
-            var {customMessage, user, updateMSGMK, updateUser} =
-            MSGMK.callbackEvent(GHbot, settingsChat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME)
-
-            settingsChat.welcome.message = customMessage;
-            if(updateMSGMK) db.chats.update(settingsChat);
-            if(updateUser) db.users.update(user);
-
+            var customMessage = MSGMK.callbackEvent(GHbot, settingsChat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME);
+            if(customMessage)
+            {
+                settingsChat.welcome.message = customMessage;
+                db.chats.update(settingsChat);
+            }
         }
 
     })
-
-    
 
 }
 

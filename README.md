@@ -1,19 +1,32 @@
 Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
 
-To Install use:
+Installation:
+
 $ npm i node-telegram-bot-api/yagop (or $ npm i https://github.com/yagop/node-telegram-bot-api)
+
 $ npm i chrono-node
+
+Set your bot token on config.js
+Config documentation: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
 
 Run with:
 $ node index.js
 
-Dont forget to set it up on config.json!
+|
+
+Useful links to contribute:
+https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
+
+When you create a plugin you can document it on https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md
+
+|
 
 TODO:
 
 -short term:
 
-    create a panel to set who can use various commands: noone, everyone, everyone DM, custom role, admins, admins DM  (4 switch buttons for each, for role open another panel)
+    allow to edit single user perms
+    add /pin command
     commands help panel
     --below low priority--
     allow on /perms to change user perms and roles +add it in a button for /info or when a role is set (/free /mod etc..)
@@ -46,6 +59,8 @@ TODO:
     allow bot clone bot when user give a token
     add optionally an userbot (when active implement in tagResolver.js)
 
+|
+
 known possible bugs:
 -sometimes db.chats.update in plugins may be not used at all because you can still edit the global object cause to reference, not using it may cause some issue. +if global reference get cleared too early code may try to access and inexistent variable
 
@@ -54,10 +69,3 @@ known possible bugs:
 -cleanHTML() may be not applyed in some text where it should, the function probably clean everything needed to clean for telegram api
 
 -if get added a new permission and it's not added to every userPerms object in chat data this may cause incorrect result in sumUserPerms
-
-
-config.json documentation at: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
-
-Look also at some code documentation to contribute: https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
-
-When you create a plugin you can document it on https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md

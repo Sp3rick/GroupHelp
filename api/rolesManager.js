@@ -1,4 +1,4 @@
-const {usernameOrFullName, genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId} = require("./utils.js");
+const {usernameOrFullName, genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId, isAdminOfChat} = require("./utils.js");
 var l = global.LGHLangs;
 
 //Roles with string name is intended as a pre-made role
@@ -339,7 +339,7 @@ function addUser(chat, user)
 //admin translation management
 function adminToPerms(admin)
 {
-
+    //NOTE: other permissions may be avaiable for every admin on chat.adminPerms
     var perms = newPerms();
     var restrictCommands = ["COMMAND_WARN","COMMAND_UNWARN","COMMAND_KICK","COMMAND_MUTE","COMMAND_UNMUTE","COMMAND_BAN","COMMAND_UNBAN"]
     var promoteCommands = ["COMMAND_FREE", "COMMAND_HELPER", "COMMAND_ADMINISTRATOR", "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNADMINISTRATOR"]
@@ -349,7 +349,7 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
-        perms = newPerms(["COMMAND_PERMS", "COMMAND_INFO", "COMMAND_STAFF", "COMMAND_RULES"],1,1,1,1,1,1,1,1,1);
+        perms = newPerms(["@COMMAND_ME"],1,1,1,1,1,1,1,1,1);
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -456,6 +456,11 @@ function sumUserPerms(chat, userId)
 {
 
     var perms = chat.basePerms;
+    if(isAdminOfChat(chat, userId))
+    {
+        var baseAdminPerms = chat.adminPerms;
+        perms = sumPermsPriority(baseAdminPerms, perms);
+    }
 
     if(!chat.users.hasOwnProperty(userId))
         return perms;
@@ -468,6 +473,7 @@ function sumUserPerms(chat, userId)
     var adminPerms = getAdminPerms(chat, userId);
     perms = sumPermsPriority(adminPerms, perms);
 
+    //higher priority calculation
     var userPerms = getUserPerms(chat, userId);
     perms = sumPermsPriority(userPerms, perms);
 

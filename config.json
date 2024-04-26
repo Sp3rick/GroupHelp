@@ -4,6 +4,7 @@
     "botStaff" : [ "361908469" ],
     "deleteChatDataAfterBotRemove" : false,
     "overwriteChatDataIfReAddedToGroup" : false,
+    "allowExternalApi" : false,
     "reserveLang" : "en_en",
     "saveDatabaseSeconds" : 3600,
     "preventSetUselessRoles" : true,

@@ -61,7 +61,7 @@ async function main(config) {
             console.log("message from waitingReply user: " + user.waitingReplyType);
 
         //handle new chats
-        if(isGroup && !db.chats.exhist( chat.id ))
+        if(isGroup && (config.overwriteChatDataIfReAddedToGroup || !db.chats.exhist( chat.id )))
         {    
             console.log( "Adding new group to database" );
 
@@ -124,7 +124,7 @@ async function main(config) {
         //configuring user.perms
         if( isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
         {
-            var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("#")[0]);
+            var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
 
@@ -163,6 +163,7 @@ async function main(config) {
             db.users.add( from );
 
         var user = Object.assign( {},  db.users.get( from.id ), from );
+        if(chat.isGroup && !db.chats.exhist( chat.id )) return; //drop callbacks from unknown groups
         var chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
 
         //take it for granted that if user clicks a button he's not going to send another message as input
@@ -175,7 +176,7 @@ async function main(config) {
         //configure user.perms
         if(chat.isGroup || cb.data.includes(":"))
         {
-            var selectedChat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("#")[0]);
+            var selectedChat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("?")[0]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
 

@@ -1,16 +1,23 @@
 General code info
 
-A new user is added to database when does write in private chat to the bot or when add him to a groups (other users id may be stored in other groups configurations)
+index.js does load every plugin and database and acutal bot on main.js
 
-"TGbot" variable is for using the bot with all its methods, "bot" is equal to access to bot data (bot = await TGbot.getMe()), docs on https://github.com/yagop/node-telegram-bot-api
+main.js does all necessary works before emitting on GHbot and event with many LibreGroupHelp related data ready to use
 
-While coding keep in mind that user should be able to delete his data in any moment, this for respecting the privacy philosophy of LibreGroupHelp (exception can be when user is banned from a group or is a staff where will be stored ONLY the userId)
+all data is managed by database.js, you can access it's methods from db.chats and db.users
+
+all jsdocs objects documentation is on GHbot.js, it's also essential to document event parameters of GHbot events
+
+use TGbot only if you need direct native access with telegram bot api, when possible you should use GHbot events and methods and if does not exhist the one needed create that, TGbot method docs can be found on https://github.com/yagop/node-telegram-bot-api, on TGbot.me is avaiable await TGbot.getMe() result
+
+While coding keep in mind that user should be able to delete his data in any moment, this for respecting the privacy philosophy of LibreGroupHelp (exception can be for essential data for groups, for example warns number, allow to delete this is going to be be abusable)
 
 
-<b>Plugins folder info</b>
 
-The code has been modularized so now you can add indipendent module files in "plugins" folder, as you can see in example.js you should require from <i>var LGHelpTemplate = require("../GHbot.js")</i>, create (and assign it to module.exports) a function with 1 argument, use this argument to extract all needed from template <i>var {GHbot, TGbot, db} = new LGHelpTemplate(args);</i>
-By that way you will be able to write plugins with all needed jsdocs (Idk how to jsdoc events, currently it's missing)
+<b>Plugins</b>
+
+Look at example.js plugin to see how it uses right functions and methods to work with LibreGroupHelp
+You can create functions in separate file in ./api/, but if you think it's going to be used only on your plugin you can do that in same file
 If you need access text of varius languages it's stored at global.LGHLangs (I advise set it like this "l = global.LGHLangs;")
 
 
@@ -18,13 +25,47 @@ If you need access text of varius languages it's stored at global.LGHLangs (I ad
 <b>Language info</b>
 
 The bot has a different language configuration both for users and group
-when LibreGroupHelp is added to a group(and add it to the database) the default group language will be inherited from the user who added the bot, the bot assumes that the user has already been added to the database before for inher the lang from (ps. find how to use telegram function to set that a bot can be added only from an admin)
+when LibreGroupHelp is added to a group (and add it to the database) the default group language will be inherited from the user who added the bot, (TODO. convert telegram user.language_code to LibreGroupHelp lang code, format on https://en.wikipedia.org/wiki/IETF_language_tag)
 
 
-main.js Global variables language-related:
 
-var langKeys = Object.keys(l); 
-var loadedLangs = Object.keys(l).length; Total number of loaded languages
+<b>Callbacks and user callbacks data management</b>
+
+Here is described the hirarchy of callbacks data.
+Giving right callaback data is essential to allow main.js to pre-set wanted values
+
+
+callbacks events (buttons inteded):
+
+cb.data OR user.waitingReplyType = CALLBACK_NAME#editor_things|editorData:groupId?targetUserId
+works with less items still in same order: CALLBACK_NAME:groupId OR CALLBACK_NAME#editor?targetUserId OR CALLBACK_NAME:groupId?targetUserId
+
+-CALLBACK_NAME: name of callback that you can use, be sure that not conflicts with other names, often plugins check if it's their match with string.startsWith()
+
+-editor: also that is often identified with string.startsWith(), it's usually used to open re-usable menus like MessageMaker.js, setNum.js, setTime.js
+
+-groupId: that allow main.js to set a full object of chat (note: msg.chat or cb.message.chat may be not affected, GHbot ever gives you a dedicated chat parameter), it also allow to set the user.perms object in private chat (in group it's done directly from chat.id)
+
+-targetUserId: that allow main.js to set a target user in various cases: cb.target, msg.userWaitingReplyTarget (target for text commands is not related with that, it's also avaiable on msg.command.target and it's based on msg.text instead of targetUserId)
+
+
+
+<b>Roles</b>
+
+Roles is managed by plugins/userHandler.js and api/rolesManager.js
+
+An user can have multiple roles at the same time
+Every role has a level, higher level means best role priority, an user inherits the level of the higher level on its roles
+An user can affect with any allowed command any other user with a level lower than him
+
+Both users and roles has their own customPerms object, user perms object has the maximal priority
+(rolesManager.js) sumUserPerms() will sum for you all permissions, including roles ordered by level and user perms itself with maximum priority, this function is all you need to know what the user can and can't do
+
+Pre-made roles are set with specific commands (/mod, /muter, /cleaner, /helper, /free) +(unset with "un" prefix, ex: "/unmod")
+To set custom roles the command will be /setrole roleName
+
+User permissions data result of sumUserPerms() may be avaiable at target.perms or user.perms
+
 
 
 <b>Custom Chat Object</b>
@@ -35,6 +76,7 @@ lang : current chat lang
 isGroup : result of (chat.type == "supergroup" || chat.type == "group")
 users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
 basePerms : base permissions applyed to every user
+adminPerms : base permissions applyed to admin
 roles : GHRole data about a specific role, full role Object if it's a custom role (key with a number)
 warns : warns.js plugin related data
 rules : rules.js plugin related data
@@ -56,6 +98,7 @@ waitingReplyType : additional data related to waitingReply
 
 Additional data of custom <i>msg</i> object:
 command : result of message text parsed with parseCommand()
+command.target : identified command targeted user
 
 
 <b>Command Object</b>
@@ -69,33 +112,21 @@ You can get this object trough parseCommand(text)
  * @property {String} args - Raw arguments text after the command
  * @property {Array} splitArgs - Array of arguments split by space
 
-<b>What is done</b>
-
-Add/Removing bot from group handling (not implemented the latter options after  message)
-    -Thanksgiving with some hint
-    -Settings and lang configuration hint
-
-Default "Hello" message when user write in private chat at bot
-
-Group settings (/settings) with main panel (Todo page 2)
-
-Rules (/rules)
-
-Bot support (does not allow media, currently users should use https://telegra.ph/)
-
-Separate language selection and management for groups and users fully implemented
+*target is not listed because that's set later by main.js
 
 
 
 Note: COMMAND_ prefix means that command can be solved in multiple languages
+@ prefix in command name gives the permission with private chat reply (example @COMMAND_RULES)
 Complete list of implemented commands:
 
 -General
 /settings - open group settings (COMMAND_SETTINGS)
-/rules - show group rules (COMMAND_RULES)
-/perms - show permissions summary of a user (COMMAND_PERMS)
-/staff - show group staff with default and custom roles (COMMAND_STAFF)
-/info - show info about a group user and edit it (COMMAND_INFO)
+/rules - show group rules (COMMAND_RULES) (@ avaiable)
+/perms - show permissions summary of a user (COMMAND_PERMS) (@ avaiable)
+/staff - show group staff with default and custom roles (COMMAND_STAFF) (@ avaiable)
+/info - show info about a group user and edit it (COMMAND_INFO) (@ avaiable)
+/me - show info about yourself (COMMAND_ME) (@ avaiable)
 -Punishments
 /del - delete a message (COMMAND_DELETE)
 /warn - warn user and punish if reach group warn limit (COMMAND_WARN)
@@ -122,3 +153,5 @@ Complete list of implemented commands:
 /untitle - remove admin title (COMMAND_UNTITLE)
 -Privacy
 /forgot - remove every data on the group about an user (COMMAND_FORGOT)
+
+You can find additional info on plugins.md https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md

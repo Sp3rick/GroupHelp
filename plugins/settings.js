@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const {genSettingsKeyboard, bold, checkCommandPerms, code} = require( "../api/utils.js" );
+const {genSettingsKeyboard, bold, checkCommandPerms, code, genSettingsText} = require( "../api/utils.js" );
 
 function main(args)
 {
@@ -59,52 +59,23 @@ function main(args)
             return;
         }
 
-        if( cb.data.startsWith("SETTINGS") ) //handle settings and prevent non-admin user from using it
-        {
+        if( cb.data.startsWith("SETTINGS") )
             lang = settingsChat.lang;
-        }
 
         if( cb.data.startsWith("SETTINGS_SELECT:") )
         {
 
-            GHbot.editMessageText(user.id, l[user.lang].SETTINGS_WHERE_OPEN, 
-                {
-                    message_id : msg.message_id,
-                    chat_id : chat.id,
-                    parse_mode : "HTML",
-                    reply_markup : 
-                    {
-                        inline_keyboard :
-                        [
-                            [{text: l[user.lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+settingsChatId}],
-                            [{text: l[user.lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+settingsChatId}],
-                        ] 
-                    } 
-                }
-            )
-            GHbot.answerCallbackQuery(user.id, cb.id);
-        }
-
-        if( cb.data.startsWith("SETTINGS_HERE:") )
-        {
-            console.log("inside SETTINGS_HERE")
-
-            var options = {
+            GHbot.editMessageText(user.id, l[user.lang].SETTINGS_WHERE_OPEN, {
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
-                reply_markup : { inline_keyboard : genSettingsKeyboard(user.lang, settingsChatId) }
-            }
-
-            var text =
-            bold(l[user.lang].SETTINGS.toUpperCase())+"\n"+
-            bold(l[user.lang].GROUP+": ")+code(settingsChat.title)+"\n"+
-            bold(l[user.lang].GROUP_LANGUAGE+": ")+"<i>"+l[settingsChat.lang].LANG_SELECTOR+"</i>\n\n"+
-            l[user.lang].SETTINGS_SELECT;
-
-            GHbot.editMessageText(user.id,text, options)
-
+                reply_markup : {inline_keyboard:[
+                    [{text: l[user.lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+settingsChatId}],
+                    [{text: l[user.lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+settingsChatId}],
+            ]}})
+            GHbot.answerCallbackQuery(user.id, cb.id);
         }
+
         if( cb.data.startsWith("SETTINGS_PRIVATE:") )
         {
 
@@ -127,6 +98,20 @@ function main(args)
             } catch (err) {
                 await GHbot.answerCallbackQuery(user.id, cb.id, { text: l[lang].SETTINGS_PRIVATE_ERROR, show_alert: true });
             }
+
+        }
+        if( cb.data.startsWith("SETTINGS_HERE:") )
+        {
+            console.log("inside SETTINGS_HERE")
+
+            var options = {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : { inline_keyboard : genSettingsKeyboard(user.lang, settingsChatId) }
+            }
+            var text = genSettingsText(user.lang, settingsChat);
+            GHbot.editMessageText(user.id,text,options);
 
         }
 

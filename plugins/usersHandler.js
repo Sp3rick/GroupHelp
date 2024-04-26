@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat, isChatAllowed} = require ("../api/utils.js");
+var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat, isChatAllowed, replyCommandChat, sendCommandReply} = require ("../api/utils.js");
 
 function main(args)
 {
@@ -86,18 +86,25 @@ function main(args)
         {
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {message_id:msg.message_id},
-                disable_notification : true
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                disable_notification : true //TODO: bot still send notification sto staffers, to-fix
             }
 
-            GHbot.sendMessage(user.id, chat.id, RM.genStaffListMessage(chat.lang, chat, db), options);
+            if(msg.reply_to_message)
+            {
+                options.reply_parameters.message_id = msg.reply_to_message.message_id;
+                options.reply_parameters.chat_id = chat.id;
+            } 
+
+            var func = (id) => {return GHbot.sendMessage(user.id, id, RM.genStaffListMessage(chat.lang, chat, db), options)};
+            sendCommandReply("COMMAND_STAFF", lang, GHbot, user, chat.id, func);
         }
 
         if(checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]))
         {    
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {message_id:msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
                 reply_markup: {inline_keyboard:[]}
             }
 
@@ -108,12 +115,39 @@ function main(args)
             if(msg.reply_to_message)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
-            }      
+                options.reply_parameters.chat_id = chat.id;
+            } 
 
             try {
                 var member = await TGbot.getChatMember(chat.id, target.id);
                 var memberAndUser = Object.assign({}, member.user, chat.users[target.id]);
-                GHbot.sendMessage(user.id, chat.id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options);
+                var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options)};
+                sendCommandReply("COMMAND_INFO", lang, GHbot, user, chat.id, func);
+            } catch (error) {
+                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+            }
+        }
+
+        if(checkCommandPerms(command, "COMMAND_ME", user.perms))
+        {
+            var options = {
+                parse_mode : "HTML",
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                reply_markup: {inline_keyboard:[]}
+            }
+
+            if(msg.reply_to_message)
+            {
+                options.reply_parameters.message_id = msg.reply_to_message.message_id;
+                options.reply_parameters.chat_id = chat.id;
+            }   
+
+            try {
+                var member = await TGbot.getChatMember(chat.id, user.id);
+                var memberAndUser = Object.assign({}, member.user, chat.users[user.id]);
+                
+                var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options)};
+                await sendCommandReply("COMMAND_ME", lang, GHbot, user, chat.id, func);
             } catch (error) {
                 handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
@@ -129,9 +163,15 @@ function main(args)
 
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {message_id:msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
                 reply_markup: {inline_keyboard:[]}
             }
+
+            if(msg.reply_to_message)
+            {
+                options.reply_parameters.message_id = msg.reply_to_message.message_id;
+                options.reply_parameters.chat_id = chat.id;
+            } 
 
             var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
@@ -141,7 +181,9 @@ function main(args)
             genPermsReport(chat.lang, target.perms)+"\n\n"+
             "🫧"+l[lang].USER_LEVEL+": "+RM.getUserLevel(chat, target.id);
 
-            GHbot.sendMessage(user.id, chat.id, text, options);
+
+            var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
+            sendCommandReply("COMMAND_PERMS", lang, GHbot, user, chat.id, func);
         }
 
         if(checkCommandPerms(command, "COMMAND_FORGOT", user.perms))

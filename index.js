@@ -2,6 +2,7 @@ global.LGHVersion = "0.1.8";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
 const TR = require("./api/tagResolver.js");
+const cp = require("./api/cryptoPrices.js");
 const config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) );
 
 console.log("Starting...")
@@ -46,6 +47,13 @@ async function main()
     } );
 
     global.LGHLangs = l; //add global reference
+
+    
+    //load external api if allowed
+    if(config.allowExternalApi)
+    {
+        await cp.load();
+    }
 
 
     //load bot

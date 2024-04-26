@@ -17,6 +17,9 @@ deleteChatDataAfterBotRemove:
 overwriteChatDataIfReAddedToGroup:
     If enabled chat data and configurations will be regenerated if bot has been re-added to the group (similiar to deleteChatDataAfterBotRemove,)
 
+allowExternalApi:
+    Allow to gather additional data by varous online api's, that's may reveal the ip of your server, default to false
+
 
 <b>Other settings</b>
 

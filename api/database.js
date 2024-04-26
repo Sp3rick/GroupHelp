@@ -67,8 +67,10 @@ function getDatabase(config) {
                 
                 chat.admins = [];
                 chat.lang = config.reserveLang;
+                chat.currency = "USD";
                 chat.users = {};
-                chat.basePerms = RM.newPerms();
+                chat.basePerms = RM.newPerms(["@COMMAND_RULES", "@COMMAND_ME", "@COMMAND_STAFF"]);
+                chat.adminPerms = RM.newPerms(["COMMAND_RULES", "@COMMAND_ME", "COMMAND_STAFF", "COMMAND_PERMS"]);
                 chat.roles = RM.newPremadeRolesObject();
                 chat.warns = { timed:{}, count:{}, limit:3, punishment:3, PTime: 0 };
                 chat.rules = {};
