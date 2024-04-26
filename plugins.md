@@ -176,6 +176,15 @@ Added commands: /settings
 
 
 
+<b>CommandsPerms.js</b>
+
+>Depends on api/utils.js
+
+A menu to change basic commands permissions for every on group or admins, in future will allow to change perms for roles 
+
+
+
+
 
 <b>Rules Plugin</b>
 
@@ -251,3 +260,13 @@ count: ([userId]: number) countains count of warns for each user
 limit: number of warns after wich should be applyed a punishment
 punishment: punishment when limit is hit [2:kick|3:mute|4:ban]
 PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of punishment
+
+
+
+
+
+<b>pin.js</b>
+
+>Depends on api/utils.js
+
+Adds /pin command and handle all related things

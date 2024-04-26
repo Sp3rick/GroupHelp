@@ -1,6 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat, isChatAllowed, replyCommandChat, sendCommandReply} = require ("../api/utils.js");
+var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat, isChatAllowed, replyCommandChat, sendCommandReply, telegramErrorToText} = require ("../api/utils.js");
+var { silentPunish } = require("../api/punishment.js");
 
 function main(args)
 {
@@ -110,7 +111,7 @@ function main(args)
 
             var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
-                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU?"+target.id}])
+                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+target.id}])
 
             if(msg.reply_to_message)
             {
@@ -175,7 +176,7 @@ function main(args)
 
             var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
-                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU?"+target.id}])
+                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+target.id}])
 
             var text = target.name+" "+l[lang].PERMISSIONS+": \n"+
             genPermsReport(chat.lang, target.perms)+"\n\n"+
@@ -214,6 +215,7 @@ function main(args)
 
         var lang = chat.lang;
         var target = cb.target;
+        var msg = cb.message;
 
         if(cb.data.startsWith("FORGOT") && target)
         {
@@ -227,11 +229,18 @@ function main(args)
                 GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].USER_IS_ADMIN, show_alert:true})
                 return;
             }
+            try {
+                await silentPunish(GHbot, user.id, chat, target.id, 2); //kick
+            } catch (error) {
+                var errText = telegramErrorToText(user.lang, error);
+                GHbot.answerCallbackQuery(user.id, cb.id, {text:errText, show_alert:true})
+                return;
+            }
 
             chat = RM.forgotUser(chat, target.id);
             db.chats.update(chat);
 
-            GHbot.sendMessage(user.id, chat.id, l[lang].SUCCESSFULL_FORGOT)
+            GHbot.editMessageText(user.id, l[lang].SUCCESSFULL_FORGOT, {chat_id:chat.id,message_id:msg.message_id});
         }
 
     })
@@ -240,14 +249,8 @@ function main(args)
     TGbot.on("chat_member", async (e) => {
 
         if(!isChatAllowed(config, e.chat.id)) return;
-        
-        var wasAdmin = e.old_chat_member.status == "administrator";
-        var wasFounder = e.old_chat_member.status == "creator";
 
-        var isAdmin = e.new_chat_member.status == "administrator";
-        var isFounder = e.new_chat_member.status == "creator";
-
-        if(!wasAdmin && !wasFounder && !isAdmin && !isFounder && db.chats.exhist(e.chat.id)) return;
+        if(!db.chats.exhist(e.chat.id)) return;
 
         var chat = db.chats.get(e.chat.id);
 

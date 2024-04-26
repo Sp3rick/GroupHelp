@@ -17,6 +17,7 @@ async function main(config) {
 
 
     const GroupHelpBot = new EventEmitter();
+    GroupHelpBot.setMaxListeners(100);
     
     
 
@@ -121,13 +122,6 @@ async function main(config) {
     
         }
 
-        //configuring user.perms
-        if( isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
-        {
-            var selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
-            user.perms = RM.sumUserPerms(selectedChat, user.id);
-        }
-
         //add any new chat user
         if(chat.users && !chat.users.hasOwnProperty(user.id))
         {
@@ -135,11 +129,19 @@ async function main(config) {
             db.chats.update(chat);
         }
 
+        //configuring user.perms
+        var selectedChat;
+        if( isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
+        {
+            selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
+            user.perms = RM.sumUserPerms(selectedChat, user.id);
+        }
+
         //configuring user.waitingReplyTarget 
         if( user.waitingReply == true && user.waitingReplyType.includes("?") )
         {
             var wrTargetId = user.waitingReplyType.split("?")[1];
-            user.waitingReplyTarget = RM.userIdToTarget(TGbot, chat, wrTargetId, db);
+            user.waitingReplyTarget = RM.userIdToTarget(TGbot, selectedChat, wrTargetId, db);
         }
 
         GroupHelpBot.emit( "message", msg, chat, user );
@@ -173,10 +175,11 @@ async function main(config) {
             db.users.update(user);
         }
 
-        //configure user.perms
+        //configure user.perms and selectedChat
+        var selectedChat;
         if(chat.isGroup || cb.data.includes(":"))
         {
-            var selectedChat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("?")[0]);
+            selectedChat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("?")[0]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
 
@@ -184,7 +187,7 @@ async function main(config) {
         if(cb.data.includes("?"))
         {
             var targetId = cb.data.split("?")[1];
-            cb.target = RM.userIdToTarget(TGbot, chat, targetId, db);
+            cb.target = RM.userIdToTarget(TGbot, selectedChat, targetId, db);
         }
 
         GroupHelpBot.emit( "callback_query", cb, chat, user );

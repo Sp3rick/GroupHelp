@@ -110,7 +110,7 @@ function callbackEvent(GHbot, db, settingsChat, cb, chat, user, cb_prefix, retur
         var infoL = genCommandButtonsLine(settingsChat, "COMMAND_INFO", prefix, settingsChatId);
         var permsL = genCommandButtonsLine(settingsChat, "COMMAND_PERMS", prefix, settingsChatId);
         buttons = [staffL, rulesL, meL, infoL, permsL];
-        //TODO: this is going to include all commands, it's going to be added with custom roles, the return button will be avaiable also there
+        //TODO: this below is going to include all commands, it's going to be added with custom roles, the return button will be avaiable also there
         //buttons.push([{text:l[lang].COMMAND_PERMS_ADMINS, callback_data:prefix+"_ROLES:"+settingsChatId}])
         returnButtons.forEach((line) => {buttons.push(line)});
         opts.reply_markup = {inline_keyboard:buttons};

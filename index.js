@@ -1,4 +1,4 @@
-global.LGHVersion = "0.1.8";
+global.LGHVersion = "0.2";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
 const TR = require("./api/tagResolver.js");

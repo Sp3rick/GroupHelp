@@ -1,5 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
-const {genSettingsKeyboard, bold, checkCommandPerms, code, genSettingsText} = require( "../api/utils.js" );
+const {genSettingsKeyboard, bold, checkCommandPerms, code, genSettingsText, genSettings2Keyboard, link} = require( "../api/utils.js" );
+const CMDPerms = require("../api/CommandsPerms.js")
 
 function main(args)
 {
@@ -94,7 +95,9 @@ function main(args)
 
             try {
                 var sentMessage = await TGbot.sendMessage(user.id, text, options);
-                GHbot.answerCallbackQuery(user.id, cb.id);
+                var privateLink = "https://t.me/"+GHbot.TGbot.me.username;
+                var opts = {parse_mode:"HTML",chat_id:chat.id,message_id:msg.message_id}
+                GHbot.editMessageText(user.id, link(l[lang].SETTINGS_SENT,privateLink),opts);
             } catch (err) {
                 await GHbot.answerCallbackQuery(user.id, cb.id, { text: l[lang].SETTINGS_PRIVATE_ERROR, show_alert: true });
             }
@@ -114,7 +117,46 @@ function main(args)
             GHbot.editMessageText(user.id,text,options);
 
         }
+        if( cb.data.startsWith("SETTINGS_PAGE2:") )
+        {
+            console.log("inside SETTINGS_PAGE2")
 
+            var options = {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : { inline_keyboard : genSettings2Keyboard(user.lang, settingsChatId) }
+            }
+            var text = genSettingsText(user.lang, settingsChat);
+            GHbot.editMessageText(user.id,text,options);
+        }
+
+
+        if(cb.data.startsWith("S_PERMS_BUTTON"))
+        {
+            var buttons = [
+                [{text: l[lang].COMMAND_PERMS_BUTTON, callback_data: "S_#CMDPERMS_MENU:"+settingsChatId}],
+                [{text: l[lang].ANONYMOUS_ADMINS_BUTTON, callback_data: "S_ANONADMINS_BUTTON:"+settingsChatId}],
+                [{text: l[lang].CHANGE_SETTINGS_BUTTON, callback_data: "S_SETTINGSPERM_BUTTON"+settingsChatId}],
+                [{text: l[lang].CUSTOM_ROLES_BUTTON, callback_data: "S_ROLES_BUTTON:"+settingsChatId}],
+                [{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_PAGE2:"+settingsChatId}]
+            ]
+            var options = {
+                message_id : msg.message_id,
+                chat_id : chat.id,
+                parse_mode : "HTML",
+                reply_markup : { inline_keyboard : buttons}
+            }
+            var text = bold(l[lang].S_PERMS_BUTTON);
+            GHbot.editMessageText(user.id,text,options);
+        }
+
+        if(cb.data.startsWith("S_#CMDPERMS"))
+        {
+            var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_PERMS_BUTTON:"+settingsChatId}]];
+            var newChat = CMDPerms.callbackEvent(GHbot, db, settingsChat, cb, chat, user, "S_", returnButtons)
+            if(newChat) db.chats.update(newChat);
+        }
 
 
         if( cb.data == "LANGS_BUTTON" || cb.data.startsWith("LANGS_BUTTON:") )

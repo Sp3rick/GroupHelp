@@ -239,7 +239,7 @@ function genSettingsKeyboard(lang, chatId)
 
         [{text: l[lang].FLAG + "Lang", callback_data: "LANGS_BUTTON:"+chatId},
         {text: l[lang].S_CLOSE_BUTTON, callback_data: "S_CLOSE_BUTTON:"+chatId},
-        {text: l[lang].OTHER_BUTTON, callback_data: "S_OTHER_BUTTON:"+chatId}],
+        {text: l[lang].OTHER_BUTTON, callback_data: "SETTINGS_PAGE2:"+chatId}],
     ] 
 
     return keyboard;
@@ -252,6 +252,34 @@ function genSettingsText(lang, chat)
     bold(l[lang].GROUP+": ")+code(chat.title)+"\n"+
     bold(l[lang].GROUP_LANGUAGE+": ")+"<i>"+l[chat.lang].LANG_SELECTOR+"</i>\n\n"+
     l[lang].SETTINGS_SELECT;
+}
+
+function genSettings2Keyboard(lang, chatId)
+{
+    var l = global.LGHLangs;
+
+    var keyboard =
+    [
+        [{text: l[lang].S_TOPIC_BUTTON, callback_data: "S_TOPIC_BUTTON:"+chatId}],
+        [{text: l[lang].S_WORDSBAN_BUTTON, callback_data: "S_WORDSBAN_BUTTON:"+chatId}],
+        [{text: l[lang].S_RECURRING_BUTTON, callback_data: "S_RECURRING_BUTTON:"+chatId}],
+        [{text: l[lang].S_MEMBERS_BUTTON, callback_data: "S_MEMBERS_BUTTON:"+chatId}],
+        [{text: l[lang].S_MASKED_BUTTON, callback_data: "S_MASKED_BUTTON:"+chatId}],
+        [{text: l[lang].S_CHANNEL_BUTTON, callback_data: "S_CHANNEL_BUTTON:"+chatId}],
+        [{text: l[lang].S_CUSTOMCMD_BUTTON, callback_data: "S_CUSTOMCMD_BUTTON:"+chatId}],
+        [{text: l[lang].S_MAGICCMD_BUTTON, callback_data: "S_MAGICCMD_BUTTON:"+chatId}],
+        [{text: l[lang].S_LENGTH_BUTTON, callback_data: "S_LENGTH_BUTTON:"+chatId}],
+
+        [{text: l[lang].S_PERMS_BUTTON, callback_data: "S_PERMS_BUTTON:"+chatId},
+        {text: l[lang].S_LOGC_BUTTON, callback_data: "S_LOGC_BUTTON:"+chatId}],
+
+        [{text: l[lang].BACK2_BUTTON, callback_data: "SETTINGS_HERE:"+chatId},
+        {text: l[lang].S_CLOSE_BUTTON, callback_data: "S_CLOSE_BUTTON:"+chatId},
+        {text: l[lang].FLAG + "Lang", callback_data: "LANGS_BUTTON:"+chatId}],
+    ] 
+
+    return keyboard;
+
 }
 
 function genSetNumKeyboard(cb_prefix, settingsChatId)
@@ -289,10 +317,12 @@ function genSetNumKeyboard(cb_prefix, settingsChatId)
 
 }
 
-function genGroupAdminPermsKeyboard(lang, admin, topicsAvaiable)
+function genGroupAdminPermsKeyboard(lang, admin, chat)
 {
     var prefix = "ADMINPERM_";
     var userId = admin.user.id;
+    var topicsAvaiable = chat.is_forum;
+    var chatId = chat.id;
 
     var deletion = admin.can_delete_messages ? "✅" : "❌";
     var videochat = admin.can_manage_video_chats ? "✅" : "❌";
@@ -308,39 +338,39 @@ function genGroupAdminPermsKeyboard(lang, admin, topicsAvaiable)
 
     var line1 =
     [
-        {text: deletion+" "+l[lang].DELETE_MESSAGES, callback_data: prefix+"DELETE?"+userId},
+        {text: deletion+" "+l[lang].DELETE_MESSAGES, callback_data: prefix+"DELETE:"+chatId+"?"+userId},
     ]
     
     var line2 =
     [
-        {text: videochat+" "+l[lang].MANAGE_VIDEOCHAT, callback_data: prefix+"VIDEOCHAT?"+userId},
-        {text: restrict+" "+l[lang].RESTRICT_MEMBERS, callback_data: prefix+"RESTRICT?"+userId},
+        {text: videochat+" "+l[lang].MANAGE_VIDEOCHAT, callback_data: prefix+"VIDEOCHAT:"+chatId+"?"+userId},
+        {text: restrict+" "+l[lang].RESTRICT_MEMBERS, callback_data: prefix+"RESTRICT:"+chatId+"?"+userId},
     ]
     var line3 =
     [
-        {text: promote+" "+l[lang].PROMOTE_MEMBERS, callback_data: prefix+"PROMOTE?"+userId},
-        {text: modify+" "+l[lang].MODIFY_GROUP, callback_data: prefix+"MODIFY?"+userId},
+        {text: promote+" "+l[lang].PROMOTE_MEMBERS, callback_data: prefix+"PROMOTE:"+chatId+"?"+userId},
+        {text: modify+" "+l[lang].MODIFY_GROUP, callback_data: prefix+"MODIFY:"+chatId+"?"+userId},
     ]
     var line4 =
     [
-        {text: invite+" "+l[lang].INVITE_MEMBERS, callback_data: prefix+"INVITE?"+userId},
-        {text: stories+" "+l[lang].MANAGE_STORIES, callback_data: prefix+"STORIES?"+userId},
+        {text: invite+" "+l[lang].INVITE_MEMBERS, callback_data: prefix+"INVITE:"+chatId+"?"+userId},
+        {text: stories+" "+l[lang].MANAGE_STORIES, callback_data: prefix+"STORIES:"+chatId+"?"+userId},
     ]
 
     var line5 =
     [
-        {text: storyedit+" "+l[lang].EDIT_STORIES, callback_data: prefix+"STORYEDIT?"+userId},
-        {text: storydel+" "+l[lang].DELETE_STORIES, callback_data: prefix+"STORYDEL?"+userId},
+        {text: storyedit+" "+l[lang].EDIT_STORIES, callback_data: prefix+"STORYEDIT:"+chatId+"?"+userId},
+        {text: storydel+" "+l[lang].DELETE_STORIES, callback_data: prefix+"STORYDEL:"+chatId+"?"+userId},
     ]
 
     var line6 =
     [
-        {text: pin+" "+l[lang].CAN_PIN, callback_data: prefix+"PIN?"+userId},
+        {text: pin+" "+l[lang].CAN_PIN, callback_data: prefix+"PIN:"+chatId+"?"+userId},
     ]
 
     var line7 =
     [
-        {text: l[lang].EDIT_ADMIN_TITLE_BUTTON, callback_data: "ADMINTITLE?"+userId},
+        {text: l[lang].EDIT_ADMIN_TITLE_BUTTON, callback_data: "ADMINTITLE:"+chatId+"?"+userId},
     ]
 
     var line8 =
@@ -349,7 +379,7 @@ function genGroupAdminPermsKeyboard(lang, admin, topicsAvaiable)
     ]
 
     if(topicsAvaiable)
-        line6.push({text: topics+" "+l[lang].MANAGE_TOPICS, callback_data: prefix+"TOPICS?"+userId})
+        line6.push({text: topics+" "+l[lang].MANAGE_TOPICS, callback_data: prefix+"TOPICS:"+chatId+"?"+userId})
 
     return [line1, line2, line3, line4, line5, line6, line7, line8];
 }
@@ -541,6 +571,8 @@ function hasAdminPermission(admins, userId, perm)
     var hasPermission = false;
     admins.forEach((admin)=>{
         if(admin.user.id == userId && admin.hasOwnProperty(perm) && admin[perm])
+            hasPermission = true;
+        if(admin.status == "creator")
             hasPermission = true;
     })
 
@@ -940,9 +972,11 @@ function telegramErrorToText(lang, error)
     else if(errDescription.includes("not enough rights"))
         text = l[lang].MISSING_RIGHTS;
     else if(errDescription.includes("user is not an administrator"))
-        text = l[lang].USER_NOT_ADMIN
+        text = l[lang].USER_NOT_ADMIN;
     else if(errDescription.includes("ADMIN_RANK_EMOJI_NOT_ALLOWED"))
-        text = l[lang].ADMIN_TITLE_EMOJI_FOUND
+        text = l[lang].ADMIN_TITLE_EMOJI_FOUND;
+    else if(errDescription.includes("RIGHT_FORBIDDEN"))
+        text = l[lang].MISSING_RIGHTS;
     else if(errDescription.includes("Too Many Requests"))
         text = "⚠️ "+errDescription;
     else
@@ -1039,6 +1073,7 @@ module.exports =
     bold : bold,
     code : code,
     tag : tag,
+    link : link,
     isObject : isObject,
     cleanHTML : cleanHTML,
     isArray : isArray,
@@ -1052,6 +1087,7 @@ module.exports =
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     genSettingsText : genSettingsText,
+    genSettings2Keyboard : genSettings2Keyboard,
     genSetNumKeyboard : genSetNumKeyboard,
     genGroupAdminPermsKeyboard : genGroupAdminPermsKeyboard,
     genGroupAdminPermsText : genGroupAdminPermsText,

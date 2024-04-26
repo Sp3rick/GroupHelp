@@ -82,6 +82,7 @@ function main(args)
         if( user.waitingReply == false && !isSupportDirected && !isReplyToUserSupport)
             GHbot.sendMessage(user.id, user.id, l[user.lang].PRESENTATION.replace("{name}",user.first_name+" "+(user.last_name||"")),{
                 parse_mode : "HTML",
+                link_preview_options : JSON.stringify({is_disabled : true}),
                 reply_markup :{inline_keyboard :[
                         [{text: l[user.lang].ADD_ME_TO_A_GROUP_BUTTON, url: "tg://resolve?domain=" + TGbot.me.username + "&startgroup&admin=change_info+delete_messages+restrict_members+invite_users+pin_messages+promote_members+manage_video_chats+manage_chat"}],
                         [{text: l[user.lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[user.lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
@@ -104,8 +105,9 @@ function main(args)
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
+                link_preview : {is_disabled:true},
                 reply_markup :{inline_keyboard:[
-                        [{text: l[lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + TGbot.me.username + "?startgroup=true"}],
+                        [{text: l[lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + TGbot.me.username + "?startgroup=true&admin=change_info+delete_messages+restrict_members+invite_users+pin_messages+promote_members+manage_video_chats+manage_chat"}],
                         [{text: l[lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
                         [{text: l[lang].SUPPORT_BUTTON, callback_data: "SUPPORT_BUTTON"}, {text: l[lang].INFO_BUTTON, callback_data: "INFO_BUTTON"}],
                         [{text: l[lang].LANGS_BUTTON, callback_data: "LANGS_BUTTON"}]
@@ -136,7 +138,7 @@ function main(args)
         if( cb.data == "INFO_BUTTON" )
         {
 
-            GHbot.editMessageText( user.id, l[lang].INFO, 
+            GHbot.editMessageText( user.id, l[lang].INFO.replace("{LGHVersion}",global.LGHVersion), 
             {
                 message_id : msg.message_id,
                 chat_id : chat.id,
@@ -149,6 +151,10 @@ function main(args)
             GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
+
+
+        if( cb.data == "NOT_IMPLEMENTED" )
+            GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].NOT_IMPLEMENTED,show_alert:true});
 
     })
 

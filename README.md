@@ -26,14 +26,12 @@ TODO:
 -short term:
 
     allow to edit single user perms
-    add /pin command
     commands help panel
     --below low priority--
     allow on /perms to change user perms and roles +add it in a button for /info or when a role is set (/free /mod etc..)
     allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
     add something to allow a group admin to identify all users with special perms
     ?add an automatic leveling system for admins? (maybe?)
-    add optionally the possibility to redirect warn permission instead of COMMAND_WARN to the command of punishment (?active by default?)
     ask double confirm to give an user the "settings" and "roles" (roles management) permission
     add photo preview-mode in MessageMaker.js
     allow to warn only usersIds who exhist on telegram, it can be checked if applyng a restriction returns true
