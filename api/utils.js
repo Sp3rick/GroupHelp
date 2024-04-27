@@ -70,6 +70,23 @@ function keysArrayToObj(array)
     return obj;
 }
 
+function chunkArray(arr, chunkSize) {
+    var result = [];
+
+    for (var i = 0; i < arr.length; i += chunkSize) {
+        var chunk = arr.slice(i, i + chunkSize);
+        result.push(chunk);
+    }
+
+    return result;
+}
+
+function getUnixTime() {
+    const currentTimeMillis = new Date().getTime();
+    const currentTimeSeconds = Math.floor(currentTimeMillis / 1000);
+    return currentTimeSeconds;
+}
+
 //TODO: add translation system that replaces any word to english (like dictionary translation)
 //ATTENTION HERE: for error he may return both 0 or 1
 function parseHumanTime(text) {
@@ -129,12 +146,6 @@ function secondsToHumanTime(lang, seconds)
 
     return text;
 
-}
-
-function getUnixTime() {
-    const currentTimeMillis = new Date().getTime();
-    const currentTimeSeconds = Math.floor(currentTimeMillis / 1000);
-    return currentTimeSeconds;
 }
 
 
@@ -484,11 +495,6 @@ function genMemberInfoText(lang, chat, user, member)
     text+=bold("⤵️ "+l[lang].JOIN_WHEN+": ")+(joinDate ? joinDate : l[lang].UNKNOWN)+"\n";
 
     return text;
-}
-
-function getSetTimeMessage()
-{
-    
 }
 
 function stateToEmoji(perm)
@@ -876,21 +882,6 @@ function LGHUserName(user, db)
     return fullName+"["+code(user.id)+"] ";
 }
 
-//currently not use GHbot, getAdmins seems to be already safe
-async function getAdmins(TGbot, chatId, db)
-{
-    var adminList = await TGbot.getChatAdministrators( chatId );
-
-    //remove deleted accounts
-    for(var i=0; i < adminList.length; ++i)
-        if(adminList[i].user.first_name.length == 0)
-            adminList.splice(i, 1)
-
-    if(db) storeMembers(adminList, db);
-
-    return adminList
-}
-
 function anonymizeAdmins(adminList)
 {
     for(var i=0; i < adminList.length; ++i)
@@ -908,30 +899,32 @@ function checkCommandPerms(command, commandKey, perms, literalNames)
 {
     literalNames = literalNames || [];
 
-    if(command &&
-        ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == ln}))&&
-        ( perms.commands.includes(commandKey) || perms.commands.includes("@"+commandKey) || literalNames.some(ln=>{return perms.commands.includes(ln)}) )
-    ) return true;
-    else return false;
+    if(!command || !command.name) return false;
+
+    var privateCommand = command.name.startsWith("*") &&
+    ( IsEqualInsideAnyLanguage(command.name.replace("*",""), commandKey) || literalNames.some(ln=>{return command.name.replace("*","") == (ln)}) ) &&
+    perms.commands.includes("@"+commandKey) || literalNames.some(ln=>{return perms.commands.includes("@"+ln)});
+
+    var publicCommand = command.name &&
+    ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == (ln)}) ) &&
+    perms.commands.includes(commandKey) || literalNames.some(ln=>{return perms.commands.includes(ln)});
+
+    var privateButAskedAsPublic = command.name &&
+    ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == (ln)}) ) &&
+    perms.commands.includes("@"+commandKey) || literalNames.some(ln=>{return perms.commands.includes("@"+ln)});
+
+    if(publicCommand) return true;
+    if(privateCommand || privateButAskedAsPublic) return 1;
+    return false;
 }
 
-function replyCommandChat(commandPerm, chatId, userId)
-{
-    return commandPerm.startsWith("@") ? userId : chatId;
-}
-
-async function sendCommandReply(commandKey, lang, GHbot, user, chatId, func)
+async function sendCommandReply(where, lang, GHbot, user, chatId, func)
 {return new Promise(async (resolve, reject)=>{
 
     var l = global.LGHLangs;
     var userId = user.id;
 
-    var commandIndex = user.perms.commands.indexOf(commandKey);
-    if(commandIndex == -1) commandIndex = user.perms.commands.indexOf("@"+commandKey);
-
-    var commandPerm = user.perms.commands[commandIndex];
-
-    var sendId = replyCommandChat(commandPerm, chatId, userId);
+    var sendId = (where === 1) ? userId : chatId;
     var privateLink = "https://t.me/"+GHbot.TGbot.me.username;
     if(sendId == chatId)
         try{resolve(func(sendId))}catch(error){reject(error)}
@@ -942,7 +935,7 @@ async function sendCommandReply(commandKey, lang, GHbot, user, chatId, func)
     }catch(error) {
         if(error.code != "ETELEGRAM"){reject(error); return;}
         var errorDesc = error.response.body.description
-        if(!errorDesc.includes("blocked")){reject(error); return;}
+        if(!errorDesc.includes("blocked") && !errorDesc.includes("can't initiate conversation")){reject(error); return;}
         try {
             var sentMsg = await GHbot.sendMessage(userId, chatId, link(l[lang].START_BOT_FIRST, privateLink), {parse_mode:"HTML"})
             resolve(sentMsg);
@@ -977,6 +970,8 @@ function telegramErrorToText(lang, error)
         text = l[lang].ADMIN_TITLE_EMOJI_FOUND;
     else if(errDescription.includes("RIGHT_FORBIDDEN"))
         text = l[lang].MISSING_RIGHTS;
+    else if(errDescription.includes("only creator can edit their custom title"))
+        text = l[lang].OWNER_ONLY_TITLE
     else if(errDescription.includes("Too Many Requests"))
         text = "⚠️ "+errDescription;
     else
@@ -1033,14 +1028,6 @@ async function loadChatUserId(TGbot, chatId, userId, db)
     }
 }
 
-function storeMembers(members, db)
-{
-    members.forEach((member)=>{
-        if(!db.users.exhist(member.user.id))
-            db.users.add(member.user)
-    })
-}
-
 function getOwner(members)
 {
     var creator = false;
@@ -1082,6 +1069,7 @@ module.exports =
     isNumber : isNumber,
     randomInt : randomInt,
     keysArrayToObj : keysArrayToObj,
+    chunkArray : chunkArray,
     isValidChat : isValidChat,
     isValidUser : isValidUser,
     parseCommand : parseCommand,
@@ -1113,10 +1101,8 @@ module.exports =
     getUnixTime : getUnixTime,
     usernameOrFullName : usernameOrFullName,
     LGHUserName : LGHUserName,
-    getAdmins : getAdmins,
     anonymizeAdmins : anonymizeAdmins,
     checkCommandPerms : checkCommandPerms,
-    replyCommandChat : replyCommandChat,
     sendCommandReply : sendCommandReply,
     telegramErrorToText : telegramErrorToText,
     handleTelegramGroupError : handleTelegramGroupError,
@@ -1125,7 +1111,6 @@ module.exports =
     unwarnUser : unwarnUser,
     clearWarns : clearWarns,
     loadChatUserId :loadChatUserId,
-    storeMembers : storeMembers,
     getOwner : getOwner,
     isChatAllowed : isChatAllowed,
 }

@@ -1,10 +1,10 @@
-Open-Source re-creation of telegram group manager Group Help in nodejs, contribs finally allowed!
+Open-Source re-creation of telegram group manager Group Help in nodejs!
+
+An official instance of bot is running on @LibreGroupHelpBot, you can use that if you can't run it locally
 
 Installation:
 
-$ npm i node-telegram-bot-api/yagop (or $ npm i https://github.com/yagop/node-telegram-bot-api)
-
-$ npm i chrono-node
+$ npm install
 
 Set your bot token on config.js
 Config documentation: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
@@ -14,10 +14,24 @@ $ node index.js
 
 |
 
+Installation trubleshooting:
+
+if you have problems with node-telegram-bot-api installation use this command url based: 
+$ npm i https://github.com/yagop/node-telegram-bot-api
+
+and if needed install other packages manually:
+$ npm i chrono-node
+
+|
+
 Useful links to contribute:
 https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
 
 When you create a plugin you can document it on https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md
+
+|
+
+Updating: to update the bot you need to backup database folder only, then repeat installation process and paste there the old database folder
 
 |
 
@@ -42,6 +56,7 @@ TODO:
     support for anonymous admins
     allow to customize /staff allowing to set roles to hide
     create a privacy setting where users can ask to esclude themself from tagResolver and replace his's first name in database with "Anonymous"
+    allow to disable tagResolver log on group settings
     allow to mute only media, or specific media type or extras
     once bot will be declared ready to use, add code versioning system to update database when user update it
     create a privacy option to allow a user deleting his data from the bot

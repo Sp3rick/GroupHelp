@@ -512,6 +512,7 @@ function genStaffListMessage(lang, chat, db)
 
     var adminIds = [];
     chat.admins.forEach(admin=>{
+        if(admin.status == "creator") return;
         if(admin.is_anonymous) return;
         adminIds.push(admin.user.id);
     })

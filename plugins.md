@@ -8,7 +8,7 @@ Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text
 --Targets--
 Any msg.command object may contain an msg.command.target object if a command target user is found
 Also cb.target may exhist, builded up from user id after "?" in cb.data
-user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "#")
+user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "?")
 
 NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database (var settingsChatId = cb.data.split(":")[1]; var settingsChat = db.chats.get(settingsChatId))
 

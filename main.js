@@ -1,12 +1,11 @@
 var LGHelpTemplate = require("./GHbot.js");
-const {parseCommand, getAdmins} = require( __dirname + "/api/utils.js" );
+const {parseCommand} = require( __dirname + "/api/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js");
 const TR = require("./api/tagResolver.js");
 const TelegramBot = require('node-telegram-bot-api');
 const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed } = require("./api/utils.js");
-  
   
 
 async function main(config) {
@@ -37,7 +36,7 @@ async function main(config) {
     const GHbot = new LGHelpTemplate({GHbot: GroupHelpBot, TGbot, db, config});
 
     //load tagResolver
-    TR.load();
+    TR.load(config);
 
     //some simplified variables
     l = global.LGHLangs;
@@ -47,7 +46,7 @@ async function main(config) {
 
         if(!isChatAllowed(config, msg.chat.id)) return;
         
-        TR.log(msg)
+        TR.logMsg(msg)
 
         var from = msg.from;
         var chat = msg.chat;
@@ -58,8 +57,17 @@ async function main(config) {
         if ( !db.users.exhist( from.id ) )
             db.users.add( from );
         var user = Object.assign( {},  db.users.get( from.id ), msg.from );
-        if(user.waitingReply != false)
-            console.log("message from waitingReply user: " + user.waitingReplyType);
+        if(user.waitingReply)
+        {
+            if(user.waitingReply !== true && user.waitingReply != chat.id)
+                    user.waitingReply = false;
+            else
+            {
+                console.log("message from waitingReply user: " + user.waitingReplyType);
+                user.waitingReply = true;
+            }
+        }
+            
 
         //handle new chats
         if(isGroup && (config.overwriteChatDataIfReAddedToGroup || !db.chats.exhist( chat.id )))
@@ -77,7 +85,7 @@ async function main(config) {
             chat = db.chats.get(chat.id)
 
             //add admins
-            var adminList = await getAdmins(TGbot, chat.id, db);
+            var adminList = await TR.getAdmins(TGbot, chat.id, db);
             chat = RM.reloadAdmins(chat, adminList);
             db.chats.update(chat);
 
@@ -154,6 +162,8 @@ async function main(config) {
 
         if(!isChatAllowed(config, cb.message.chat.id)) return;
 
+        TR.logCb(cb);
+
         console.log("Callback data: " + cb.data)
 
         var msg = cb.message;
@@ -169,7 +179,7 @@ async function main(config) {
         var chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
 
         //take it for granted that if user clicks a button he's not going to send another message as input
-        if( user.waitingReply == true )
+        if( user.waitingReply == chat.id || user.waitingReply === true )
         {
             user.waitingReply = false;
             db.users.update(user);

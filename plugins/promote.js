@@ -1,6 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {checkCommandPerms, handleTelegramGroupError, getAdmins, code, genGroupAdminPermsKeyboard, bold, genGroupAdminPermsText, telegramErrorToText, hasAdminPermission, isAdminOfChat} = require ("../api/utils.js");
+const { getAdmins } = require("../api/tagResolver.js");
+var {checkCommandPerms, handleTelegramGroupError, code, genGroupAdminPermsKeyboard, bold, genGroupAdminPermsText, telegramErrorToText, hasAdminPermission, isAdminOfChat} = require ("../api/utils.js");
 var removeAdminOpts = {can_manage_chat:false,can_delete_messages:false,can_manage_video_chats:false,can_restrict_members:false,
     can_promote_members:false,can_change_info:false,can_invite_users:false,can_post_stories:false,can_edit_stories:false,
     can_delete_stories:false,can_pin_messages:false,can_manage_topics:false};
@@ -413,7 +414,7 @@ function main(args)
             }
 
             //currently allowing to change title of any admin by other admins is wanted
-            user.waitingReply = true;
+            user.waitingReply = chat.id;
             user.waitingReplyType = "ADMINTITLE:"+settingsChatId+"?"+target.id;
             db.users.update(user);
             GHbot.editMessageText(user.id,  l[lang].SEND_NEW_TITLE, {message_id : msg.message_id, chat_id : cb.message.chat.id, parse_mode : "HTML",

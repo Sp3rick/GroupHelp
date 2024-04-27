@@ -141,7 +141,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT:") )
     {
 
-        user.waitingReply = true;
+        user.waitingReply = chat.id;
         user.waitingReplyType = cb_prefix+"#MSGMK_TEXT:"+settingsChatId;
         db.users.update(user);
 
@@ -215,7 +215,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA:") )
     {
 
-        user.waitingReply = true;
+        user.waitingReply = chat.id;
         user.waitingReplyType = cb_prefix+"#MSGMK_MEDIA:"+settingsChatId;
         db.users.update(user);
 
@@ -275,7 +275,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS:") )
     {
 
-        user.waitingReply = true;
+        user.waitingReply = chat.id;
         user.waitingReplyType = cb_prefix+"#MSGMK_BUTTONS:"+settingsChatId;
         db.users.update(user);
 

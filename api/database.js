@@ -1,7 +1,21 @@
 const fs = require( "fs" );
 const TelegramBot = require('node-telegram-bot-api');
-const {randomInt, isNumber, isValidChat, isValidUser, getUnixTime} = require( global.directory + "/api/utils.js" )
+const {isValidChat, isValidUser, getUnixTime} = require( global.directory + "/api/utils.js" )
 var RM = require("../api/rolesManager.js");
+
+function updateDatabase(version, versionFile, chatsDir, usersDir)
+{
+    if(version == "0.2")
+    {
+        version = "0.2.1";
+        console.log("\tupdating from 0.2 to 0.2.1 ...");
+    }
+
+    //add new if here to update from latest dbVersion to new
+
+
+    fs.writeFileSync(versionFile, version);
+}
 
 /**
  * @typedef {import("node-telegram-bot-api")} TelegramBot
@@ -23,21 +37,32 @@ function getDatabase(config) {
         console.log( "Generated \"database\" folder" );
 
     }
-    var dbDirFiles = fs.readdirSync( dir )
-    if( !dbDirFiles.includes( "chats" ) )
+    var exhistChatsFolder = fs.existsSync(chatsDir);
+    if( !exhistChatsFolder )
     {
 
-        fs.mkdirSync( chatsDir);
+        fs.mkdirSync(chatsDir);
         console.log( "Generated \"database/chats\" folder" );
 
     }
-    if( !dbDirFiles.includes( "users" ) )
+    var exhistUsersFolder = fs.existsSync(usersDir);
+    if( !exhistUsersFolder)
     {
 
-        fs.mkdirSync( usersDir);
+        fs.mkdirSync(usersDir);
         console.log( "Generated \"database/users\" folder" );
 
     }
+
+    console.log("Updating database if it's too old...")
+    var dbVersion = "";
+    var versionFile = dir+"/version";
+    var dbDirFiles = fs.readdirSync( dir )
+    if( !dbDirFiles.includes( "version") )
+        dbVersion = "0.2";
+    else
+        dbVersion = fs.readFileSync(versionFile);
+    updateDatabase(dbVersion, versionFile, chatsDir, usersDir);
 
     global.DBCHATS = {};
 

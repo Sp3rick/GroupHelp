@@ -1,5 +1,4 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { forceHandleRequest, pushChatRequest, pushUserRequest } = require("../api/SafeTelegram.js");
 
 function main(args)
 {
@@ -105,7 +104,7 @@ function main(args)
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
-                link_preview : {is_disabled:true},
+                link_preview_options : JSON.stringify({is_disabled : true}),
                 reply_markup :{inline_keyboard:[
                         [{text: l[lang].ADD_ME_TO_A_GROUP_BUTTON, url: "https://t.me/" + TGbot.me.username + "?startgroup=true&admin=change_info+delete_messages+restrict_members+invite_users+pin_messages+promote_members+manage_video_chats+manage_chat"}],
                         [{text: l[lang].GROUP_BUTTON, url: "https://t.me/LibreGHelp" }, {text: l[lang].CHANNEL_BUTTON, url: "https://t.me/LibreGroupHelp"}],
@@ -119,7 +118,7 @@ function main(args)
         if( cb.data == "SUPPORT_BUTTON" )
         {
 
-            user.waitingReply = true;
+            user.waitingReply = chat.id;
             user.waitingReplyType = "SUPPORT";
             db.users.update(user);
 

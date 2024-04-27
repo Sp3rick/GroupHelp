@@ -1,5 +1,6 @@
 {
   "dependencies": {
-    "node-telegram-bot-api": "^0.64.0"
+    "chrono-node": "^2.7.5",
+    "node-telegram-bot-api": "github:yagop/node-telegram-bot-api"
   }
 }

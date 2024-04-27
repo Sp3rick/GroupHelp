@@ -7,6 +7,7 @@
     "allowExternalApi" : false,
     "reserveLang" : "en_en",
     "saveDatabaseSeconds" : 3600,
+    "saveTagResolverSeconds" : 3600,
     "preventSetUselessRoles" : true,
     "chatWhitelist" : [],
     "privateWhitelist" : false,

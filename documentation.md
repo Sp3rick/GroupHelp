@@ -50,6 +50,14 @@ works with less items still in same order: CALLBACK_NAME:groupId OR CALLBACK_NAM
 
 
 
+<b>Expect user messages</b>
+
+You can expect for user messages by set user.waitingReply to the chatId where you are expecting a reply and user.waitingReplyType with callback data you will able to retrieve after, set to true if you want to set it for every chat, then you need to update user object on database with db.users.update(user)
+When you receive a new message event user.waitingReply will be set true or false by main.js depending if it's the right chat
+Remember that if you make a new user.waitingReply in a certain point you will need also to disable that, otherwise other bot functions that want that bot is not waiting for any user reply may not work
+
+
+
 <b>Roles</b>
 
 Roles is managed by plugins/userHandler.js and api/rolesManager.js
@@ -118,6 +126,7 @@ You can get this object trough parseCommand(text)
 
 Note: COMMAND_ prefix means that command can be solved in multiple languages
 @ prefix in command name gives the permission with private chat reply (example @COMMAND_RULES)
+to explicitly ask to reply to your command in private chat use * as prefix (ex. /\*rules, /\*perms)
 Complete list of implemented commands:
 
 -General

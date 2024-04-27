@@ -14,8 +14,10 @@ function main(args)
     GHbot.onMessage( (msg, chat, user) => {
 
         var command = msg.command;
+        var where;
 
-        if( chat.isGroup && command && checkCommandPerms(command, "COMMAND_RULES", user.perms) )
+        where = checkCommandPerms(command, "COMMAND_RULES", user.perms);
+        if( chat.isGroup && command && where )
         {
             var options = {reply_parameters: {chat_id:chat.id, message_id: msg.message_id}};
             if(msg.reply_to_message)
@@ -24,7 +26,7 @@ function main(args)
                 options.reply_parameters.chat_id = chat.id;
             }
             var func = (id) => {return MSGMK.sendMessage(GHbot, user, chat, chat.rules, l[chat.lang].RULES_TITLE, options, id)};
-            sendCommandReply("COMMAND_RULES", chat.lang, GHbot, user, chat.id, func);
+            sendCommandReply(where, chat.lang, GHbot, user, chat.id, func);
         }
 
         //security guards

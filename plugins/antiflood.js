@@ -1,16 +1,24 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToTextAndTime } = require("../api/utils.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToTextAndTime, chunkArray } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 const RM = require("../api/rolesManager.js");
 const { punishUser } = require("../api/punishment.js");
 
-//object structure: global.LGHFlood[chatId] = { lastUse, lastPunishment, messages: {[messageId] : messageTime} }
+//object structure: global.LGHFlood[chatId+userId] = { lastPunishment, grouped: { [groupId] : {ids: [messageIds], time} }, single: { [messageId] : time } }
 global.LGHFlood = {};
 
-function checkMessages(flood, messages)
+function clearOutOfRangeMessages(key, now, maxTime)
 {
-    
+    var grouped = global.LGHFlood[key].grouped;
+    Object.keys(grouped).forEach((groupId)=>{
+        var time = grouped[groupId].time;
+        if( (now-time) > maxTime) delete global.LGHFlood[key].grouped[groupId];
+    })
+    Object.keys(global.LGHFlood[key].single).forEach((id)=>{
+        var time  = global.LGHFlood[key].single[id];
+        if( (now-time) > maxTime) delete global.LGHFlood[key].single[id];
+    })
 }
 
 
@@ -27,28 +35,11 @@ function main(args)
 
     //clear useless chats/messages on global.LGHFlood
     setInterval(()=>{
-
         var now = getUnixTime();
-        var chatIds = Object.keys(global.LGHFlood);
-        chatIds.forEach((chatId)=>{
-
-            var chat = global.LGHFlood[chatId];
-            
-            //delete useless messages for the antiflood
-            var msgIds = Object.keys(chat.messages)
-            msgIds.forEach((msgId)=>{
-                var time = chat.messages[msgId]
-                if(now - time > config.ANTIFLOOD_timeMax)
-                    delete global.LGHFlood[chatId].messages[msgId]
-            })
-
-            //if no messages clear chat object
-            msgIds = Object.keys(chat.messages)
-            if(msgIds.length == 0)
-                delete global.LGHFlood[chatId] 
-
+        var keys = Object.keys(global.LGHFlood);
+        keys.forEach((key)=>{
+            clearOutOfRangeMessages(key, now, timeMax)
         }
-
     )},timeMax*1000)
 
     l = global.LGHLangs; //importing langs object
@@ -190,47 +181,69 @@ function main(args)
             if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
             if(user.perms.flood == 1) return;
 
-            if(!global.LGHFlood.hasOwnProperty(chat.id))
-                global.LGHFlood[chat.id] = {lastUse: 0, lastPunishment : 0, messages: {}};
+            var key = chat.id+"_"+user.id;
+
+            if(!global.LGHFlood.hasOwnProperty(key))
+                global.LGHFlood[key] = {lastPunishment : 0, grouped: {}, single: {}};
             
             var now = msg.date;
-            global.LGHFlood[chat.id].lastUse = now;
-            global.LGHFlood[chat.id].messages[msg.message_id] = now;
-
-            //triggher detection
-            var isFloodLimitFired = false;
-
             var mLevel = chat.flood.messages;
             var tLevel = chat.flood.time;
+            var grouped = global.LGHFlood[key].grouped;
+            clearOutOfRangeMessages(key, now, tLevel);
 
-            var inRangeMessagesIds = [];
-            var messageIds = Object.keys(global.LGHFlood[chat.id].messages)
-            messageIds.forEach((messageId)=>{
-                var time = global.LGHFlood[chat.id].messages[messageId];
-                if( (now - time) <= tLevel )
-                    inRangeMessagesIds.push(messageId);
-                else
-                    delete global.LGHFlood[chat.id].messages[messageId]
-            })
-
-            if(inRangeMessagesIds.length >= mLevel)
-                isFloodLimitFired = true;
-
-
-            if(chat.flood.delete && isFloodLimitFired)
-                TGbot.deleteMessages(chat.id, inRangeMessagesIds)
-
-
-            var lastPunishment = global.LGHFlood[chat.id].lastPunishment;
-            if(isFloodLimitFired && (now - lastPunishment) > tLevel)
+            //count this message
+            if(msg.hasOwnProperty("media_group_id") && !grouped.hasOwnProperty(msg.media_group_id))
             {
-                global.LGHFlood[chat.id].lastPunishment = now;
+                global.LGHFlood[key].grouped[msg.media_group_id] = {ids:[msg.message_id], time: now}
+            }
+            else if(msg.hasOwnProperty("media_group_id") && grouped.hasOwnProperty(msg.media_group_id))
+            {
+                global.LGHFlood[key].grouped[msg.media_group_id].ids.push(msg.message_id);
+                global.LGHFlood[key].grouped[msg.media_group_id].time = now;
+            }
+            else if(!msg.hasOwnProperty("media_group_id"))
+            {
+                global.LGHFlood[key].single[msg.message_id] = now;
+            }
+
+            //check if antiflood fired
+            var fire = false;
+            var messageCount = Object.keys(global.LGHFlood[key].grouped).length + Object.keys(global.LGHFlood[key].single).length;
+            if(messageCount > mLevel) fire = true;
+    
+
+            //flood reaction//
+            if(fire && chat.flood.delete)
+            {
+                var messagesIds = [];
+
+                Object.keys(grouped).forEach((groupId)=>{
+                    grouped[groupId].ids.forEach((id)=>{messagesIds.push(id)});
+                    delete global.LGHFlood[key].grouped[groupId];
+                })
+                Object.keys(global.LGHFlood[key].single).forEach((id)=>{
+                    messagesIds.push(id);
+                    delete global.LGHFlood[key].single[id];
+                })
+
+                //keep inside 100 messages telegram limit
+                chunkArray(messagesIds, 100).forEach((ids)=>{
+                    TGbot.deleteMessages(chat.id, ids)
+                })
+                
+            }
+
+            //punish
+            var lastPunishment = global.LGHFlood[key].lastPunishment;
+            var recentlyPunished = (now - lastPunishment) < tLevel;
+            if(fire && !recentlyPunished)
+            {
                 var PTime = (chat.flood.PTime == 0) ? -1 : chat.flood.PTime;
                 var reason = l[chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",chat.flood.messages).replaceAll("{time}",chat.flood.time);
                 punishUser(GHbot, user.id,  chat, RM.userToTarget(chat, user), chat.flood.punishment, PTime, reason)
             }
-            if(isFloodLimitFired) //update lastPunishment anyway, by this way user will be punished once for each flood round
-                global.LGHFlood[chat.id].lastPunishment = now;
+            if(fire) global.LGHFlood[key].lastPunishment = now;
 
         })()}
 

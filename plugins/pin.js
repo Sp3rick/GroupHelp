@@ -13,8 +13,10 @@ function main(args)
 
         var command = msg.command;
         var lang = chat.lang;
+        var where;
 
-        if(checkCommandPerms(command, "COMMAND_PIN", user.perms, ["pin"]))
+        where = checkCommandPerms(command, "COMMAND_PIN", user.perms, ["pin"]);
+        if(where)
         {
 
             if(!msg.reply_to_message) return;
@@ -32,7 +34,7 @@ function main(args)
             }
             var text = l[lang].ASK_PIN_NOTIFY
             var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply("COMMAND_PIN", lang, GHbot, user, chat.id, func);
+            sendCommandReply(where, lang, GHbot, user, chat.id, func);
         }
 
     } )

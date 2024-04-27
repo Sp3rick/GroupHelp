@@ -1,7 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js");
 var RM = require("../api/rolesManager.js");
-var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, getAdmins, isAdminOfChat, isChatAllowed, replyCommandChat, sendCommandReply, telegramErrorToText} = require ("../api/utils.js");
+var {genPermsReport, genMemberInfoText, checkCommandPerms, getUnixTime, handleTelegramGroupError, IsEqualInsideAnyLanguage, isAdminOfChat, isChatAllowed, replyCommandChat, sendCommandReply, telegramErrorToText} = require ("../api/utils.js");
 var { silentPunish } = require("../api/punishment.js");
+const { getAdmins } = require("../api/tagResolver.js");
 
 function main(args)
 {
@@ -12,7 +13,7 @@ function main(args)
     l = global.LGHLangs; //importing langs object
 
     //founder role is automatically set from /reload command
-    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_RULES", "COMMAND_PERMS", "COMMAND_STAFF", "COMMAND_INFO", "COMMAND_PIN",
+    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PIN",
     "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE",
     "COMMAND_UNBAN", "COMMAND_UNMUTE", "COMMAND_UNWARN",
     "COMMAND_FREE", "COMMAND_HELPER", "COMMAND_CLEANER", "COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_COFOUNDER", "COMMAND_ADMINISTRATOR",
@@ -50,6 +51,8 @@ function main(args)
         var command = msg.command;
         var lang = chat.lang;
         var target = command.target;
+        var where;
+
         if(IsEqualInsideAnyLanguage(command.name, "COMMAND_RELOAD"))
         {
             var options = {
@@ -83,7 +86,8 @@ function main(args)
             GHbot.sendMessage(user.id, chat.id, text, options);
         }
 
-        if(checkCommandPerms(command, "COMMAND_STAFF", user.perms, ["staff"]))
+        where = checkCommandPerms(command, "COMMAND_STAFF", user.perms, ["staff"]);
+        if(where)
         {
             var options = {
                 parse_mode : "HTML",
@@ -98,10 +102,11 @@ function main(args)
             } 
 
             var func = (id) => {return GHbot.sendMessage(user.id, id, RM.genStaffListMessage(chat.lang, chat, db), options)};
-            sendCommandReply("COMMAND_STAFF", lang, GHbot, user, chat.id, func);
+            sendCommandReply(where, lang, GHbot, user, chat.id, func);
         }
 
-        if(checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]))
+        where = checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]);
+        if(where)
         {    
             var options = {
                 parse_mode : "HTML",
@@ -123,13 +128,14 @@ function main(args)
                 var member = await TGbot.getChatMember(chat.id, target.id);
                 var memberAndUser = Object.assign({}, member.user, chat.users[target.id]);
                 var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options)};
-                sendCommandReply("COMMAND_INFO", lang, GHbot, user, chat.id, func);
+                sendCommandReply(where, lang, GHbot, user, chat.id, func);
             } catch (error) {
                 handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
         }
 
-        if(checkCommandPerms(command, "COMMAND_ME", user.perms))
+        where = checkCommandPerms(command, "COMMAND_ME", user.perms);
+        if(where)
         {
             var options = {
                 parse_mode : "HTML",
@@ -148,13 +154,14 @@ function main(args)
                 var memberAndUser = Object.assign({}, member.user, chat.users[user.id]);
                 
                 var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options)};
-                await sendCommandReply("COMMAND_ME", lang, GHbot, user, chat.id, func);
+                await sendCommandReply(where, lang, GHbot, user, chat.id, func);
             } catch (error) {
                 handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
         }
 
-        if(checkCommandPerms(command, "COMMAND_PERMS", user.perms, ["perms"]))
+        where = checkCommandPerms(command, "COMMAND_PERMS", user.perms, ["perms"]);
+        if(where)
         {
             if(!target)
             {
@@ -184,7 +191,7 @@ function main(args)
 
 
             var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply("COMMAND_PERMS", lang, GHbot, user, chat.id, func);
+            sendCommandReply(where, lang, GHbot, user, chat.id, func);
         }
 
         if(checkCommandPerms(command, "COMMAND_FORGOT", user.perms))

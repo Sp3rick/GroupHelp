@@ -41,7 +41,7 @@ function callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, return
     if( cb.data.startsWith(cb_prefix+"#STIME_ZERO:") ) time = 0;
     if( cb.data.startsWith(cb_prefix+"#STIME") )
     {
-        user.waitingReply = true;
+        user.waitingReply = chat.id;
         user.waitingReplyType = cb_prefix+"#STIME:"+settingsChatId;
         db.users.update(user);
 
