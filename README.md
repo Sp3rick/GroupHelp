@@ -31,7 +31,7 @@ When you create a plugin you can document it on https://github.com/Sp3rick/Group
 
 |
 
-Updating: to update the bot you need to backup database folder only, then repeat installation process and paste there the old database folder
+Updating: to update the bot you need to backup ./database folder and ./config.js only, then repeat installation process and paste there the old database folder
 
 |
 
