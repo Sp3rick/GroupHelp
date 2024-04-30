@@ -129,6 +129,17 @@ optional if configuration allow external api:
 
 
 
+<b>setChatBasedPunish.js</b>
+
+>Depends on api/utils.js
+>Depends on api/setTime.js
+
+A settings panel to edit LGHChatBasedPunish object (avaiable on GHbot.js)
+
+
+
+
+
 <b>usersHandler.js</b>
 
 >Depends on api/rolesManager.js

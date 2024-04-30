@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToTextAndTime, chunkArray } = require("../api/utils.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToTextAndTime, chunkArray, textToPunishment, genPunishButtons, handlePunishmentCallback } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 const RM = require("../api/rolesManager.js");
@@ -38,7 +38,12 @@ function main(args)
         var now = getUnixTime();
         var keys = Object.keys(global.LGHFlood);
         keys.forEach((key)=>{
-            clearOutOfRangeMessages(key, now, timeMax)
+            clearOutOfRangeMessages(key, now, timeMax);
+
+            var groupedNum = Object.keys(global.LGHFlood[key].grouped).length;
+            var singleNum = Object.keys(global.LGHFlood[key].single).length;
+            if( groupedNum == 0 && singleNum == 0)
+                delete global.LGHFlood[key];   
         }
     )},timeMax*1000)
 
@@ -62,34 +67,35 @@ function main(args)
         if( !(user.hasOwnProperty("perms") && user.perms.settings) ) return;
         if( chat.isGroup && settingsChatId != chat.id) return;
 
+        var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]];
+        var cb_prefix = cb.data.split("#")[0];
+
         //main menu based settings
-        var toSetPunishment = -1;
-        if( cb.data.startsWith("S_FLOOD_M_OFF:") )
-            toSetPunishment = 0;
-        if( cb.data.startsWith("S_FLOOD_M_WARN:") )
-            toSetPunishment = 1;
-        if( cb.data.startsWith("S_FLOOD_M_KICK:") )
-            toSetPunishment = 2;
-        if( cb.data.startsWith("S_FLOOD_M_MUTE:") )
-            toSetPunishment = 3;
-        if( cb.data.startsWith("S_FLOOD_M_BAN:") )
-            toSetPunishment = 4;
-        if( toSetPunishment != -1 )
+        if( cb.data.startsWith("S_FLOOD_M_P_") )
         {
-            if(settingsChat.flood.punishment == toSetPunishment)
-            {
-                GHbot.answerCallbackQuery(user.id, cb.id);
-                return;
-            }
-            settingsChat.flood.punishment = toSetPunishment;
-            db.chats.update(settingsChat)
+            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, settingsChat.flood.punishment);
+            if(toSetPunishment == settingsChat.flood.punishment) return;
+            else {settingsChat.flood.punishment = toSetPunishment; db.chats.update(settingsChat)};
         }
-        if( cb.data.startsWith("S_FLOOD_M_DELETESWITCH:") )
+        //Set punishment duration
+        if(cb.data.startsWith("S_FLOOD_M_PTIME#STIME") )
+        {
+            var currentTime = settingsChat.flood.PTime;
+            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.flood.punishment));
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
+
+            if(time != -1 && time != currentTime)
+            {
+                settingsChat.flood.PTime = time;
+                db.chats.update(settingsChat);
+            }
+            return;
+        }
+        if( cb.data.startsWith("S_FLOOD_M_DELETION:") )
         {
             settingsChat.flood.delete = !settingsChat.flood.delete;
             db.chats.update(settingsChat)
         }
-        //main menu
         if( cb.data.startsWith("S_FLOOD_M_") )
         {
 
@@ -97,40 +103,24 @@ function main(args)
             var punishmentText = punishmentToTextAndTime(lang, punishment, settingsChat.flood.PTime)
             var text = l[lang].ANTIFLOOD+"\n"+
             l[lang].ANTIFLOOD_DESCRIPTION.replace("{messages}",settingsChat.flood.messages).replace("{seconds}",settingsChat.flood.time)+"\n\n"+
-            punishmentText;
-        
-            var deleteSwitchButtonName = l[lang].DELETE_MESSAGES_BUTTON+(settingsChat.flood.delete?"✔️":"✖️");
-            var options = 
-            {
+            bold(l[lang].PUNISHMENT+": ")+punishmentText;
+            
+            var buttons = [[{text: l[lang].MESSAGES_BUTTON, callback_data: "S_FLOOD_MESSAGES#SNUM_MENU:"+settingsChatId},{text: l[lang].TIME_BUTTON, callback_data: "S_FLOOD_TIME#SNUM_MENU:"+settingsChatId}]]
+            genPunishButtons(lang, punishment, "S_FLOOD_M", settingsChatId, true, settingsChat.flood.delete).forEach((line)=>buttons.push(line));
+            buttons.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}]);
+
+            var options = {
                 message_id : msg.message_id,
                 chat_id : chat.id,
                 parse_mode : "HTML",
-                reply_markup : 
-                {
-                    inline_keyboard :
-                    [
-                        [{text: l[lang].MESSAGES_BUTTON, callback_data: "S_FLOOD_MESSAGES#SNUM_MENU:"+settingsChatId}, {text: l[lang].TIME_BUTTON, callback_data: "S_FLOOD_TIME#SNUM_MENU:"+settingsChatId}],
-                        [{text: l[lang].OFF2, callback_data: "S_FLOOD_M_OFF:"+settingsChatId}, {text: l[lang].WARN_BUTTON, callback_data: "S_FLOOD_M_WARN:"+settingsChatId}],
-                        [{text: l[lang].KICK_BUTTON, callback_data: "S_FLOOD_M_KICK:"+settingsChatId}, {text: l[lang].MUTE_BUTTON, callback_data: "S_FLOOD_M_MUTE:"+settingsChatId}, {text: l[lang].BAN_BUTTON, callback_data: "S_FLOOD_M_BAN:"+settingsChatId}],
-                        [{text: deleteSwitchButtonName, callback_data: "S_FLOOD_M_DELETESWITCH:"+settingsChatId}],
-                    ] 
-                } 
+                reply_markup : {inline_keyboard: buttons} 
             }
-            
-            var punishmentTimeSetButton = genPunishmentTimeSetButton(lang, punishment, "S_FLOOD_PTIME", settingsChatId);
-            if(punishmentTimeSetButton) options.reply_markup.inline_keyboard.push(punishmentTimeSetButton);
-            
-            options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}])
-
             GHbot.editMessageText(user.id, text, options)
             GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
 
-
         //Setnum variables
-        var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        var cb_prefix = cb.data.split("#")[0];
         if( cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
@@ -154,22 +144,6 @@ function main(args)
                 db.chats.update(settingsChat);
             }
             else GHbot.answerCallbackQuery(user.id, cb.id);
-        }
-
-
-        //Set punishment duration
-        var returnButtons = [[{text: l[lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        if(cb.data.startsWith("S_FLOOD_PTIME#STIME") ) //example S_FLOOD_PTIME_WARN
-        {
-            var currentTime = settingsChat.flood.PTime;
-            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.flood.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
-
-            if(time != -1 && time != currentTime)
-            {
-                settingsChat.flood.PTime = time;
-                db.chats.update(settingsChat);
-            }
         }
 
     })
@@ -254,11 +228,10 @@ function main(args)
         if( !(user.perms && user.perms.settings) ) return;
         
         var settingsChat = db.chats.get(settingsChatId)
-        
         //punishment time setting
-        var returnButtons = [[{text: l[user.lang].CANCEL_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
+        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
         var cb_prefix = user.waitingReplyType.split("#")[0];
-        if( user.waitingReplyType.startsWith("S_FLOOD_PTIME#STIME") )
+        if( user.waitingReplyType.startsWith("S_FLOOD_M_PTIME#STIME") )
         {
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
             var time = ST.messageEvent(GHbot, settingsChat.flood.PTime, msg, chat, user, cb_prefix, returnButtons, title);

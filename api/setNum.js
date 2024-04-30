@@ -9,7 +9,6 @@ const {isNumber, genSetNumKeyboard} = require("./utils.js");
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
  * @param  {String} cb_prefix
- * @param  {String} title
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable editing the message
  * @param  {Number} min - minimum allowed time in seconds

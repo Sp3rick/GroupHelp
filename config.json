@@ -8,6 +8,7 @@
     "reserveLang" : "en_en",
     "saveDatabaseSeconds" : 3600,
     "saveTagResolverSeconds" : 3600,
+    "maxCallbackAge" : 86400,
     "preventSetUselessRoles" : true,
     "chatWhitelist" : [],
     "privateWhitelist" : false,

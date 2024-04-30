@@ -19,7 +19,6 @@ const {parseHumanTime, secondsToHumanTime} = require("./utils.js");
  */
 function callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title, min, max)
 {
-
     var l = global.LGHLangs;
     var time = currentTime;
 

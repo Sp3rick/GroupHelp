@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { genPunishmentTimeSetButton, punishmentToText, punishmentToTextAndTime, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns } = require("../api/utils.js");
+const { genPunishmentTimeSetButton, punishmentToText, punishmentToTextAndTime, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns, textToPunishment } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 
@@ -69,18 +69,10 @@ function main(args)
         if( !(user.perms && user.perms.settings) ) return;
         if( chat.isGroup && settingsChatId != chat.id) return;
 
-        var punishmentText = punishmentToTextAndTime(lang, settingsChat.warns.punishment, settingsChat.warns.PTime);
-
         //main menu based settings
-        var toSetPunishment = -1;
-        if( cb.data.startsWith("S_WARN_BUTTON_P_OFF:") )
-            toSetPunishment = 0;
-        if( cb.data.startsWith("S_WARN_BUTTON_P_KICK:") )
-            toSetPunishment = 2;
-        if( cb.data.startsWith("S_WARN_BUTTON_P_MUTE:") )
-            toSetPunishment = 3;
-        if( cb.data.startsWith("S_WARN_BUTTON_P_BAN:") )
-            toSetPunishment = 4;
+        var toSetPunishment = -1
+        if( cb.data.startsWith("S_WARN_BUTTON_P_") )
+            toSetPunishment = textToPunishment(cb.data.split("S_WARN_BUTTON_P_")[1].split(":")[0]);
         if( toSetPunishment != -1 )
         {
             if(settingsChat.warns.punishment == toSetPunishment)
@@ -91,6 +83,7 @@ function main(args)
             settingsChat.warns.punishment = toSetPunishment;
             db.chats.update(settingsChat)
         }
+        var punishmentText = punishmentToTextAndTime(lang, settingsChat.warns.punishment, settingsChat.warns.PTime);
         if(cb.data.startsWith("S_WARN_BUTTON"))
         {
             var punishment = settingsChat.warns.punishment;

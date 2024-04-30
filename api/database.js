@@ -3,12 +3,48 @@ const TelegramBot = require('node-telegram-bot-api');
 const {isValidChat, isValidUser, getUnixTime} = require( global.directory + "/api/utils.js" )
 var RM = require("../api/rolesManager.js");
 
+function newSpamObj()
+{
+    var obj = {
+        tgLinks: { usernames:false, bots:false, punishment:1, PTime:30 },
+        links: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:30 },
+        forward: { channels: {punishment: 0, PTime: 1800, delete: false},
+            groups: {punishment: 0, PTime: 1800, delete: false},
+            users: {punishment: 0, PTime: 1800, delete: false},
+            bots: {punishment: 0, PTime: 1800, delete: false},
+        },
+        quote: {
+            channels: {punishment: 0, PTime: 1800, delete: false},
+            groups: {punishment: 0, PTime: 1800, delete: false},
+            users: {punishment: 0, PTime: 1800, delete: false},
+            bots: {punishment: 0, PTime: 1800, delete: false},
+        },
+        exceptions : []
+    }
+
+    return obj;
+}
+
 function updateDatabase(version, versionFile, chatsDir, usersDir)
 {
     if(version == "0.2")
     {
         version = "0.2.1";
         console.log("\tupdating from 0.2 to 0.2.1 ...");
+    }
+
+    if(version == "0.2.1")
+    {
+        version = "0.2.2";
+        console.log("\tupdating from 0.2.1 to 0.2.2 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+            chat.spam = newSpamObj();
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
     }
 
     //add new if here to update from latest dbVersion to new
@@ -101,6 +137,7 @@ function getDatabase(config) {
                 chat.rules = {};
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
                 chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true }
+                chat.spam = newSpamObj();
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );

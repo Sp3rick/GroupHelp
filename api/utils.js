@@ -87,6 +87,12 @@ function getUnixTime() {
     return currentTimeSeconds;
 }
 
+function isValidHost(host) {
+    host = host.toLowerCase();
+    var hostRegex = /^(((?!-))(xn--|_)?[a-z0-9-]{0,61}[a-z0-9]{1,1}\.)*(xn--)?([a-z0-9][a-z0-9\-]{0,60}|[a-z0-9-]{1,30}\.[a-z]{2,})$/;
+    return hostRegex.test(host);
+}
+
 //TODO: add translation system that replaces any word to english (like dictionary translation)
 //ATTENTION HERE: for error he may return both 0 or 1
 function parseHumanTime(text) {
@@ -607,6 +613,24 @@ function isValidUser(user){
 
 }
 
+function isValidUsername(string)
+{
+    var username = false;
+    if(string.includes("t.me/"))
+        username = string.split("t.me/")[1];
+    if(string.includes("telegram.me/"))
+        username = string.split("telegram.me/")[1];
+    if(string.startsWith("@"))
+        username = string.replace("@","");
+
+    if(!username) username = string;
+
+    //NFT usernames may be 4 chars long
+    if(/^[a-zA-Z0-9]+$/.test(username) && username.length > 3 && username.length < 33)
+        return username;
+    return false;
+}
+
 function exhistInsideAnyLanguage(optionName)
 {
     var l = global.LGHLangs;
@@ -800,6 +824,18 @@ function mediaTypeToMethod(type)
 
 }
 
+function textToPunishment(text)
+{
+    switch (text) {
+        case "OFF": return 0;
+        case "WARN": return 1;
+        case "KICK": return 2;
+        case "MUTE": return 3;
+        case "BAN": return 4;
+        default: return -1;
+    }
+}
+
 function punishmentToText(lang, punishment)
 {
     var l = global.LGHLangs;
@@ -819,9 +855,8 @@ function punishmentToTextAndTime(lang, punishment, time)
     var l = global.LGHLangs;
     time = time || 0;
 
-    var punishmentText = punishmentToText(lang, punishment);
+    var text = punishmentToText(lang, punishment);
 
-    var text = bold(l[lang].PUNISHMENT)+": "+punishmentText;
     if((punishment == 1 || punishment == 3 || punishment == 4) && time != 0)
         text+=" "+l[lang].FOR_HOW_MUCH+" "+secondsToHumanTime(lang, time);
     return text;
@@ -841,6 +876,28 @@ function punishmentToSetTimeButtonText(lang, punishment)
     }
 }
 
+/**
+ * Handles a punishment callback identified and splitted by "_P_"
+ * @param {*} GHbot 
+ * @param {*} cb 
+ * @param {*} userId 
+ * @param {*} punishment 
+ * @returns {Number} - returns new punishment number
+ */
+function handlePunishmentCallback(GHbot, cb, userId, punishment)
+{
+    var toSetPunishment = punishment;
+    if( cb.data.includes("_P_") )
+        toSetPunishment = textToPunishment(cb.data.split("_P_")[1].split(":")[0]);
+    if( toSetPunishment != -1 )
+    {
+        punishment = toSetPunishment;
+        if(punishment == toSetPunishment)
+            GHbot.answerCallbackQuery(userId, cb.id);
+    }
+    return punishment;
+}
+
 function genPunishmentTimeSetButton(lang, punishment, prefix, chatId)
 {
     var l = global.LGHLangs;
@@ -853,6 +910,35 @@ function genPunishmentTimeSetButton(lang, punishment, prefix, chatId)
         case 4: return [{text: timeButtonText, callback_data: prefix+"#STIME:"+chatId}];
     }
     return false;
+}
+
+/**
+ * 
+ * @param {*} lang 
+ * @param {*} punishment 
+ * @param {*} prefix 
+ * @param {*} chatId 
+ * @returns {Array<Array<TelegramBot.KeyboardButton>>} - Returns buttons with callback data prefix+"_P_"+punishmentText+":"+chatId;
+ */
+function genPunishButtons(lang, punishment, prefix, chatId, deletion, delState)
+{
+
+    var buttons = [
+        [{text: l[lang].OFF2_BUTTON, callback_data: prefix+"_P_OFF:"+chatId},
+        {text: l[lang].WARN_BUTTON, callback_data: prefix+"_P_WARN:"+chatId},
+        {text: l[lang].KICK_BUTTON, callback_data: prefix+"_P_KICK:"+chatId}],
+
+        [{text: l[lang].MUTE_BUTTON, callback_data: prefix+"_P_MUTE:"+chatId},
+        {text: l[lang].BAN_BUTTON, callback_data: prefix+"_P_BAN:"+chatId}]
+    ];
+
+    var pTimeB = genPunishmentTimeSetButton(lang, punishment, prefix+"_PTIME", chatId);
+    if(pTimeB) buttons.push(pTimeB);
+
+    var deleteMessagesBText = l[lang].DELETE_MESSAGES_BUTTON + ( delState ? " ✔️" : " ✖️");
+    if(deletion) buttons.push([{text: deleteMessagesBText, callback_data: prefix+"_DELETION:"+chatId}]);
+
+    return buttons;
 }
 
 function usernameOrFullName(user)
@@ -894,12 +980,19 @@ function anonymizeAdmins(adminList)
     return adminList;
 }
 
-//check if it's a valid command and if the user has a specific permission to run that
+/**
+ * 
+ * @param {*} command 
+ * @param {*} commandKey 
+ * @param {*} perms 
+ * @param {*} literalNames 
+ * @returns {Boolean|1} Returns 1 if should be sent on private chat, true for public chat, false for missing permissions
+ */
 function checkCommandPerms(command, commandKey, perms, literalNames)
 {
     literalNames = literalNames || [];
 
-    if(!command || !command.name) return false;
+    if(!command || !command.name || !perms) return false;
 
     var privateCommand = command.name.startsWith("*") &&
     ( IsEqualInsideAnyLanguage(command.name.replace("*",""), commandKey) || literalNames.some(ln=>{return command.name.replace("*","") == (ln)}) ) &&
@@ -1070,8 +1163,10 @@ module.exports =
     randomInt : randomInt,
     keysArrayToObj : keysArrayToObj,
     chunkArray : chunkArray,
+    isValidHost : isValidHost,
     isValidChat : isValidChat,
     isValidUser : isValidUser,
+    isValidUsername : isValidUsername,
     parseCommand : parseCommand,
     genSettingsKeyboard : genSettingsKeyboard,
     genSettingsText : genSettingsText,
@@ -1092,7 +1187,10 @@ module.exports =
     extractMedia : extractMedia,
     mediaTypeToMethod : mediaTypeToMethod,
     punishmentToSetTimeButtonText :punishmentToSetTimeButtonText,
+    handlePunishmentCallback : handlePunishmentCallback,
     genPunishmentTimeSetButton :genPunishmentTimeSetButton,
+    genPunishButtons : genPunishButtons,
+    textToPunishment : textToPunishment,
     punishmentToText : punishmentToText,
     punishmentToTextAndTime : punishmentToTextAndTime,
     parseHumanTime : parseHumanTime,

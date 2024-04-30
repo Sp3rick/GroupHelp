@@ -5,7 +5,7 @@ const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js");
 const TR = require("./api/tagResolver.js");
 const TelegramBot = require('node-telegram-bot-api');
-const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed } = require("./api/utils.js");
+const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime } = require("./api/utils.js");
   
 
 async function main(config) {
@@ -177,6 +177,13 @@ async function main(config) {
         var user = Object.assign( {},  db.users.get( from.id ), from );
         if(chat.isGroup && !db.chats.exhist( chat.id )) return; //drop callbacks from unknown groups
         var chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
+        
+        //drop too old callbacks, prevent incompatible calls
+        if(getUnixTime() - cb.message.date > config.maxCallbackAge) //86400 = 1 day
+        {
+            GHbot.answerCallbackQuery(user.id, cb.id, {text:l[user.lang].BUTTON_TOO_OLD, show_alert:true})
+            return;
+        }
 
         //take it for granted that if user clicks a button he's not going to send another message as input
         if( user.waitingReply == chat.id || user.waitingReply === true )

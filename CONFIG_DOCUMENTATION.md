@@ -32,6 +32,9 @@ saveDatabaseSeconds:
 saveTagResolverSeconds:
     Number of seconds of how often tagResolver data should be saved on disk
 
+maxCallbackAge:
+    Maximum number of seconds a callback button should be old to be accepted by the bot, you can reduce this in case of incompatible callbacks after an update that cause crash
+
 preventSetUselessRoles:
     Disallow from setting roles if it does not change the user status in the group
 

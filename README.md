@@ -39,6 +39,10 @@ TODO:
 
 -short term:
 
+    add exceptions on anti-spam
+    fix crash on wrong html formatting in messagemaker
+    allow /*settings
+    add a message on chat on /del
     allow to edit single user perms
     commands help panel
     --below low priority--
