@@ -39,7 +39,6 @@ TODO:
 
 -short term:
 
-    add exceptions on anti-spam
     fix crash on wrong html formatting in messagemaker
     allow /*settings
     add a message on chat on /del
@@ -54,6 +53,7 @@ TODO:
     add photo preview-mode in MessageMaker.js
     allow to warn only usersIds who exhist on telegram, it can be checked if applyng a restriction returns true
     add config to allow/disallow adding bot from non-admin users
+    ?identify reply_parameters and add everytime allow_sending_without_reply?
 
 -medium term:
 

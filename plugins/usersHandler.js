@@ -91,7 +91,7 @@ function main(args)
         {
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 disable_notification : true //TODO: bot still send notification sto staffers, to-fix
             }
 
@@ -110,7 +110,7 @@ function main(args)
         {    
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:[]}
             }
 
@@ -122,7 +122,8 @@ function main(args)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
                 options.reply_parameters.chat_id = chat.id;
-            } 
+            }
+            console.log(options)
 
             try {
                 var member = await TGbot.getChatMember(chat.id, target.id);
@@ -139,7 +140,7 @@ function main(args)
         {
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:[]}
             }
 
@@ -171,7 +172,7 @@ function main(args)
 
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:[]}
             }
 

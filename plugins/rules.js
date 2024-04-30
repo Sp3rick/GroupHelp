@@ -19,7 +19,7 @@ function main(args)
         where = checkCommandPerms(command, "COMMAND_RULES", user.perms);
         if( chat.isGroup && command && where )
         {
-            var options = {reply_parameters: {chat_id:chat.id, message_id: msg.message_id}};
+            var options = {reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true}};
             if(msg.reply_to_message)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;

@@ -29,7 +29,7 @@ function main(args)
 
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id},
+                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:buttons}
             }
             var text = l[lang].ASK_PIN_NOTIFY
