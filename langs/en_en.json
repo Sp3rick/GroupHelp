@@ -192,6 +192,7 @@
     "SNUM_CB_TOOSMALL" : "⚠️ This is smaller than minimum limit ({number}).",
     "STIME_INVALID_INPUT" : "<i>⚠️ Your time is invalid. Try again.</i>",
     "REACHED_WARN_LIMIT" : "reached warn limit",
+    "MESSAGE_BEEN_DELETED_REASON" : "{name}, your message has been deleted because of: {reason}",
     "HAS_BEEN" : "has been",
     "HAS_BEEN_WARNED" : "warned",
     "HAS_BEEN_KICKED" : "has been {emoji} kicked",

@@ -1147,6 +1147,17 @@ function isChatAllowed(config, chatId)
     return true;
 }
 
+async function validateTelegramHTML(GHbot, userId, chatId, text)
+{return new Promise(async (resolve, reject)=>{
+    try {
+        var sentMsg = await GHbot.sendMessage(userId, chatId, text, {parse_mode:"HTML"});
+        GHbot.TGbot.deleteMessages(chatId, [sentMsg.message_id]);
+        resolve(true);
+    } catch (error) {
+        resolve(false);
+    }
+})}
+
 module.exports = 
 {
 
@@ -1211,4 +1222,5 @@ module.exports =
     loadChatUserId :loadChatUserId,
     getOwner : getOwner,
     isChatAllowed : isChatAllowed,
+    validateTelegramHTML : validateTelegramHTML,
 }

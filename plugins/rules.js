@@ -11,7 +11,7 @@ function main(args)
 
     l = global.LGHLangs; //importing langs object
 
-    GHbot.onMessage( (msg, chat, user) => {
+    GHbot.onMessage( async (msg, chat, user) => {
 
         var command = msg.command;
         var where;
@@ -37,7 +37,7 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId)
 
-        var customMessage = MSGMK.messageEvent(GHbot, db, settingsChat.rules, msg, chat, user, "S_RULES");
+        var customMessage = await MSGMK.messageEvent(GHbot, db, settingsChat.rules, msg, chat, user, "S_RULES");
 
         if(customMessage)
         {

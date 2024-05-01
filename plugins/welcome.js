@@ -43,7 +43,7 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId);
 
-        var customMessage = MSGMK.messageEvent(GHbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
+        var customMessage = await MSGMK.messageEvent(GHbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
 
         if(customMessage)
         {

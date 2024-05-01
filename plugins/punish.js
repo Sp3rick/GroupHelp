@@ -1,6 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
 const { punishUser, unpunishUser, silentPunish, silentUnpunish, genPunishText, genUnpunishButtons, genUnpunishText, genRevokePunishButton } = require("../api/punishment.js");
-const { checkCommandPerms, parseHumanTime, telegramErrorToText, unwarnUser, clearWarns } = require("../api/utils.js");
+const { LGHUserNameByTarget } = require("../api/tagResolver.js");
+const { checkCommandPerms, parseHumanTime, telegramErrorToText, unwarnUser, clearWarns, LGHUserName, bold, getUnixTime } = require("../api/utils.js");
 
 function main(args)
 {
@@ -19,7 +20,19 @@ function main(args)
         var target = command.target;
 
         if( chat.isGroup && checkCommandPerms(command, "COMMAND_DELETE", user.perms, ["del"]))
+        {
+            if(msg.reply_to_message)
+            {
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET, {parse_mode: "HTML"});
+                return;
+            }
             TGbot.deleteMessages(chat.id, [msg.message_id, msg.reply_to_message.message_id]);
+            var fullUsername = LGHUserNameByTarget(msg, target.id);
+            if(command.args && command.args.length > 0 && (getUnixTime() - msg.reply_to_message.date < 172800))
+                GHbot.sendMessage(user.id, chat.id, l[lang].MESSAGE_BEEN_DELETED_REASON
+                .replace("{name}",fullUsername).replace("{reason}",bold(command.args)),
+                {parse_mode: "HTML"});
+        }
 
 
         var punishment = false;

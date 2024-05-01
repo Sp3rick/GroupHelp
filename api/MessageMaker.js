@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold} = require("./utils.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML} = require("./utils.js");
 const { pushUserRequest } = require("./SafeTelegram.js");
 const { substitute } = require("./substitutor.js");
 
@@ -360,7 +360,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
  * 
  * @return {customMessage|false}
  */
-function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix)
+async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix)
 {
 
     var l = global.LGHLangs;
@@ -384,12 +384,10 @@ function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix)
     if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_TEXT:") )
     {
 
-        if( !msg.hasOwnProperty("text") )
+        if( !msg.hasOwnProperty("text") || !(await validateTelegramHTML(GHbot, user.id, chat.id, msg.text)))
         {
-
             GHbot.sendMessage(user.id, chat.id, l[user.lang].PARSING_ERROR_TEXT, options)
             return false;
-
         }
 
         customMessage.text = msg.text;
@@ -416,7 +414,7 @@ function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix)
             return false;
         }
         
-        if( msg.hasOwnProperty("caption") )
+        if( msg.hasOwnProperty("caption") && await validateTelegramHTML(GHbot, user.id, chat.id, msg.caption))
         {
             if(customMessage.hasOwnProperty("entities")) delete customMessage.entities; //delete old entities
             customMessage.text = msg.caption;
