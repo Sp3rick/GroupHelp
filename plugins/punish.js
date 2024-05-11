@@ -19,24 +19,46 @@ function main(args)
         var lang = chat.lang;
         var target = command.target;
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_DELETE", user.perms, ["del"]))
+        var punishment = false;
+        var removePunishment = false;
+        var commandDelete = chat.isGroup && checkCommandPerms(command, "COMMAND_DELETE", user.perms, ["del"]);
+        var silentDelete = false;
+        if(checkCommandPerms(command, "COMMAND_DELWARN", user.perms))
         {
-            if(msg.reply_to_message)
+            silentDelete = true;
+            punishment = 1;
+        }
+        if(checkCommandPerms(command, "COMMAND_DELKICK", user.perms))
+        {
+            silentDelete = true;
+            punishment = 2;
+        }
+        if(checkCommandPerms(command, "COMMAND_DELMUTE", user.perms))
+        {
+            silentDelete = true;
+            punishment = 3;
+        }
+        if(checkCommandPerms(command, "COMMAND_DELBAN", user.perms))
+        {
+            silentDelete = true;
+            punishment = 4;
+        }
+
+        if( commandDelete || silentDelete)
+        {
+            if(!msg.reply_to_message && !silentDelete)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET, {parse_mode: "HTML"});
+                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_DELETE_TARGET, {parse_mode: "HTML"});
                 return;
             }
             TGbot.deleteMessages(chat.id, [msg.message_id, msg.reply_to_message.message_id]);
             var fullUsername = LGHUserNameByTarget(msg, target.id);
-            if(command.args && command.args.length > 0 && (getUnixTime() - msg.reply_to_message.date < 172800))
+            if(!silentDelete && command.args && command.args.length > 0 && (getUnixTime() - msg.reply_to_message.date < 172800))
                 GHbot.sendMessage(user.id, chat.id, l[lang].MESSAGE_BEEN_DELETED_REASON
                 .replace("{name}",fullUsername).replace("{reason}",bold(command.args)),
                 {parse_mode: "HTML"});
         }
 
-
-        var punishment = false;
-        var removePunishment = false;
         if( chat.isGroup && checkCommandPerms(command, "COMMAND_WARN", user.perms))
             punishment = 1;
         if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNWARN", user.perms))

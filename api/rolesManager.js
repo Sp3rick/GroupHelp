@@ -455,6 +455,7 @@ function orderRolesByPriority(roles, chat) //Chat required only if role is numbe
 function sumUserPerms(chat, userId)
 {
 
+    //calculating user permissions//
     var perms = chat.basePerms;
     if(isAdminOfChat(chat, userId))
     {
@@ -476,6 +477,39 @@ function sumUserPerms(chat, userId)
     //higher priority calculation
     var userPerms = getUserPerms(chat, userId);
     perms = sumPermsPriority(userPerms, perms);
+
+
+    //additional permissions//
+    //add warn permission if correlated to punishment
+    if(!perms.commands.includes("COMMAND_WARN"))
+    {
+        if(chat.warns.punishment == 2 && perms.commands.includes("COMMAND_KICK"))
+            perms.commands.push("COMMAND_WARN")
+        if(chat.warns.punishment == 3 && perms.commands.includes("COMMAND_MUTE"))
+            perms.commands.push("COMMAND_WARN")
+        if(chat.warns.punishment == 4 && perms.commands.includes("COMMAND_BAN"))
+            perms.commands.push("COMMAND_WARN")
+    }
+    if(!perms.commands.includes("COMMAND_UNWARN"))
+    {
+        if(chat.warns.punishment == 3 && perms.commands.includes("COMMAND_UNMUTE"))
+            perms.commands.push("COMMAND_UNWARN")
+        if(chat.warns.punishment == 4 && perms.commands.includes("COMMAND_UNBAN"))
+            perms.commands.push("COMMAND_UNWARN")
+    }
+
+    //add mixed commands
+    if(perms.commands.includes("COMMAND_DELETE"))
+    {
+        if(perms.commands.includes("COMMAND_WARN"))
+            perms.commands.push("COMMAND_DELWARN")
+        if(perms.commands.includes("COMMAND_KICK"))
+            perms.commands.push("COMMAND_DELKICK")
+        if(perms.commands.includes("COMMAND_MUTE"))
+            perms.commands.push("COMMAND_DELMUTE")
+        if(perms.commands.includes("COMMAND_BAN"))
+            perms.commands.push("COMMAND_DELBAN")
+    }
 
     return perms;
 

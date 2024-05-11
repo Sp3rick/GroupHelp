@@ -141,9 +141,16 @@ Complete list of implemented commands:
 -Punishments
 * /del - delete a message (COMMAND_DELETE)
 * /warn - warn user and punish if reach group warn limit (COMMAND_WARN)
+* /unwarn - remove a warn from user (COMMAND_UNWARN)
+* /delwarn - warn user and delete a message (COMMAND_DELWARN)
 * /kick - kick an user out from the group (COMMAND_KICK)
+* /delkick - kick user and delete a message (COMMAND_DELKICK)
 * /mute - disable messages to a user (COMMAND_MUTE)
+* /unmute - re-enable messages to an user (COMMAND_UNMUTE)
+* /delmute - mute user and delete a message (COMMAND_DELMUTE)
 * /ban - permanently remove an user from the group (COMMAND_BAN)
+* /unban - unban  user from the group (COMMAND_UNBAN)
+* /delban - ban user and delete a message (COMMAND_DELBAN)
 
 -Roles
 * /free - give free role to user (COMMAND_FREE)
