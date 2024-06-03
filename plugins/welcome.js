@@ -43,7 +43,7 @@ function main(args)
 
         var settingsChat = db.chats.get(settingsChatId);
 
-        var customMessage = await MSGMK.messageEvent(GHbot, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
+        var customMessage = await MSGMK.messageEvent(GHbot, db, settingsChat.welcome.message, msg, chat, user, "S_WELCOME");
 
         if(customMessage)
         {
@@ -155,7 +155,7 @@ function main(args)
         if( cb.data.startsWith("S_WELCOME#MSGMK") )
         {
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_WELCOME_BUTTON:"+settingsChatId}]];
-            var customMessage = MSGMK.callbackEvent(GHbot, settingsChat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME);
+            var customMessage = MSGMK.callbackEvent(GHbot, db, settingsChat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME);
             if(customMessage)
             {
                 settingsChat.welcome.message = customMessage;

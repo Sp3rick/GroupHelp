@@ -1,4 +1,4 @@
-global.LGHVersion = "0.2.2.2";
+global.LGHVersion = "0.2.2.3";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
 const TR = require("./api/tagResolver.js");
@@ -67,7 +67,13 @@ async function main()
     directory.forEach( (fileName) => {
 
         var func = require( __dirname + "/plugins/" + fileName );
-        func({GHbot : GHbot, TGbot : TGbot, db : db, config : config})
+        try {
+            func({GHbot : GHbot, TGbot : TGbot, db : db, config : config})
+        } catch (error) {
+            console.log("The plugin " + fileName + " is crashed, i will turn it off and log here the error");
+            console.log(error);
+        }
+        
         console.log( "\tloaded " + fileName)
 
     } )

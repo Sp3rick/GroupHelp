@@ -39,22 +39,12 @@ TODO:
 
 -short term:
 
-    allow /*settings
     allow to edit single user perms
     commands help panel
-    --below low priority--
-    allow on /perms to change user perms and roles +add it in a button for /info or when a role is set (/free /mod etc..)
-    allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
-    add something to allow a group admin to identify all users with special perms
-    ?add an automatic leveling system for admins? (maybe?)
-    ask double confirm to give an user the "settings" and "roles" (roles management) permission
-    add photo preview-mode in MessageMaker.js
-    allow to warn only usersIds who exhist on telegram, it can be checked if applyng a restriction returns true
-    add config to allow/disallow adding bot from non-admin users
-    ?identify reply_parameters and add everytime allow_sending_without_reply?
 
 -medium term:
 
+    allow on /perms to change user perms and roles, +add it in a button for /info or when a role is set (/free /mod etc..), +ask double confirm to give an user the "settings" and "roles" permission
     support for anonymous admins
     allow to customize /staff allowing to set roles to hide
     create a privacy setting where users can ask to esclude themself from tagResolver and replace his's first name in database with "Anonymous"
@@ -74,13 +64,23 @@ TODO:
     allow bot clone bot when user give a token
     add optionally an userbot (when active implement in tagResolver.js)
 
+-other things:
+
+    implement direct private settings with /*settings
+    allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
+    add something to allow a group admin to identify all users with additional bot perms
+    ?add an automatic leveling system for admins? (maybe?)
+    add photo preview-mode in MessageMaker.js
+    allow to warn only usersIds who exhist on telegram, it can be checked if applyng a restriction returns true
+    add config to allow/disallow adding bot from non-admin users
+    ?identify reply_parameters and add everytime allow_sending_without_reply? (GHBot.js)
+
+
 |
 
 known possible bugs:
 -sometimes db.chats.update in plugins may be not used at all because you can still edit the global object cause to reference, not using it may cause some issue. +if global reference get cleared too early code may try to access and inexistent variable
 
--if bot is expecting a message from an user it will take the reply from any chat the user write
+-cleanHTML() may be not applyed in some text where it should, and nothing assure that it's 100% able to clean everything needed for telegram api
 
--cleanHTML() may be not applyed in some text where it should, the function probably clean everything needed to clean for telegram api
-
--if get added a new permission and it's not added to every userPerms object in chat data this may cause incorrect result in sumUserPerms
+-if you add a new permission on userPerms object, every userPerms object should be updated adding that, otherwise this may cause incorrect result in sumUserPerms

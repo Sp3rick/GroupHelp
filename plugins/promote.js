@@ -89,7 +89,7 @@ function main(args)
                 GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
 
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
             }
 
         }

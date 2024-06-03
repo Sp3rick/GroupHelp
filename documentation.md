@@ -165,11 +165,13 @@ Complete list of implemented commands:
 * /unmod - remove moderator role to user (COMMAND_UNMODERATOR)
 * /cofounder - set cofounder role to user (COMMAND_COFOUNDER)
 * /uncofounder - remove cofounder role to user (COMMAND_UNCOFOUNDER)
+
 -Admins
 * /admin - make user admin (COMMAND_ADMINISTRATOR)
 * /unadmin - remove admin role to user (COMMAND_UNADMINISTRATOR)
 * /title - set admin title (COMMAND_TITLE)
 * /untitle - remove admin title (COMMAND_UNTITLE)
+
 -Privacy
 * /forgot - remove every data on the group about an user (COMMAND_FORGOT)
 

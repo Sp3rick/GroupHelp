@@ -1065,6 +1065,8 @@ function telegramErrorToText(lang, error)
         text = l[lang].MISSING_RIGHTS;
     else if(errDescription.includes("only creator can edit their custom title"))
         text = l[lang].OWNER_ONLY_TITLE
+    else if(errDescription.includes("CHAT_ADMIN_REQUIRED"))
+        text = l[lang].MISSING_RIGHT_OR_ALREADY_PROMOTED;
     else if(errDescription.includes("Too Many Requests"))
         text = "⚠️ "+errDescription;
     else
