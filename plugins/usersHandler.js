@@ -50,7 +50,7 @@ function main(args)
 
         var command = msg.command;
         var lang = chat.lang;
-        var target = command.target;
+        var target = msg.target;
         var where;
 
         if(IsEqualInsideAnyLanguage(command.name, "COMMAND_RELOAD"))
@@ -123,7 +123,6 @@ function main(args)
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
                 options.reply_parameters.chat_id = chat.id;
             }
-            console.log(options)
 
             try {
                 var member = await TGbot.getChatMember(chat.id, target.id);
@@ -185,6 +184,7 @@ function main(args)
             var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
                 options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+target.id}])
+            options.reply_markup.inline_keyboard.push([{text:l[lang].COMMAND_PERMS_BUTTON2,callback_data:"S_#CMDPERMS_MENU:"+chat.id}]);
 
             var text = target.name+" "+l[lang].PERMISSIONS+": \n"+
             genPermsReport(chat.lang, target.perms)+"\n\n"+

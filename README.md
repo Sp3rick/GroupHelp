@@ -67,6 +67,8 @@ TODO:
 -other things:
 
     implement direct private settings with /*settings
+    add a /commands command to help user to know bot commands, admin commands, and custom-group commands if avaiable
+    a check system to drop wrong formatted cb.data and user.waitingReplyType
     allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
     add something to allow a group admin to identify all users with additional bot perms
     ?add an automatic leveling system for admins? (maybe?)

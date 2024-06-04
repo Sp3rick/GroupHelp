@@ -1,5 +1,6 @@
 const fs = require( "fs" );
-const { usernameOrFullName, isNumber, code } = require("./utils");
+const { usernameOrFullName, isNumber, code, loadChatUserId } = require("./utils");
+const RM = require("./rolesManager");
 
 if(!global.LGHTagToId) global.LGHTagToId = {};
 if(!global.LGHIdToTag) global.LGHIdToTag = {};
@@ -107,15 +108,11 @@ function getTag(userId) {
     return false;
 }
 
-function getCommandTargetUserId(msg) {
-    if (!msg.command) return false;
+function getMessageTargetUserId(msg) {
+    if (!msg.command && !msg.hasOwnProperty("reply_to_message")) return false;
 
     if (msg.hasOwnProperty("reply_to_message"))
         return msg.reply_to_message.from.id;
-
-    if (msg.hasOwnProperty("entities") && msg.entities.length > 1)
-        if (msg.entities[1].type == "text_mention")
-            return msg.entities[1].user.id;
 
     if (msg.command.splitArgs && msg.command.splitArgs.length > 0) {
 
@@ -132,6 +129,10 @@ function getCommandTargetUserId(msg) {
         return getId(username);
     }
 
+    if (msg.hasOwnProperty("entities") && msg.entities.length > 1)
+        if (msg.entities[1].type == "text_mention")
+            return msg.entities[1].user.id;
+
     return msg.from.id;
 }
 
@@ -140,6 +141,33 @@ function LGHUserNameByTarget(msg, userId) {
         usernameOrFullName(msg.reply_to_message.from) + " " : (getTag(userId) ? "@" + getTag(userId) + " " : "");
     LGHUserName += "[" + code(userId) + "] ";
     return LGHUserName;
+}
+
+//chat and TGbot are needed to allow getting the user from telegram getChatMember
+//chat object is needed for target.perms
+//msg.command is needed to get target from text that's a command
+async function getMessageTarget(msg, chat, TGbot, db)
+{
+    var targetId = getMessageTargetUserId(msg);
+    if(!targetId) return false;
+
+    var target = {
+        id:targetId,
+        name: LGHUserNameByTarget(msg, targetId),
+    }
+    if(chat && chat.isGroup) target.perms = RM.sumUserPerms(chat, targetId);
+    target.user = msg.hasOwnProperty("reply_to_message") ? msg.reply_to_message.from : db.users.get(targetId);
+    if(!target.user && TGbot && chat) target.user = await loadChatUserId(TGbot, chat.id, targetId, db);
+
+    //if target is got from args remove that one responsable from the command object
+    if(!msg.hasOwnProperty("reply_to_message") && targetId != msg.from.id)
+    {
+        msg.command.args = (msg.command.splitArgs.length >= 2) ?
+            msg.command.args.split(msg.command.splitArgs[0]+" ")[1] : msg.command.args = "";
+        msg.command.splitArgs.shift();   
+    }
+
+    return target;
 }
 
 function storeMembers(members, db)
@@ -168,6 +196,6 @@ async function getAdmins(TGbot, chatId, db) {
 module.exports = {
     load, save,
     log, logUsers, logEntities, logMsg, logCb, logMembers,
-    getId, getTag, getCommandTargetUserId,
+    getId, getTag, getMessageTargetUserId, getMessageTarget,
     LGHUserNameByTarget, storeMembers, getAdmins,
 };

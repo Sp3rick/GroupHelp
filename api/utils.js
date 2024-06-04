@@ -1067,6 +1067,8 @@ function telegramErrorToText(lang, error)
         text = l[lang].OWNER_ONLY_TITLE
     else if(errDescription.includes("CHAT_ADMIN_REQUIRED"))
         text = l[lang].MISSING_RIGHT_OR_ALREADY_PROMOTED;
+    else if(errDescription.includes("can't promote self"))
+        text = l[lang].CANT_SELF_PROMOTE;
     else if(errDescription.includes("Too Many Requests"))
         text = "⚠️ "+errDescription;
     else
@@ -1112,11 +1114,12 @@ function clearWarns(chat, userId)
     return chat;
 }
 
+//db is optional
 async function loadChatUserId(TGbot, chatId, userId, db)
 {
     try {
         var user = await TGbot.getChatMember(chatId, userId).user;
-        db.users.add(user);
+        if(db) db.users.add(user);
         return user;
     } catch (error) {
         return false;

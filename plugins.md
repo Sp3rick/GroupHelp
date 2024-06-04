@@ -6,7 +6,7 @@ user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: i
 NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
 Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
 --Targets--
-Any msg.command object may contain an msg.command.target object if a command target user is found
+Any message object may contain an msg.target object if a command or message target user is found
 Also cb.target may exhist, builded up from user id after "?" in cb.data
 user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "?")
 
@@ -108,7 +108,7 @@ text avaiable substitutions:
 • {GROUPNAME} = group name
 • {GROUPUSERNAME} = group username
 • {GROUPID} = group id
-(TO IMPLEMENT)
+(TO IMPLEMENT & TODO: allow to make a sum of dates and time)
 • {RULES} = group regulation text
 • {DATE} = current date
 • {TIME} = current time
@@ -118,12 +118,13 @@ text avaiable substitutions:
 • {UNIX} = seconds since 1970/1/1
 
 optional if configuration allow external api:
+Syntax: FIAT{SYMBOL:OPTION}
 • {BTC} {ETH} {BNB} {SOL} {XRP} {DOGE} {TON} {ADA} ... {XMR} = crypto price, avaiable any top2000 crypto symbol
-• {TOP1} {TOP2} ... {TOP2000} = get crypto symbol at specific classific height (max 2000)
--Crypto options: CAP(capitalization), VOL(24h volume), SUPPLY, RANK(cap classific), NAME, EXPLORER. (example: {CAPBITCOIN})
--Convert from default to specific currency: ${number}, €{number}, £{number}, CHF{number} or ₣{number}.
--Examples: {BNB}, €{BTC}, CHF{ETH}, £{BTC:CAP}, {XMR:SUPPLY}, €{{TOP15}} £{{TOP3}:VOL}
--Api: https://api.coincap.io/v2/assets (https://docs.coincap.io/)
+• {TOP1} {TOP2} ... {TOP2000} = get crypto symbol at specific classific height (max 2000) ({TOP1} will translate to "BTC", so {{TOP1}} is the same of {BTC} and will give you the crypto price)
+• Options: CAP(capitalization), VOL(24h volume), SUPPLY, RANK(cap classific), NAME, EXPLORER. (example: {CAPBITCOIN})
+• Convert from default to specific currency: ${number}, €{number}, £{number}, CHF{number} or ₣{number}.
+• Examples: {BNB}, €{BTC}, CHF{ETH}, £{BTC:CAP}, {XMR:SUPPLY}, €{{TOP15}} £{{TOP3}:NAME}
+• Api: https://api.coincap.io/v2/assets (https://docs.coincap.io/)
 
 
 

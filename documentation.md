@@ -46,7 +46,7 @@ works with less items still in same order: CALLBACK_NAME:groupId OR CALLBACK_NAM
 
 -groupId: that allow main.js to set a full object of chat (note: msg.chat or cb.message.chat may be not affected, GHbot ever gives you a dedicated chat parameter), it also allow to set the user.perms object in private chat (in group it's done directly from chat.id)
 
--targetUserId: that allow main.js to set a target user in various cases: cb.target, msg.userWaitingReplyTarget (target for text commands is not related with that, it's also avaiable on msg.command.target and it's based on msg.text instead of targetUserId)
+-targetUserId: that allow main.js to set a target user in various cases: cb.target, msg.userWaitingReplyTarget (target for text commands is not related with that, it's also avaiable on msg.target and it's based on msg.text instead of targetUserId)
 
 
 
@@ -106,7 +106,7 @@ waitingReplyType : additional data related to waitingReply
 
 Additional data of custom <i>msg</i> object:
 command : result of message text parsed with parseCommand()
-command.target : identified command targeted user
+target : identified target of message, it's may be derived from the command or from replyed user
 
 
 <b>Command Object</b>

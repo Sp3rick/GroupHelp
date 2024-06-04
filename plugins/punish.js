@@ -17,7 +17,7 @@ function main(args)
 
         var command = msg.command;
         var lang = chat.lang;
-        var target = command.target;
+        var target = msg.target;
 
         var punishment = false;
         var removePunishment = false;

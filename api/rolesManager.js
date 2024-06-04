@@ -1,5 +1,5 @@
-const {usernameOrFullName, genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId, isAdminOfChat} = require("./utils.js");
-var l = global.LGHLangs;
+const {genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId, isAdminOfChat} = require("./utils.js");
+l = global.LGHLangs;
 
 //Roles with string name is intended as a pre-made role
 //pre-made roles chat.roles[role] will contain only "users" array, data about the role are stored on global.roles[role]

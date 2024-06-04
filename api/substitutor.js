@@ -10,7 +10,8 @@ function includesTopNumber(text) {
 
 function hasSubstitution(text, prefix) {
     const regex = new RegExp(`\\{${prefix.toUpperCase()}(:\\d+|:\\w+)?\\}`);
-    return regex.test(text);
+    var result = regex.test(text)
+    return result;
 }
 
 
@@ -60,6 +61,7 @@ function substitute(text, user, chat, db)
 
     //set symbols to crypto
     cp.getCoinList().forEach((symbol)=>{
+        if(symbol != "BTC") return;
         while(hasSubstitution(text, symbol))
         {
             var opts = text.split("{"+symbol)[1].split("}")[0];
@@ -67,8 +69,8 @@ function substitute(text, user, chat, db)
 
             //set currency
             var currency = chat.currency;
-            var beforeSub = text.split(sub)[0];
-            var afterSub = text.split(sub)[1];
+            var [beforeSub, ...afterSub] = text.split(sub);
+            afterSub = afterSub.join(sub);
             if(beforeSub.endsWith("$"))
             {
                 currency = "USD";
@@ -94,8 +96,7 @@ function substitute(text, user, chat, db)
                 currency = "CHF";
                 beforeSub = replaceLast(beforeSub, "₣", "");
             }
-            else
-                currency = "USD";
+            else currency = "USD";
 
             text = beforeSub+sub+afterSub;
 

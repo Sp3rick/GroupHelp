@@ -42,7 +42,7 @@ async function main(config) {
     l = global.LGHLangs;
 
 
-    TGbot.on( "message", async (msg, metadata) => {
+    TGbot.on( "message", async (msg, metadata) => { try {
 
         if(!isChatAllowed(config, msg.chat.id)) return;
         
@@ -57,17 +57,6 @@ async function main(config) {
         if ( !db.users.exhist( from.id ) )
             db.users.add( from );
         var user = Object.assign( {},  db.users.get( from.id ), msg.from );
-        if(user.waitingReply)
-        {
-            if(user.waitingReply !== true && user.waitingReply != chat.id)
-                    user.waitingReply = false;
-            else
-            {
-                console.log("message from waitingReply user: " + user.waitingReplyType);
-                user.waitingReply = true;
-            }
-        }
-            
 
         //handle new chats
         if(isGroup && (config.overwriteChatDataIfReAddedToGroup || !db.chats.exhist( chat.id )))
@@ -105,37 +94,17 @@ async function main(config) {
         }
         chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
         
-        //configuring msg.command and msg.command.target
-        var command = parseCommand(msg.text || "");
-        msg.command = command;
-        msg.command.target = false;
-        var targetId = TR.getCommandTargetUserId(msg);
-        if(targetId)
-        {
-            msg.command.target = {
-                id:targetId,
-                name: TR.LGHUserNameByTarget(msg, targetId),
-            }
-            if(isGroup) msg.command.target.perms = RM.sumUserPerms(chat, targetId);
-            msg.command.target.user = msg.hasOwnProperty("reply_to_message") ? msg.reply_to_message.from : db.users.get(targetId);
-            if(!msg.command.target.user) msg.command.target.user = loadChatUserId(TGbot, chat.id, targetId, db);
-
-            //if target is got from args exclude that one responsable
-            if(!msg.hasOwnProperty("reply_to_message") && targetId != msg.from.id)
-            {
-                msg.command.args = (msg.command.splitArgs.length >= 2) ?
-                    msg.command.args.split(msg.command.splitArgs[0]+" ")[1] : msg.command.args = "";
-                msg.command.splitArgs.shift();   
-            }
-    
-        }
-
         //add any new chat user
         if(chat.users && !chat.users.hasOwnProperty(user.id))
         {
             chat = RM.addUser(chat, msg.from);
             db.chats.update(chat);
         }
+
+        //configuring msg.command and msg.target
+        var command = parseCommand(msg.text || "");
+        msg.command = command;
+        msg.target = await TR.getMessageTarget(msg, chat, TGbot, db);
 
         //configuring user.perms
         var selectedChat;
@@ -144,9 +113,21 @@ async function main(config) {
             selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
             user.perms = RM.sumUserPerms(selectedChat, user.id);
         }
+        
+        //configuring waitingReply
+        if(user.waitingReply)
+        {
+            if(user.waitingReply !== true && user.waitingReply != chat.id)
+                    user.waitingReply = false;
+            else
+            {
+                console.log("message from waitingReply user: ["+user.waitingReply+"] "+user.waitingReplyType);
+                user.waitingReply = true;
+            }
+        }
 
         //configuring user.waitingReplyTarget 
-        if( user.waitingReply == true && user.waitingReplyType.includes("?") )
+        if( user.waitingReply && user.waitingReplyType.includes("?") )
         {
             var wrTargetId = user.waitingReplyType.split("?")[1];
             user.waitingReplyTarget = RM.userIdToTarget(TGbot, selectedChat, wrTargetId, db);
@@ -156,9 +137,13 @@ async function main(config) {
         if ( chat.type == "private" )
             GroupHelpBot.emit( "private", msg, chat, user );
 
-    } );
+    } catch (err) {
+        console.log("Error in main.js on message event, i will log the error and then the received message");
+        console.log(err);
+        console.log(msg);
+    } } );
 
-    TGbot.on( "callback_query", async (cb) => {
+    TGbot.on( "callback_query", async (cb) => { try {
 
         if(!isChatAllowed(config, cb.message.chat.id)) return;
 
@@ -209,7 +194,11 @@ async function main(config) {
 
         GroupHelpBot.emit( "callback_query", cb, chat, user );
 
-    } )
+    } catch (err) {
+        console.log("Error in main.js on callback_query event, i will log the error and then the received callback");
+        console.log(err);
+        console.log(cb);
+    } } )
 
     TGbot.on( "left_chat_member", (msg) => {
 

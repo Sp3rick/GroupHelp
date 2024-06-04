@@ -18,7 +18,7 @@ function main(args)
 
         var command = msg.command;
         var lang = chat.lang;
-        var target = user.waitingReplyTarget || command.target;
+        var target = user.waitingReplyTarget || msg.target;
         var text = false;
         var options = {parse_mode : "HTML"};
         var toSetRole = false;
@@ -246,9 +246,15 @@ function main(args)
 
 
 
-        //security guards
+        //below from here handle set title
         if( !(user.waitingReply && user.waitingReplyType.startsWith("ADMINTITLE")) ) return;
-        if( !user.perms.commands.includes("COMMAND_ADMINISTRATOR") && !user.perms.commands.includes("COMMAND_TITLE") ) return;
+        if( !user.perms.commands.includes("COMMAND_TITLE") )
+        {
+            user.waitingReply = false;
+            GHbot.sendMessage(user.id, chat.id, l[lang].MISSING_PERMISSION);
+            db.users.update(user);
+            return;
+        }
 
         var settingsChatId = user.waitingReplyType.split(":")[1].split("?")[0];
         var settingsChat = Object.assign( {}, db.chats.get(settingsChatId), (chat.isGroup ? chat : {}) );
@@ -408,6 +414,13 @@ function main(args)
         {
             //check if caller is admin
             if(!isAdminOfChat(settingsChat, user.id))
+            {
+                GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION,show_alert:true});
+                return;
+            }
+
+            //check if user has permission to set titles
+            if( !user.perms.commands.includes("COMMAND_TITLE") )
             {
                 GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION,show_alert:true});
                 return;
