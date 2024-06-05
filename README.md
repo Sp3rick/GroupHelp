@@ -86,3 +86,5 @@ known possible bugs:
 -cleanHTML() may be not applyed in some text where it should, and nothing assure that it's 100% able to clean everything needed for telegram api
 
 -if you add a new permission on userPerms object, every userPerms object should be updated adding that, otherwise this may cause incorrect result in sumUserPerms
+
+-in some unkown cases you may get stuck in exceptions menu and SafeGram.js will block any user request due too high accumulated volume of something pending

@@ -26,6 +26,7 @@ function substitute(text, user, chat, db)
         var nameSurname = user.first_name+(user.last_name? " "+user.last_name : "");
         var surname = user.last_name || "{SURNAME}";
         var username = user.username ? "@"+user.username : "{USERNAME}";
+        var lang = user.lang || chat.lang;
         text = text
         .replaceAll("{ID}",user.id)
         .replaceAll("{NAME}",user.first_name)
@@ -34,8 +35,8 @@ function substitute(text, user, chat, db)
         .replaceAll("{GHNAME}",LGHUserName(user, db))
         .replaceAll("{USERNAME}",username)
         .replaceAll("{MENTION}",tag(nameSurname, user.id))
-        .replaceAll("{LANG}",l[user.lang].LANG_SHORTNAME)
-        .replaceAll("{FLAG}",l[user.lang].FLAG)
+        .replaceAll("{LANG}",l[lang].LANG_SHORTNAME)
+        .replaceAll("{FLAG}",l[lang].FLAG)
     }
     if(chat)
     {

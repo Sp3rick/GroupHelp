@@ -16,18 +16,18 @@ function main(args)
         if(chat.isGroup && chat.welcome.state && msg.hasOwnProperty("new_chat_members") )
         {
             var options = {reply_parameters: { message_id: msg.message_id, chat_id: chat.id }};
-            msg.new_chat_members.forEach(async (user) => {
+            msg.new_chat_members.forEach(async (newUser) => {
 
-                if(user.is_bot) return;
-                if(chat.welcome.once && chat.welcome.joinList.includes(user.id)) return;
+                if(newUser.is_bot) return;
+                if(chat.welcome.once && chat.welcome.joinList.includes(newUser.id)) return;
 
                 if(chat.welcome.clean && chat.welcome.lastWelcomeId != false)
                     TGbot.deleteMessages(chat.id, [chat.welcome.lastWelcomeId]);
 
-                var sentMessage = await MSGMK.sendMessage(GHbot, user, chat, chat.welcome.message, false, options);
+                var sentMessage = await MSGMK.sendMessage(GHbot, newUser, chat, chat.welcome.message, false, options);
                 if(sentMessage)
                 {
-                    chat.welcome.joinList.push(user.id);
+                    chat.welcome.joinList.push(newUser.id);
                     chat.welcome.lastWelcomeId = sentMessage.message_id;
                 }
                 db.chats.update(chat);

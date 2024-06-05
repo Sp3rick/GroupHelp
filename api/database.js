@@ -6,7 +6,7 @@ var RM = require("../api/rolesManager.js");
 function newSpamObj()
 {
     var obj = {
-        tgLinks: { usernames:false, bots:false, punishment:1, PTime:30 },
+        tgLinks: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:30 },
         links: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:30 },
         forward: { channels: {punishment: 0, PTime: 1800, delete: false},
             groups: {punishment: 0, PTime: 1800, delete: false},
@@ -19,7 +19,6 @@ function newSpamObj()
             users: {punishment: 0, PTime: 1800, delete: false},
             bots: {punishment: 0, PTime: 1800, delete: false},
         },
-        exceptions : []
     }
 
     return obj;
@@ -35,14 +34,34 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
 
     if(version == "0.2.1")
     {
-        version = "0.2.2";
-        console.log("\tupdating from 0.2.1 to 0.2.2 ...");
+        version = "0.2.4";
+        console.log("\tupdating from 0.2.1 to 0.2.4 ...");
 
         var chatFiles = fs.readdirSync(chatsDir);
         chatFiles.forEach((fileName)=>{
             var file = chatsDir+"/"+fileName;
             var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
             chat.spam = newSpamObj();
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
+    }
+
+    if(version == "0.2.2")
+    {
+        version = "0.2.4";
+        console.log("\tupdating from 0.2.2 to 0.2.4 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+
+            if(chat.spam.hasOwnProperty("exceptions"))
+            {
+                chat.spam.tgLinks.exceptions = chat.spam.exceptions;
+                delete chat.spam.exceptions;
+            }
+
             fs.writeFileSync(file, JSON.stringify(chat));
         })
     }

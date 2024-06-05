@@ -131,7 +131,6 @@ function main(args)
                 settingsChat.flood.messages = num;
                 db.chats.update(settingsChat);
             }
-            else GHbot.answerCallbackQuery(user.id, cb.id);
         }
         if( cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") )
         {
@@ -143,14 +142,13 @@ function main(args)
                 settingsChat.flood.time = num;
                 db.chats.update(settingsChat);
             }
-            else GHbot.answerCallbackQuery(user.id, cb.id);
         }
 
     })
 
     GHbot.onMessage( async (msg, chat, user) => {
 
-
+        //flood detection
         if(chat.type != "private"){(()=>{
             if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
             if(user.perms.flood == 1) return;

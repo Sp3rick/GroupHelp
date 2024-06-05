@@ -125,7 +125,6 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
     var l = global.LGHLangs;
 
     var settingsChatId = user.waitingReplyType.split(":")[1].split("?")[0];
-    var update = false;
     var prefix = cb_prefix+"#EXC";
     var lang = user.lang;
     max = max || 100;
@@ -133,7 +132,8 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
 
     //gather wanted data passed by user
     var foundStrings = false;
-    var channelForward = msg.forward_origin && msg.forward_origin.type == "channel"
+    var channelForward = msg.forward_origin && msg.forward_origin.type == "channel";
+    var hUserForward = msg.forward_origin && msg.forward_origin.type == "hidden_user";
     if(channelForward)
     {
         var originChat = msg.forward_origin.chat;
@@ -159,6 +159,8 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
             foundStrings = [exceptions[excIndex]];
         
     }
+    else if(hUserForward)
+        foundStrings = [msg.forward_origin.sender_user_name+":|hidden"];
     else if (msg.text)
         foundStrings = msg.text.split(/\r?\n/);
 

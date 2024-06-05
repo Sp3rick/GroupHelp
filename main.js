@@ -133,10 +133,16 @@ async function main(config) {
             user.waitingReplyTarget = RM.userIdToTarget(TGbot, selectedChat, wrTargetId, db);
         }
 
-        GroupHelpBot.emit( "message", msg, chat, user );
-        if ( chat.type == "private" )
-            GroupHelpBot.emit( "private", msg, chat, user );
-
+        try {
+            GroupHelpBot.emit( "message", msg, chat, user );
+            if ( chat.type == "private" ) GroupHelpBot.emit( "private", msg, chat, user );
+        } catch (err) {
+            console.log("Error after emitting a valid GroupHelpBot \"message\", i will log error then \"msg\", \"chat\", \"user\" ")
+            console.log(err);
+            console.log(msg);
+            console.log(chat);
+            console.log(user);
+        }
     } catch (err) {
         console.log("Error in main.js on message event, i will log the error and then the received message");
         console.log(err);
@@ -192,8 +198,15 @@ async function main(config) {
             cb.target = RM.userIdToTarget(TGbot, selectedChat, targetId, db);
         }
 
-        GroupHelpBot.emit( "callback_query", cb, chat, user );
-
+        try {
+            GroupHelpBot.emit( "callback_query", cb, chat, user );
+        } catch (err) {
+            console.log("Error after emitting a valid GroupHelpBot \"callback_query\", i will log error then \"cb\", \"chat\", \"user\" ")
+            console.log(err);
+            console.log(cb);
+            console.log(chat);
+            console.log(user);
+        }
     } catch (err) {
         console.log("Error in main.js on callback_query event, i will log the error and then the received callback");
         console.log(err);

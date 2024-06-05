@@ -541,7 +541,10 @@ function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalO
 
     options.reply_markup.inline_keyboard = customMessage.buttonsParsed;
     options = Object.assign( {}, options, additionalOptions )
+
+    text = substitute(text, user, chat);
     
+    //send
     if(customMessage.media)
     {
         var method = mediaTypeToMethod(customMessage.media.type);
@@ -551,10 +554,8 @@ function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalO
             options.caption_entities = JSON.stringify(options.entities);
         return pushUserRequest(TGbot, method, userId, sendId, customMessage.media.fileId, options);
     }
-
     if(!customMessage.hasOwnProperty("text"))
         return GHbot.sendMessage( userId, sendId, bold(messageTitle), {parse_mode:"HTML"} );;
-    text = substitute(text, user, chat);
     return GHbot.sendMessage( userId, sendId, text, options );
 
 }

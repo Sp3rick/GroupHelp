@@ -142,7 +142,7 @@
     "ANTIFLOOD_PUNISHMENT" : "AntiFlood, user sent more than {number} messages in {time} seconds",
     "ANTISPAM_TGLINKS_DESCRIPTION" : "<b>📘 Telegram links</b>\nFrom this menu you can set a punishment for users who send messages containing Telegram links.\n\n<b>🎯 Username Antispam: </b> this option triggers the antispam when a <b>username</b> considered spam is sent.\n\n<b>Bots Antispam: </b>this option triggers the antispam when a Bot link is sent.\n\n<b>Punishment: </b>{punishment}\n<b>Deletion: </b>{deletion}",
     "ANTISPAM_LINKS_DESCRIPTION" : "<b>🔗 TOTAL LINKS BLOCK</b>\nChoose the punishment for those who sends any kind of link.\n\n<b>Punishment: </b>{punishment}\n<b>Deletion: </b>{deletion}",
-    "ANTISPAM_FORWARD_DESCRITPION" : "<b>📩 Forwarding</b> Select punishment for users who forward messages in the group.\n\nForward from groups option blocks messages written by an anonymous administrator of another group and forwarded to this group.",
+    "ANTISPAM_FORWARD_DESCRITPION" : "<b>📩 Forwarding</b>\nSelect punishment for users who forward messages in the group.\n\nForward from groups option blocks messages written by an anonymous administrator of another group and forwarded to this group.",
     "ANTISPAM_QUOTES_DESCRITPION" : "<b>💭 Quote</b>\nSelect punishment for users who send messages containing quotes from external chats.",
     "CHAT_BASED_PERMS" : "<b>📣 Forwards from channels</b>\n └ {channels}\n<b>👥 Groups</b>\n └ {groups}\n<b>👤 Users</b>\n └ {users}\n<b>🤖 Bots</b>\n └ {bots}",
     "CHANNELS_BUTTON" : "📣 Channels",

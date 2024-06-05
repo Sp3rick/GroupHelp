@@ -16,7 +16,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @typedef {Object} LGHPunish antispam.js settings Object.
  * @property {Number} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
  * @property {Number|0|1|2|3|4|null} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
- * @property {boolean|null} delete - True if flooded messages should be deleted.
+ * @property {boolean|null} delete - True if deletion is enabled as side effect.
  */
 /**
  * @typedef {Object} LGHChatBasedPunish - Object to reresent different punish settings for more chat types
@@ -95,6 +95,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {Array.<String>} users - array of userId in this role
  */
 
+//PLUGINS DECLARATIONS
 /**
  * @typedef {Object} LGHWarns - warns.js plugin related data
  * @property {Object.<string, Number>} timed - ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over
@@ -114,7 +115,6 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {customMessage} message - CustomMessage object.
  */
 
-
 /**
  * @typedef {Object} LGHFloodAdds - antiflood.js settings additional Object elements.
  * @property {Number} messages - Number of messages needed to trigger the Antiflood.
@@ -124,21 +124,21 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @typedef {LGHFloodAdds & LGHPunish} LGHFlood - antiflood.js settings Object.
  */
 
-
 /**
  * @typedef {Object} LGHSpamTgLinksAdds - antispam.js settings Object additional items.
  * @property {Boolean} usernames - True if usernames should be considered as spam.
  * @property {Boolean} bots - True if bots should be considered as spam.
+ * @property {Array<String>} exceptions - Array of Telegram exceptions, may contain "Name:Id", "Name:|hidden" (for hidden users), or t.me link, or @username, "Name"
  */
 /**
- * @typedef {LGHSpamTgLinksAdds & LGHPunish} LGHSpamTgLinks - antispam.js settings about telegram links Object.
+ * @typedef {LGHSpamTgLinksAdds & LGHPunish} LGHSpamTgLinks - antispam.js settings about Telegram Links Object.
  */
 /**
  * @typedef {Object} LGHSpamLinksAdds - antispam.js spam links Object additional items.
- * @property {Array<String>} exceptions - Array of strings of allowed links.
+ * @property {Array<String>} exceptions - Array of strings of allowed links or hostnames.
  */
 /**
- * @typedef {LGHSpamLinksAdds & LGHPunish} LGHSpamLinks - antispam.js settings about links Object.
+ * @typedef {LGHSpamLinksAdds & LGHPunish} LGHSpamLinks - antispam.js settings about Links Object.
  */
 /**
  * @typedef {LGHChatBasedPunish} LGHSpamForward - antispam.js settings about foward.
@@ -153,7 +153,6 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHSpamLinks} links - rules and exceptions for all links considered as spam
  * @property {LGHSpamForward} forward - rules and exceptions for all forwarded messages considered as spam
  * @property {LGHSpamQuote} quote - rules and exceptions for all quoted messages considered as spam
- * @property {Array<String>} exceptions - Array of strings of allowed telegram exceptions
  */
 
 
