@@ -1,6 +1,6 @@
 Here there are various documentations about various plugins, if you created one you can document it here
 
-If you need documentation look at here [documentation.md](https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md)
+If you need documentation look at here [documentation.md](https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md)
 
 
 ## Roles Manager
