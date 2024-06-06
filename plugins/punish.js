@@ -13,15 +13,15 @@ function main(args)
 
     GHbot.onMessage( (msg, chat, user) => {
 
-        if(!chat.isGroup) return;
+        if(!msg.chat.isGroup) return;
 
         var command = msg.command;
-        var lang = chat.lang;
+        var lang = msg.chat.lang;
         var target = msg.target;
 
         var punishment = false;
         var removePunishment = false;
-        var commandDelete = chat.isGroup && checkCommandPerms(command, "COMMAND_DELETE", user.perms, ["del"]);
+        var commandDelete = msg.chat.isGroup && checkCommandPerms(command, "COMMAND_DELETE", user.perms, ["del"]);
         var silentDelete = false;
         if(checkCommandPerms(command, "COMMAND_DELWARN", user.perms))
         {
@@ -48,38 +48,38 @@ function main(args)
         {
             if(!msg.reply_to_message && !silentDelete)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_DELETE_TARGET, {parse_mode: "HTML"});
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_DELETE_TARGET, {parse_mode: "HTML"});
                 return;
             }
-            TGbot.deleteMessages(chat.id, [msg.message_id, msg.reply_to_message.message_id]);
+            TGbot.deleteMessages(msg.chat.id, [msg.message_id, msg.reply_to_message.message_id]);
             var fullUsername = LGHUserNameByTarget(msg, target.id);
             if(!silentDelete && command.args && command.args.length > 0 && (getUnixTime() - msg.reply_to_message.date < 172800))
-                GHbot.sendMessage(user.id, chat.id, l[lang].MESSAGE_BEEN_DELETED_REASON
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].MESSAGE_BEEN_DELETED_REASON
                 .replace("{name}",fullUsername).replace("{reason}",bold(command.args)),
                 {parse_mode: "HTML"});
         }
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_WARN", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_WARN", user.perms))
             punishment = 1;
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNWARN", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNWARN", user.perms))
             removePunishment = 1;
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_KICK", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_KICK", user.perms))
             punishment = 2;
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_MUTE", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_MUTE", user.perms))
             punishment = 3;
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNMUTE", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNMUTE", user.perms))
             removePunishment = 3;
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_BAN", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_BAN", user.perms))
             punishment = 4;
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNBAN", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNBAN", user.perms))
             removePunishment = 4;
 
         if((punishment || removePunishment) && !target)
         {
-            GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+            GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
             return;
         }
         if(punishment)
@@ -95,20 +95,20 @@ function main(args)
             
             if(target.perms.immune == 1)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].USER_IS_IMMUNE);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].USER_IS_IMMUNE);
                 return;
             }
 
-            punishUser(GHbot, user.id, chat, target, punishment, time, reason)
+            punishUser(GHbot, user.id, msg.chat, target, punishment, time, reason)
         }
         if(removePunishment)
-            unpunishUser(GHbot, user.id, chat, target, removePunishment, command.args)
+            unpunishUser(GHbot, user.id, msg.chat, target, removePunishment, command.args)
 
     } )
 
     GHbot.onCallback( async (cb, chat, user) => {
 
-        //security guards
+        //security guards for settings
         if(!chat.isGroup) return;
         if(!cb.data.startsWith("PUNISH_")) return;
         if(!cb.target)

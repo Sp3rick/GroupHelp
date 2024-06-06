@@ -219,6 +219,7 @@ testObject()
 
 /**
  * @typedef {Object} CustomMessage
+ * @property {LGHChat} chat - Always original chat object where the message is coming from
  * @property {ParsedCommand & CustomCommand} command - result of message text parsed with parseCommand()
  */
 
@@ -230,6 +231,7 @@ testObject()
 //CUSTOM CALLBACK DECLARTIONS
 /**
  * @typedef {Object} CustomCallback
+ * @property {LGHChat} chat - Always original chat object where the callback is coming from
  * @property {TargetUser} target - Optional temporary object with data about a target LGH user in the command, false if no target found
  */
 

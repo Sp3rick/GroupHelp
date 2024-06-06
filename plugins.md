@@ -1,21 +1,9 @@
-When you create a plugin you can use our-made events with many variables already set
+Here there are various documentations about various plugins, if you created one you can document it here
 
-ONLY for events from LGHBot you have additional elements bot-related
-If event comes from a group the "chat" object will contain the full Custom Chat Object (look at documentation.md) by the database (it's identified by isGroup or if callback data contains a groupId)
-user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: if chat.isGroup is true, if callback.data contains a groupId, or on message if user.waitingReply is true and user.waitingReplyType contains a groupId
-NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
-Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
---Targets--
-Any message object may contain an msg.target object if a command or message target user is found
-Also cb.target may exhist, builded up from user id after "?" in cb.data
-user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "?")
-
-NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database (var settingsChatId = cb.data.split(":")[1]; var settingsChat = db.chats.get(settingsChatId))
-
-You can find a comment referring security guards that you can use too in plugins/welcome.js
+If you need documentation look at here [documentation.md](https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md)
 
 
-<b>Roles Manager</b>
+## Roles Manager
 (api/rolesManager.js)
 
 >Depends on api/utils.js
@@ -69,7 +57,7 @@ users: array of userId in this role
 
 
 
-<b>Message Maker</b>
+## Message Maker
 (api/MessageMaker.js)
 
 >Depends on api/utils.js
@@ -130,7 +118,7 @@ Syntax: FIAT{SYMBOL:OPTION}
 
 
 
-<b>setChatBasedPunish.js</b>
+## setChatBasedPunish.js
 
 >Depends on api/utils.js
 >Depends on api/setTime.js
@@ -141,7 +129,7 @@ A settings panel to edit LGHChatBasedPunish object (avaiable on GHbot.js)
 
 
 
-<b>usersHandler.js</b>
+## usersHandler.js
 
 >Depends on api/rolesManager.js
 >Depends on api/utils.js
@@ -154,7 +142,7 @@ Added commands: /reload, /staff, /info, /perms, /forgot
 
 
 
-<b>promote.js</b>
+## promote.js
 
 >Depends on api/rolesManager.js
 >Depends on api/utils.js
@@ -166,7 +154,7 @@ Added commands: /free, /unfree, /helper, /unhelper, /cleaner, /uncleaner, /muter
 
 
 
-<b>punish.js</b>
+## punish.js
 
 >Depends on api/punishments.js
 >Depends on api/utils.js
@@ -178,7 +166,7 @@ Added commands: /delete, /warn, /unwarn, /kick, /mute, /unmute, /ban, /unban
 
 
 
-<b>Settings Plugin</b>
+## Settings Plugin
 
 >Depends on api/utils.js
 
@@ -188,7 +176,7 @@ Added commands: /settings
 
 
 
-<b>CommandsPerms.js</b>
+## CommandsPerms.js
 
 >Depends on api/utils.js
 
@@ -198,7 +186,7 @@ A menu to change basic commands permissions for every on group or admins, in fut
 
 
 
-<b>Rules Plugin</b>
+## Rules Plugin
 
 >Depends on api/MessageMaker.js
 >Depends on api/utils.js
@@ -214,7 +202,7 @@ Note: if format is false or entities unavaiable set message parse_mode to HTML (
 
 
 
-<b>Welcome Plugin</b>
+## Welcome Plugin
 
 >Depends on api/MessageMaker.js
 >Depends on api/utils.js
@@ -236,7 +224,7 @@ message : customMessage object
 
 
 
-<b>Anti-Flood Plugin</b>
+## Anti-Flood Plugin
 
 >Depends on api/rolesManager.js
 >Depends on api/utils.js
@@ -257,7 +245,7 @@ delete: true if flooded messages should be deleted
 
 
 
-<b>warns.js</b>
+## warns.js
 
 >Depends on api/utils.js
 >Depends on api/setNum.js
@@ -277,7 +265,7 @@ PTime: avaiable if punishment is set to warn/mute/ban, contains seconds of punis
 
 
 
-<b>pin.js</b>
+## pin.js
 
 >Depends on api/utils.js
 

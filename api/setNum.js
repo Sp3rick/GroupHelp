@@ -33,7 +33,7 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 
     if(!user.waitingReplyType.startsWith(cb_prefix+"#SNUM") || user.waitingReply != true)
     {
-        user.waitingReply = true;
+        user.waitingReply = chat.id;
         user.waitingReplyType = cb_prefix+"#SNUM:"+settingsChatId;
         db.users.update(user);
     }

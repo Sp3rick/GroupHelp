@@ -1,41 +1,46 @@
-Open-Source re-creation of telegram group manager Group Help in nodejs!
+## LibreGroupHelp
 
-An official instance of bot is running on @LibreGroupHelpBot, you can use that if you can't run it locally
+Open-Source re-creation of telegram group manager Group Help in NodeJS based on [node-telegram-api](https://github.com/yagop/node-telegram-bot-api).
 
-Installation:
+An official instance of bot is running on [@LibreGroupHelpBot](https://t.me/LibreGroupHelpBot)
 
-$ npm install
+## Installation:
 
-Set your bot token on config.js
-Config documentation: https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md
+```bash
+npm install
+```
+
+Set your bot token on config.js, look at [config documentation](https://github.com/Sp3rick/GroupHelp/blob/main/CONFIG_DOCUMENTATION.md).
 
 Run with:
-$ node index.js
-
-|
+```bash
+node index.js
+```
 
 Installation trubleshooting:
 
-if you have problems with node-telegram-bot-api installation use this command url based: 
-$ npm i https://github.com/yagop/node-telegram-bot-api
+if you have problems with node-telegram-bot-api installation try this command url based:
+```bash
+npm i https://github.com/yagop/node-telegram-bot-api
+```
 
 and if needed install other packages manually:
-$ npm i chrono-node
+```bash
+npm i chrono-node
+```
 
-|
+## Contribute
 
 Useful links to contribute:
-https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md
+[documentation.md](https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md).
+[Create a plugin](https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md).
 
-When you create a plugin you can document it on https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md
 
-|
+## Updating
+To update the bot you need to backup ./database folder and ./config.json only, then repeat installation process and paste there the old database and config.json, you may need to add some config.json parameters manually
 
-Updating: to update the bot you need to backup ./database folder and ./config.js only, then repeat installation process and paste there the old database folder
 
-|
-
-TODO:
+## Our TODO List:
 
 -short term:
 
@@ -78,9 +83,7 @@ TODO:
     ?identify reply_parameters and add everytime allow_sending_without_reply? (GHBot.js)
 
 
-|
-
-known possible bugs:
+## Known possible bugs:
 -sometimes db.chats.update in plugins may be not used at all because you can still edit the global object cause to reference, not using it may cause some issue. +if global reference get cleared too early code may try to access and inexistent variable
 
 -cleanHTML() may be not applyed in some text where it should, and nothing assure that it's 100% able to clean everything needed for telegram api
@@ -88,3 +91,8 @@ known possible bugs:
 -if you add a new permission on userPerms object, every userPerms object should be updated adding that, otherwise this may cause incorrect result in sumUserPerms
 
 -in some unkown cases you may get stuck in exceptions menu and SafeGram.js will block any user request due too high accumulated volume of something pending
+
+
+## Ask a question
+
+If you have any questions about LibreGroupHelp, feel free to open an issue or ask directly in our telegram group - [@LGHChat](https://t.me/LGHChat).

@@ -54,64 +54,57 @@ function main(args)
         var msg = cb.message;
         var lang = user.lang;
 
-        var settingsChatId = {};
-        var settingsChat = {};
-        if( cb.data.startsWith("S_FLOOD") )
-        {
-            settingsChatId = cb.data.split(":")[1]
-            settingsChat = db.chats.get(settingsChatId)
-        }
-
-        //security guards
+        //security guards for settings
+        if(!chat.isGroup) return;
         if( !cb.data.startsWith("S_FLOOD") ) return;
         if( !(user.hasOwnProperty("perms") && user.perms.settings) ) return;
-        if( chat.isGroup && settingsChatId != chat.id) return;
+        if( cb.chat.isGroup && chat.id != cb.chat.id) return;
 
-        var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]];
+        var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+chat.id}]];
         var cb_prefix = cb.data.split("#")[0];
 
         //main menu based settings
         if( cb.data.startsWith("S_FLOOD_M_P_") )
         {
-            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, settingsChat.flood.punishment);
-            if(toSetPunishment == settingsChat.flood.punishment) return;
-            else {settingsChat.flood.punishment = toSetPunishment; db.chats.update(settingsChat)};
+            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, chat.flood.punishment);
+            if(toSetPunishment == chat.flood.punishment) return;
+            else {chat.flood.punishment = toSetPunishment; db.chats.update(chat)};
         }
         //Set punishment duration
         if(cb.data.startsWith("S_FLOOD_M_PTIME#STIME") )
         {
-            var currentTime = settingsChat.flood.PTime;
-            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, settingsChat.flood.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
+            var currentTime = chat.flood.PTime;
+            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, chat.flood.punishment));
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, returnButtons, title)
 
             if(time != -1 && time != currentTime)
             {
-                settingsChat.flood.PTime = time;
-                db.chats.update(settingsChat);
+                chat.flood.PTime = time;
+                db.chats.update(chat);
             }
             return;
         }
         if( cb.data.startsWith("S_FLOOD_M_DELETION:") )
         {
-            settingsChat.flood.delete = !settingsChat.flood.delete;
-            db.chats.update(settingsChat)
+            chat.flood.delete = !chat.flood.delete;
+            db.chats.update(chat)
         }
         if( cb.data.startsWith("S_FLOOD_M_") )
         {
 
-            var punishment = settingsChat.flood.punishment;
-            var punishmentText = punishmentToTextAndTime(lang, punishment, settingsChat.flood.PTime)
+            var punishment = chat.flood.punishment;
+            var punishmentText = punishmentToTextAndTime(lang, punishment, chat.flood.PTime)
             var text = l[lang].ANTIFLOOD+"\n"+
-            l[lang].ANTIFLOOD_DESCRIPTION.replace("{messages}",settingsChat.flood.messages).replace("{seconds}",settingsChat.flood.time)+"\n\n"+
+            l[lang].ANTIFLOOD_DESCRIPTION.replace("{messages}",chat.flood.messages).replace("{seconds}",chat.flood.time)+"\n\n"+
             bold(l[lang].PUNISHMENT+": ")+punishmentText;
             
-            var buttons = [[{text: l[lang].MESSAGES_BUTTON, callback_data: "S_FLOOD_MESSAGES#SNUM_MENU:"+settingsChatId},{text: l[lang].TIME_BUTTON, callback_data: "S_FLOOD_TIME#SNUM_MENU:"+settingsChatId}]]
-            genPunishButtons(lang, punishment, "S_FLOOD_M", settingsChatId, true, settingsChat.flood.delete).forEach((line)=>buttons.push(line));
-            buttons.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+settingsChatId}]);
+            var buttons = [[{text: l[lang].MESSAGES_BUTTON, callback_data: "S_FLOOD_MESSAGES#SNUM_MENU:"+chat.id},{text: l[lang].TIME_BUTTON, callback_data: "S_FLOOD_TIME#SNUM_MENU:"+chat.id}]]
+            genPunishButtons(lang, punishment, "S_FLOOD_M", chat.id, true, chat.flood.delete).forEach((line)=>buttons.push(line));
+            buttons.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+chat.id}]);
 
             var options = {
                 message_id : msg.message_id,
-                chat_id : chat.id,
+                chat_id : cb.chat.id,
                 parse_mode : "HTML",
                 reply_markup : {inline_keyboard: buttons} 
             }
@@ -123,24 +116,24 @@ function main(args)
         //Setnum variables
         if( cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") )
         {
-            var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            var num = SN.callbackEvent(GHbot, db, settingsChat.flood.messages, cb, chat, user, cb_prefix, returnButtons, title, msgMin, msgMax);
+            var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",chat.flood.time);
+            var num = SN.callbackEvent(GHbot, db, chat.flood.messages, cb, cb.chat, user, cb_prefix, returnButtons, title, msgMin, msgMax);
 
-            if(num != -1 && num != settingsChat.flood.messages)
+            if(num != -1 && num != chat.flood.messages)
             {
-                settingsChat.flood.messages = num;
-                db.chats.update(settingsChat);
+                chat.flood.messages = num;
+                db.chats.update(chat);
             }
         }
         if( cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") )
         {
-            var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            var num = SN.callbackEvent(GHbot, db, settingsChat.flood.time, cb, chat, user, cb_prefix, returnButtons, title, timeMin, timeMax);
+            var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",chat.flood.messages);
+            var num = SN.callbackEvent(GHbot, db, chat.flood.time, cb, cb.chat, user, cb_prefix, returnButtons, title, timeMin, timeMax);
 
-            if(num != -1 && num != settingsChat.flood.time)
+            if(num != -1 && num != chat.flood.time)
             {
-                settingsChat.flood.time = num;
-                db.chats.update(settingsChat);
+                chat.flood.time = num;
+                db.chats.update(chat);
             }
         }
 
@@ -149,18 +142,18 @@ function main(args)
     GHbot.onMessage( async (msg, chat, user) => {
 
         //flood detection
-        if(chat.type != "private"){(()=>{
-            if(chat.flood.punishment == 0 && chat.flood.delete == false) return;
+        if(msg.chat.type != "private"){(()=>{
+            if(msg.chat.flood.punishment == 0 && msg.chat.flood.delete == false) return;
             if(user.perms.flood == 1) return;
 
-            var key = chat.id+"_"+user.id;
+            var key = msg.chat.id+"_"+user.id;
 
             if(!global.LGHFlood.hasOwnProperty(key))
                 global.LGHFlood[key] = {lastPunishment : 0, grouped: {}, single: {}};
             
             var now = msg.date;
-            var mLevel = chat.flood.messages;
-            var tLevel = chat.flood.time;
+            var mLevel = msg.chat.flood.messages;
+            var tLevel = msg.chat.flood.time;
             var grouped = global.LGHFlood[key].grouped;
             clearOutOfRangeMessages(key, now, tLevel);
 
@@ -186,7 +179,7 @@ function main(args)
     
 
             //flood reaction//
-            if(fire && chat.flood.delete)
+            if(fire && msg.chat.flood.delete)
             {
                 var messagesIds = [];
 
@@ -201,7 +194,7 @@ function main(args)
 
                 //keep inside 100 messages telegram limit
                 chunkArray(messagesIds, 100).forEach((ids)=>{
-                    TGbot.deleteMessages(chat.id, ids)
+                    TGbot.deleteMessages(msg.chat.id, ids)
                 })
                 
             }
@@ -211,9 +204,9 @@ function main(args)
             var recentlyPunished = (now - lastPunishment) < tLevel;
             if(fire && !recentlyPunished)
             {
-                var PTime = (chat.flood.PTime == 0) ? -1 : chat.flood.PTime;
-                var reason = l[chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",chat.flood.messages).replaceAll("{time}",chat.flood.time);
-                punishUser(GHbot, user.id,  chat, RM.userToTarget(chat, user), chat.flood.punishment, PTime, reason)
+                var PTime = (msg.chat.flood.PTime == 0) ? -1 : msg.chat.flood.PTime;
+                var reason = l[msg.chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",msg.chat.flood.messages).replaceAll("{time}",msg.chat.flood.time);
+                punishUser(GHbot, user.id,  msg.chat, RM.userToTarget(msg.chat, user), msg.chat.flood.punishment, PTime, reason)
             }
             if(fire) global.LGHFlood[key].lastPunishment = now;
 
@@ -221,52 +214,50 @@ function main(args)
 
         //security guards
         if( !(user.waitingReply && user.waitingReplyType.startsWith("S_FLOOD")) ) return;
-        var settingsChatId = user.waitingReplyType.split(":")[1];
-        if( chat.isGroup && settingsChatId != chat.id ) return;//additional security guard
+        if( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
         
-        var settingsChat = db.chats.get(settingsChatId)
         //punishment time setting
-        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
+        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+chat.id}]]
         var cb_prefix = user.waitingReplyType.split("#")[0];
         if( user.waitingReplyType.startsWith("S_FLOOD_M_PTIME#STIME") )
         {
-            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
-            var time = ST.messageEvent(GHbot, settingsChat.flood.PTime, msg, chat, user, cb_prefix, returnButtons, title);
+            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.flood.punishment));
+            var time = ST.messageEvent(GHbot, chat.flood.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
 
-            if(time != -1 && time != settingsChat.flood.PTime)
+            if(time != -1 && time != chat.flood.PTime)
             {
-                settingsChat.flood.PTime = time;
-                db.chats.update(settingsChat);
+                chat.flood.PTime = time;
+                db.chats.update(chat);
             }
         }
 
         var newValue = -1;
-        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+settingsChatId}]]
-        var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, settingsChat.flood.punishment));
+        var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+chat.id}]]
+        var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.flood.punishment));
         if( user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM")  )
         {
-            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",settingsChat.flood.time);
-            newValue = SN.messageEvent(GHbot, settingsChat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
+            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",chat.flood.time);
+            newValue = SN.messageEvent(GHbot, chat.flood.messages, msg, msg.chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
         }
     
         if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM")  )
         {
-            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",settingsChat.flood.messages);
-            newValue = SN.messageEvent(GHbot, settingsChat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
+            var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",chat.flood.messages);
+            newValue = SN.messageEvent(GHbot, chat.flood.time, msg, msg.chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
         }
         if(newValue != -1)
         {
-            if(user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM") && newValue != settingsChat.flood.messages)
+            if(user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM") && newValue != chat.flood.messages)
             {
-                settingsChat.flood.messages = newValue;
-                db.chats.update(settingsChat);
+                chat.flood.messages = newValue;
+                db.chats.update(chat);
             }
 
-            if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM") && newValue != settingsChat.flood.time )
+            if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM") && newValue != chat.flood.time )
             {
-                settingsChat.flood.time = newValue;
-                db.chats.update(settingsChat);
+                chat.flood.time = newValue;
+                db.chats.update(chat);
             }
         }
 

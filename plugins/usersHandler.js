@@ -40,16 +40,16 @@ function main(args)
 
     GHbot.onMessage( async (msg, chat, user) => {
 
-        if(!chat.isGroup) return;
+        if(!msg.chat.isGroup) return;
 
-        if(!chat.users[user.id].firtJoin)
+        if(!msg.chat.users[user.id].firtJoin)
         {
-            chat.users[user.id].firtJoin = getUnixTime();
-            db.chats.update(chat);
+            msg.chat.users[user.id].firtJoin = getUnixTime();
+            db.chats.update(msg.chat);
         }
 
         var command = msg.command;
-        var lang = chat.lang;
+        var lang = msg.chat.lang;
         var target = msg.target;
         var where;
 
@@ -64,11 +64,11 @@ function main(args)
 
             //TODO: add a token based bot complete restart
 
-            var adminList = await getAdmins(TGbot, chat.id, db);
-            chat = RM.reloadAdmins(chat, adminList);
-            db.chats.update(chat);
+            var adminList = await getAdmins(TGbot, msg.chat.id, db);
+            msg.chat = RM.reloadAdmins(msg.chat, adminList);
+            db.chats.update(msg.chat);
 
-            chat.admins.forEach((admin)=>{if(admin.user.id==TGbot.me.id){
+            msg.chat.admins.forEach((admin)=>{if(admin.user.id==TGbot.me.id){
                 if(!admin.can_delete_messages)
                     text+=l[lang].CANT_DELETE+"\n";
                 if(!admin.can_pin_messages)
@@ -83,7 +83,7 @@ function main(args)
 
             text+="✅ "+l[lang].ADMINS_UPDATED;
 
-            GHbot.sendMessage(user.id, chat.id, text, options);
+            GHbot.sendMessage(user.id, msg.chat.id, text, options);
         }
 
         where = checkCommandPerms(command, "COMMAND_STAFF", user.perms, ["staff"]);
@@ -91,18 +91,18 @@ function main(args)
         {
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
+                reply_parameters: {chat_id:msg.chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 disable_notification : true //TODO: bot still send notification sto staffers, to-fix
             }
 
             if(msg.reply_to_message)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
-                options.reply_parameters.chat_id = chat.id;
+                options.reply_parameters.chat_id = msg.chat.id;
             } 
 
-            var func = (id) => {return GHbot.sendMessage(user.id, id, RM.genStaffListMessage(chat.lang, chat, db), options)};
-            sendCommandReply(where, lang, GHbot, user, chat.id, func);
+            var func = (id) => {return GHbot.sendMessage(user.id, id, RM.genStaffListMessage(msg.chat.lang, msg.chat, db), options)};
+            sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
         }
 
         where = checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]);
@@ -110,27 +110,27 @@ function main(args)
         {    
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
+                reply_parameters: {chat_id:msg.chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:[]}
             }
 
-            var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
+            var isUserAdmin = msg.chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
-                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+target.id}])
+                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+msg.chat.id+"?"+target.id}])
 
             if(msg.reply_to_message)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
-                options.reply_parameters.chat_id = chat.id;
+                options.reply_parameters.chat_id = msg.chat.id;
             }
 
             try {
-                var member = await TGbot.getChatMember(chat.id, target.id);
-                var memberAndUser = Object.assign({}, member.user, chat.users[target.id]);
-                var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options)};
-                sendCommandReply(where, lang, GHbot, user, chat.id, func);
+                var member = await TGbot.getChatMember(msg.chat.id, target.id);
+                var memberAndUser = Object.assign({}, member.user, msg.chat.users[target.id]);
+                var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(msg.chat.lang, msg.chat, memberAndUser, member), options)};
+                sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
         }
 
@@ -139,24 +139,24 @@ function main(args)
         {
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
+                reply_parameters: {chat_id:msg.chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:[]}
             }
 
             if(msg.reply_to_message)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
-                options.reply_parameters.chat_id = chat.id;
+                options.reply_parameters.chat_id = msg.chat.id;
             }   
 
             try {
-                var member = await TGbot.getChatMember(chat.id, user.id);
-                var memberAndUser = Object.assign({}, member.user, chat.users[user.id]);
+                var member = await TGbot.getChatMember(msg.chat.id, user.id);
+                var memberAndUser = Object.assign({}, member.user, msg.chat.users[user.id]);
                 
-                var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(chat.lang, chat, memberAndUser, member), options)};
-                await sendCommandReply(where, lang, GHbot, user, chat.id, func);
+                var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(msg.chat.lang, msg.chat, memberAndUser, member), options)};
+                await sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
         }
 
@@ -165,41 +165,41 @@ function main(args)
         {
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
             var options = {
                 parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
+                reply_parameters: {chat_id:msg.chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
                 reply_markup: {inline_keyboard:[]}
             }
 
             if(msg.reply_to_message)
             {
                 options.reply_parameters.message_id = msg.reply_to_message.message_id;
-                options.reply_parameters.chat_id = chat.id;
+                options.reply_parameters.chat_id = msg.chat.id;
             } 
 
-            var isUserAdmin = chat.admins.some((admin)=>{return admin.user.id == target.id});
+            var isUserAdmin = msg.chat.admins.some((admin)=>{return admin.user.id == target.id});
             if(isUserAdmin)
-                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+target.id}])
-            options.reply_markup.inline_keyboard.push([{text:l[lang].COMMAND_PERMS_BUTTON2,callback_data:"S_#CMDPERMS_MENU:"+chat.id}]);
+                options.reply_markup.inline_keyboard.push([{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+msg.chat.id+"?"+target.id}])
+            options.reply_markup.inline_keyboard.push([{text:l[lang].COMMAND_PERMS_BUTTON2,callback_data:"S_#CMDPERMS_MENU:"+msg.chat.id}]);
 
             var text = target.name+" "+l[lang].PERMISSIONS+": \n"+
-            genPermsReport(chat.lang, target.perms)+"\n\n"+
-            "🫧"+l[lang].USER_LEVEL+": "+RM.getUserLevel(chat, target.id);
+            genPermsReport(msg.chat.lang, target.perms)+"\n\n"+
+            "🫧"+l[lang].USER_LEVEL+": "+RM.getUserLevel(msg.chat, target.id);
 
 
             var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply(where, lang, GHbot, user, chat.id, func);
+            sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
         }
 
         if(checkCommandPerms(command, "COMMAND_FORGOT", user.perms))
         {
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
@@ -214,7 +214,7 @@ function main(args)
 
             var text = l[lang].CONFIRM_FORGOT.replaceAll("{user}",target.name)
 
-            GHbot.sendMessage(user.id, chat.id, text, options);
+            GHbot.sendMessage(user.id, msg.chat.id, text, options);
         }
 
     } )
@@ -225,7 +225,7 @@ function main(args)
         var target = cb.target;
         var msg = cb.message;
 
-        if(cb.data.startsWith("FORGOT") && target)
+        if(cb.data.startsWith("FORGOT") && target && chat.isGroup)
         {
             if(!user.perms.commands.includes("COMMAND_FORGOT"))
             {
@@ -248,7 +248,7 @@ function main(args)
             chat = RM.forgotUser(chat, target.id);
             db.chats.update(chat);
 
-            GHbot.editMessageText(user.id, l[lang].SUCCESSFULL_FORGOT, {chat_id:chat.id,message_id:msg.message_id});
+            GHbot.editMessageText(user.id, l[lang].SUCCESSFULL_FORGOT, {chat_id:cb.chat.id,message_id:msg.message_id});
         }
 
     })

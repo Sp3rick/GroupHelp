@@ -34,7 +34,7 @@ function main(args)
             }
             var text = l[lang].ASK_PIN_NOTIFY
             var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply(where, lang, GHbot, user, chat.id, func);
+            sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
         }
 
     } )
@@ -44,25 +44,15 @@ function main(args)
         var msg = cb.message;
         var lang = user.lang;
 
-        var settingsChatId = {};
-        var settingsChat = {};
-
-        if( cb.data.startsWith("PIN_") )
-        {
-
-            settingsChatId = cb.data.split(":")[1]
-            settingsChat = db.chats.get(settingsChatId)
-
-        }
-
-        //security guards
+        //security guards for settings
+        if(!chat.isGroup) return;
         if( !cb.data.startsWith("PIN_") ) return;
         if( !(user.perms && user.perms.commands.includes("COMMAND_PIN") || user.perms.commands.includes("@COMMAND_PIN")) ) return;
-        if( chat.isGroup && settingsChatId != chat.id) return;
+        if( cb.chat.isGroup && chat.id != cb.chat.id) return;
 
         if(cb.data.startsWith("PIN_CANCEL"))
         {
-            TGbot.deleteMessages(chat.id, [msg.message_id]);
+            TGbot.deleteMessages(cb.chat.id, [msg.message_id]);
             return;
         }
 
@@ -79,14 +69,13 @@ function main(args)
 
             try {
                 await TGbot.pinChatMessage(pinChatId, pinMsgId, options);
-                TGbot.deleteMessages(chat.id, [msg.message_id]);
+                TGbot.deleteMessages(cb.chat.id, [msg.message_id]);
             } catch (error) {
                 var errText = telegramErrorToText(lang, error);
                 GHbot.answerCallbackQuery(user.id, cb.id, {text:errText, show_alert:true});
             }
 
         }
-            
 
     })
 

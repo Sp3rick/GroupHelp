@@ -74,7 +74,7 @@ function main(args) {
     GHbot.onMessage((msg, chat, user) => {
 
         //spam detection
-        if(chat.type != "private"){(()=>{
+        if(msg.chat.type != "private"){(()=>{
             
             //unallowed forward detection
             /*
@@ -92,69 +92,66 @@ function main(args) {
         if (!(user.waitingReply)) return;
         var myCallback = user.waitingReplyType.startsWith("S_ANTISPAM") || user.waitingReplyType.startsWith("S_TGLINKS") || user.waitingReplyType.startsWith("S_FORWARD") || user.waitingReplyType.startsWith("S_QUOTES") || user.waitingReplyType.startsWith("S_LINKS");
         if (!myCallback) return;
-        var settingsChatId = user.waitingReplyType.split(":")[1];
-        if (chat.isGroup && settingsChatId != chat.id) return;//additional security guard
+        if (msg.chat.isGroup && chat.id != msg.chat.id) return;//additional security guard
         if (!(user.perms && user.perms.settings)) return;
-
-        var settingsChat = db.chats.get(settingsChatId)
 
         var lang = user.lang;
 
         //tglink
         if (user.waitingReplyType.startsWith("S_TGLINKS_PTIME#STIME")) {
-            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_TGLINKS:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_TGLINKS:" + chat.id }]]
             var cb_prefix = user.waitingReplyType.split("#")[0];
-            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, settingsChat.spam.tgLinks.punishment));
-            var time = ST.messageEvent(GHbot, settingsChat.spam.tgLinks.PTime, msg, chat, user, cb_prefix, returnButtons, title);
+            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, chat.spam.tgLinks.punishment));
+            var time = ST.messageEvent(GHbot, chat.spam.tgLinks.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
 
-            if (time != -1 && time != settingsChat.spam.tgLinks.PTime) {
-                settingsChat.spam.tgLinks.PTime = time;
-                db.chats.update(settingsChat);
+            if (time != -1 && time != chat.spam.tgLinks.PTime) {
+                chat.spam.tgLinks.PTime = time;
+                db.chats.update(chat);
             }
         }
 
         //links
         if (user.waitingReplyType.startsWith("S_LINKS_PTIME#STIME")) {
-            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_LINKS:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_LINKS:" + chat.id }]]
             var cb_prefix = user.waitingReplyType.split("#")[0];
-            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, settingsChat.spam.links.punishment));
-            var time = ST.messageEvent(GHbot, settingsChat.spam.links.PTime, msg, chat, user, cb_prefix, returnButtons, title);
+            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, chat.spam.links.punishment));
+            var time = ST.messageEvent(GHbot, chat.spam.links.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
 
-            if (time != -1 && time != settingsChat.spam.links.PTime) {
-                settingsChat.spam.links.PTime = time;
-                db.chats.update(settingsChat);
+            if (time != -1 && time != chat.spam.links.PTime) {
+                chat.spam.links.PTime = time;
+                db.chats.update(chat);
             }
         }
         if (user.waitingReplyType.startsWith("S_LINKS#EXC")) {
-            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_LINKS#EXC_MENU:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_LINKS#EXC_MENU:" + chat.id }]]
             var cb_prefix = user.waitingReplyType.split("#")[0];
             var title = l[lang].ANTISPAM_LINKS_EXC;
-            var newExc = SE.messageEvent(GHbot, db, settingsChat.spam.links.exceptions, linksValidator, msg, chat, user, cb_prefix, returnButtons);
+            var newExc = SE.messageEvent(GHbot, db, chat.spam.links.exceptions, linksValidator, msg, msg.chat, user, cb_prefix, returnButtons);
             if (newExc) {
-                settingsChat.spam.links.exceptions = newExc;
-                db.chats.update(settingsChat);
+                chat.spam.links.exceptions = newExc;
+                db.chats.update(chat);
             }
         }
 
-        //forward punishment of any chat type setting
+        //forward punishment of any msg.chat type setting
         if (user.waitingReplyType.startsWith("S_FORWARD#CBP"))
         {
-            var newCbp = CBP.messageEvent(GHbot, settingsChat.spam.forward, msg, chat, user, "S_FORWARD");
+            var newCbp = CBP.messageEvent(GHbot, chat.spam.forward, msg, msg.chat, user, "S_FORWARD");
             if(newCbp)
             {
-                settingsChat.spam.forward = newCbp;
-                db.chats.update(settingsChat);
+                chat.spam.forward = newCbp;
+                db.chats.update(chat);
             }
         }
 
-        //quote punishment of any chat type setting
+        //quote punishment of any msg.chat type setting
         if (user.waitingReplyType.startsWith("S_QUOTES#CBP"))
         {
-            var newCbp = CBP.messageEvent(GHbot, settingsChat.spam.quote, msg, chat, user, "S_QUOTES");
+            var newCbp = CBP.messageEvent(GHbot, chat.spam.quote, msg, msg.chat, user, "S_QUOTES");
             if(newCbp)
             {
-                settingsChat.spam.quote = newCbp;
-                db.chats.update(settingsChat);
+                chat.spam.quote = newCbp;
+                db.chats.update(chat);
             }
         }
 
@@ -163,13 +160,13 @@ function main(args) {
         user.waitingReplyType.startsWith("S_FORWARD#EXC") || user.waitingReplyType.startsWith("S_QUOTES#CBP");
         if (editTelegramExceptions) {
             var returnLocation = user.waitingReplyType.split("#EXC")[0].split("_").at(-1);
-            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_"+returnLocation+"#EXC_MENU:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_"+returnLocation+"#EXC_MENU:" + chat.id }]]
             var cb_prefix = user.waitingReplyType.split("#")[0];
             var title = l[lang].ANTISPAM_EXC;
-            var newExc = SE.messageEvent(GHbot, db, settingsChat.spam.tgLinks.exceptions, tgLinkValidator, msg, chat, user, cb_prefix, returnButtons);
+            var newExc = SE.messageEvent(GHbot, db, chat.spam.tgLinks.exceptions, tgLinkValidator, msg, msg.chat, user, cb_prefix, returnButtons);
             if (newExc) {
-                settingsChat.spam.tgLinks.exceptions = newExc;
-                db.chats.update(settingsChat);
+                chat.spam.tgLinks.exceptions = newExc;
+                db.chats.update(chat);
             }
         }
 
@@ -181,38 +178,29 @@ function main(args) {
         var msg = cb.message;
         var lang = user.lang;
 
-        var settingsChatId = {};
-        var settingsChat = {};
-
         var myCallback = cb.data.startsWith("S_ANTISPAM") || cb.data.startsWith("S_TGLINKS") || cb.data.startsWith("S_FORWARD") || cb.data.startsWith("S_QUOTES") || cb.data.startsWith("S_LINKS");
-        if (myCallback) {
 
-            settingsChatId = cb.data.split(":")[1]
-            settingsChat = db.chats.get(settingsChatId)
-
-        }
-
-
-        //security guards
+        //security guards for settings
+        if(!chat.isGroup) return;
         if (!myCallback) return;
         if (!(user.perms && user.perms.settings)) return;
-        if (chat.isGroup && settingsChatId != chat.id) return;
+        if (cb.chat.isGroup && chat.id != cb.chat.id) return;
 
         //spam setting selector
         if (cb.data.startsWith("S_ANTISPAM_BUTTON:")) {
 
             GHbot.editMessageText(user.id, bold(l[lang].S_ANTISPAM_BUTTON), {
                 message_id: msg.message_id,
-                chat_id: chat.id,
+                chat_id: cb.chat.id,
                 parse_mode: "HTML",
                 reply_markup:
                 {
                     inline_keyboard:
                         [
-                            [{ text: l[lang].TGLINKS_BUTTON, callback_data: "S_TGLINKS:" + settingsChatId }],
-                            [{ text: l[lang].FORWARDING_BUTTON, callback_data: "S_FORWARD#CBP:" + settingsChatId }, { text: l[lang].QUOTE_BUTTON, callback_data: "S_QUOTES#CBP:" + settingsChatId }],
-                            [{ text: l[lang].LINKS_BLOCK_BUTTON, callback_data: "S_LINKS:" + settingsChatId }],
-                            [{ text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:" + settingsChatId }]
+                            [{ text: l[lang].TGLINKS_BUTTON, callback_data: "S_TGLINKS:" + chat.id }],
+                            [{ text: l[lang].FORWARDING_BUTTON, callback_data: "S_FORWARD#CBP:" + chat.id }, { text: l[lang].QUOTE_BUTTON, callback_data: "S_QUOTES#CBP:" + chat.id }],
+                            [{ text: l[lang].LINKS_BLOCK_BUTTON, callback_data: "S_LINKS:" + chat.id }],
+                            [{ text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:" + chat.id }]
                         ]
                 }
             })
@@ -224,80 +212,80 @@ function main(args) {
         if( cb.data.startsWith("S_TGLINKS#EXC") || cb.data.startsWith("S_FORWARD#EXC") || cb.data.startsWith("S_QUOTES#EXC") )
         {
             var returnLocation = cb.data.split("#EXC")[0].split("_").at(-1);
-            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_"+returnLocation+":" + settingsChatId }]]
+            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_"+returnLocation+":" + chat.id }]]
             var cb_prefix = cb.data.split("#")[0];
             var title = l[lang].ANTISPAM_EXC;
             var addTitle = l[lang].TELEGRAM_EXC_ADD;
             var delTitle = l[lang].TELEGRAM_EXC_DELETE;
-            var newExc = SE.callbackEvent(GHbot, db, settingsChat.spam.tgLinks.exceptions, cb, chat, user, cb_prefix, returnButtons, title, addTitle, delTitle);
+            var newExc = SE.callbackEvent(GHbot, db, chat.spam.tgLinks.exceptions, cb, cb.chat, user, cb_prefix, returnButtons, title, addTitle, delTitle);
             if(newExc)
             {
-                settingsChat.spam.tgLinks.exceptions = newExc;
-                db.chats.update(settingsChat);
+                chat.spam.tgLinks.exceptions = newExc;
+                db.chats.update(chat);
             }
             return;
         }
 
         //TGLINKS//
-        var tgLinksReturnB = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_TGLINKS:" + settingsChatId }]]
+        var tgLinksReturnB = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_TGLINKS:" + chat.id }]]
         //punishment
         if (cb.data.startsWith("S_TGLINKS_P_")) {
-            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, settingsChat.spam.tgLinks.punishment);
-            if (toSetPunishment == settingsChat.spam.tgLinks.punishment) return;
-            else { settingsChat.spam.tgLinks.punishment = toSetPunishment; db.chats.update(settingsChat) };
+            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, chat.spam.tgLinks.punishment);
+            if (toSetPunishment == chat.spam.tgLinks.punishment) return;
+            else { chat.spam.tgLinks.punishment = toSetPunishment; db.chats.update(chat) };
         }
         if (cb.data.startsWith("S_TGLINKS_PTIME#STIME")) {
             
             var cb_prefix = cb.data.split("#")[0];
-            var currentTime = settingsChat.spam.tgLinks.PTime;
-            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(lang, settingsChat.spam.tgLinks.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, tgLinksReturnB, title)
+            var currentTime = chat.spam.tgLinks.PTime;
+            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(lang, chat.spam.tgLinks.punishment));
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, tgLinksReturnB, title)
 
             if (time != -1 && time != currentTime) {
-                settingsChat.spam.tgLinks.PTime = time;
-                db.chats.update(settingsChat);
+                chat.spam.tgLinks.PTime = time;
+                db.chats.update(chat);
             }
             return;
         }
         //deletion switch
         if (cb.data.startsWith("S_TGLINKS_DELETION")) {
-            settingsChat.spam.tgLinks.delete = !settingsChat.spam.tgLinks.delete;
-            db.chats.update(settingsChat);
+            chat.spam.tgLinks.delete = !chat.spam.tgLinks.delete;
+            db.chats.update(chat);
         }
         //usernames switch
         if (cb.data.startsWith("S_TGLINKS_USERNAME")) {
-            settingsChat.spam.tgLinks.usernames = !settingsChat.spam.tgLinks.usernames;
-            db.chats.update(settingsChat);
+            chat.spam.tgLinks.usernames = !chat.spam.tgLinks.usernames;
+            db.chats.update(chat);
         }
         //bots switch
         if (cb.data.startsWith("S_TGLINKS_BOTS")) {
-            settingsChat.spam.tgLinks.bots = !settingsChat.spam.tgLinks.bots;
-            db.chats.update(settingsChat);
+            chat.spam.tgLinks.bots = !chat.spam.tgLinks.bots;
+            db.chats.update(chat);
         }
         if (cb.data.startsWith("S_TGLINKS")) {
-            var punishment = settingsChat.spam.tgLinks.punishment;
-            var pTime = settingsChat.spam.tgLinks.PTime;
-            var deletion = settingsChat.spam.tgLinks.delete;
-            var usernames = settingsChat.spam.tgLinks.usernames;
-            var bots = settingsChat.spam.tgLinks.bots;
+            var punishment = chat.spam.tgLinks.punishment;
+            var pTime = chat.spam.tgLinks.PTime;
+            var deletion = chat.spam.tgLinks.delete;
+            var usernames = chat.spam.tgLinks.usernames;
+            var bots = chat.spam.tgLinks.bots;
 
             var usernameBText = l[lang].USERNAME_ANTISPAM + (usernames ? " ✔️" : " ✖️");
             var botsBText = l[lang].BOTS_ANTISPAM + (bots ? " ✔️" : " ✖️");
 
-            var buttons = genPunishButtons(lang, punishment, "S_TGLINKS", settingsChatId, true, deletion);
+            var buttons = genPunishButtons(lang, punishment, "S_TGLINKS", chat.id, true, deletion);
 
-            buttons.push([{ text: usernameBText, callback_data: "S_TGLINKS_USERNAME:" + settingsChatId }])
-            buttons.push([{ text: botsBText, callback_data: "S_TGLINKS_BOTS:" + settingsChatId }])
+            buttons.push([{ text: usernameBText, callback_data: "S_TGLINKS_USERNAME:" + chat.id }])
+            buttons.push([{ text: botsBText, callback_data: "S_TGLINKS_BOTS:" + chat.id }])
 
-            buttons.push([{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + settingsChatId },
-            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_TGLINKS#EXC_MENU:" + settingsChatId }])
+            buttons.push([{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + chat.id },
+            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_TGLINKS#EXC_MENU:" + chat.id }])
 
             var punishmentText = punishmentToTextAndTime(lang, punishment, pTime);
-            var deletionText = settingsChat.spam.tgLinks.delete ? l[lang].YES_EM : l[lang].NO_EM;
+            var deletionText = chat.spam.tgLinks.delete ? l[lang].YES_EM : l[lang].NO_EM;
             var text = l[lang].ANTISPAM_TGLINKS_DESCRIPTION.replace("{punishment}", punishmentText).replace("{deletion}", deletionText);
             GHbot.editMessageText(user.id, text, {
                 message_id: msg.message_id,
-                chat_id: chat.id,
+                chat_id: cb.chat.id,
                 parse_mode: "HTML",
                 reply_markup: { inline_keyboard: buttons }
             })
@@ -306,23 +294,23 @@ function main(args) {
 
 
         //LINKS//
-        var linksReturnB = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_LINKS:" + settingsChatId }]]
+        var linksReturnB = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_LINKS:" + chat.id }]]
         //punishment
         if (cb.data.startsWith("S_LINKS_P_")) {
-            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, settingsChat.spam.links.punishment);
-            if (toSetPunishment == settingsChat.spam.links.punishment) return;
-            else { settingsChat.spam.links.punishment = toSetPunishment; db.chats.update(settingsChat) };
+            var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, chat.spam.links.punishment);
+            if (toSetPunishment == chat.spam.links.punishment) return;
+            else { chat.spam.links.punishment = toSetPunishment; db.chats.update(chat) };
         }
         if (cb.data.startsWith("S_LINKS_PTIME#STIME")) {
-            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_LINKS:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_LINKS:" + chat.id }]]
             var cb_prefix = cb.data.split("#")[0];
-            var currentTime = settingsChat.spam.links.PTime;
-            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(lang, settingsChat.spam.links.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
+            var currentTime = chat.spam.links.PTime;
+            var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(lang, chat.spam.links.punishment));
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, returnButtons, title)
 
             if (time != -1 && time != currentTime) {
-                settingsChat.spam.links.PTime = time;
-                db.chats.update(settingsChat);
+                chat.spam.links.PTime = time;
+                db.chats.update(chat);
             }
             return;
         }
@@ -333,35 +321,35 @@ function main(args) {
             var title = l[lang].ANTISPAM_LINKS_EXC;
             var addTitle = l[lang].LINKS_EXC_ADD;
             var delTitle = l[lang].LINKS_EXC_DELETE;
-            var newExc = SE.callbackEvent(GHbot, db, settingsChat.spam.links.exceptions, cb, chat, user, cb_prefix, linksReturnB, title, addTitle, delTitle);
+            var newExc = SE.callbackEvent(GHbot, db, chat.spam.links.exceptions, cb, cb.chat, user, cb_prefix, linksReturnB, title, addTitle, delTitle);
             if(newExc)
             {
-                settingsChat.spam.links.exceptions = newExc;
-                db.chats.update(settingsChat);
+                chat.spam.links.exceptions = newExc;
+                db.chats.update(chat);
             }
             return;
         }
         //deletion switch
         if (cb.data.startsWith("S_LINKS_DELETION")) {
-            settingsChat.spam.links.delete = !settingsChat.spam.links.delete;
-            db.chats.update(settingsChat);
+            chat.spam.links.delete = !chat.spam.links.delete;
+            db.chats.update(chat);
         }
         if (cb.data.startsWith("S_LINKS")) {
-            var punishment = settingsChat.spam.links.punishment;
-            var pTime = settingsChat.spam.links.PTime;
-            var deletion = settingsChat.spam.links.delete;
+            var punishment = chat.spam.links.punishment;
+            var pTime = chat.spam.links.PTime;
+            var deletion = chat.spam.links.delete;
 
-            var buttons = genPunishButtons(lang, punishment, "S_LINKS", settingsChatId, true, deletion);
+            var buttons = genPunishButtons(lang, punishment, "S_LINKS", chat.id, true, deletion);
 
-            buttons.push([{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + settingsChatId },
-            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_LINKS#EXC_MENU:" + settingsChatId }])
+            buttons.push([{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + chat.id },
+            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_LINKS#EXC_MENU:" + chat.id }])
 
             var punishmentText = punishmentToTextAndTime(lang, punishment, pTime);
-            var deletionText = settingsChat.spam.links.delete ? l[lang].YES_EM : l[lang].NO_EM;
+            var deletionText = chat.spam.links.delete ? l[lang].YES_EM : l[lang].NO_EM;
             var text = l[lang].ANTISPAM_LINKS_DESCRIPTION.replace("{punishment}", punishmentText).replace("{deletion}", deletionText);
             GHbot.editMessageText(user.id, text, {
                 message_id: msg.message_id,
-                chat_id: chat.id,
+                chat_id: cb.chat.id,
                 parse_mode: "HTML",
                 reply_markup: { inline_keyboard: buttons }
             })
@@ -371,28 +359,28 @@ function main(args) {
         //FORWARDING// //default on setChatBasedPunish
         if (cb.data.startsWith("S_FORWARD")) {
             if(!cb.data.includes("S_FORWARD#CBP")) cb.data = cb.data.replace("S_FORWARD", "S_FORWARD#CBP"); //this because forwarding hasn't its own menu
-            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + settingsChatId },
-            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_FORWARD#EXC_MENU:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + chat.id },
+            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_FORWARD#EXC_MENU:" + chat.id }]]
             var title = l[lang].ANTISPAM_FORWARD_DESCRITPION+"\n";
 
-            var newCbp = CBP.callbackEvent(GHbot, db, settingsChat.spam.forward, cb, chat, user, "S_FORWARD", returnButtons, title);
+            var newCbp = CBP.callbackEvent(GHbot, db, chat.spam.forward, cb, cb.chat, user, "S_FORWARD", returnButtons, title);
             if (newCbp) {
-                settingsChat.spam.forward = newCbp;
-                db.chats.update(settingsChat);
+                chat.spam.forward = newCbp;
+                db.chats.update(chat);
             }
         }
 
         //QUOTING// //default on setChatBasedPunish
         if (cb.data.startsWith("S_QUOTES")) {
             if(!cb.data.includes("S_QUOTES#CBP")) cb.data = cb.data.replace("S_QUOTES", "S_QUOTES#CBP"); //this because quoties hasn't its own menu
-            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + settingsChatId },
-            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_QUOTES#EXC_MENU:" + settingsChatId }]]
+            var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + chat.id },
+            { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_QUOTES#EXC_MENU:" + chat.id }]]
             var title = l[lang].ANTISPAM_QUOTES_DESCRITPION+"\n";
 
-            var newCbp = CBP.callbackEvent(GHbot, db, settingsChat.spam.quote, cb, chat, user, "S_QUOTES", returnButtons, title);
+            var newCbp = CBP.callbackEvent(GHbot, db, chat.spam.quote, cb, cb.chat, user, "S_QUOTES", returnButtons, title);
             if (newCbp) {
-                settingsChat.spam.quote = newCbp;
-                db.chats.update(settingsChat);
+                chat.spam.quote = newCbp;
+                db.chats.update(chat);
             }
         }
 

@@ -1,4 +1,4 @@
-General code info
+## General code info
 
 index.js does load every plugin and database and acutal bot on main.js
 
@@ -10,35 +10,93 @@ all jsdocs objects documentation is on GHbot.js, it's also essential to document
 
 use TGbot only if you need direct native access with telegram bot api, when possible you should use GHbot events and methods and if does not exhist the one needed create that, TGbot method docs can be found on https://github.com/yagop/node-telegram-bot-api, on TGbot.me is avaiable await TGbot.getMe() result
 
-While coding keep in mind that user should be able to delete his data in any moment, this for respecting the privacy philosophy of LibreGroupHelp (exception can be for essential data for groups, for example warns number, allow to delete this is going to be be abusable)
+While coding keep in mind that user should be able to delete his data in any moment, this for respecting the privacy philosophy of LibreGroupHelp (exception can be for essential data for groups, for example warns number, allow to delete this is going to be abusable)
 
-
-
-<b>Plugins</b>
+## Plugins
 
 Look at example.js plugin to see how it uses right functions and methods to work with LibreGroupHelp
-You can create functions in separate file in ./api/, but if you think it's going to be used only on your plugin you can do that in same file
+
+```javascript
+var LGHelpTemplate = require("../GHbot.js")
+
+function main(args)
+{
+
+    const GHbot = new LGHelpTemplate(args);
+    const {TGbot, db, config} = GHbot;
+
+    //here your plugin code//
+
+    l = global.LGHLangs; //importing langs object
+
+    GHbot.onMessage( (msg, chat, user) => {
+
+        if( chat.type == "private" && msg.text == "/test999" )
+            GHbot.sendMessage( user.id, chat.id, "Hello, i send this because im a plugin\n"+l[user.lang].flag );
+
+    } )
+
+
+}
+
+module.exports = main;
+```
+
+
+You can create and use functions to import on ./api/, but if you think it's going to be used only on your plugin you can do that in same file
 If you need access text of varius languages it's stored at global.LGHLangs (I advise set it like this "l = global.LGHLangs;")
 
 
+## GHBot variables
 
-<b>Language info</b>
+ONLY for events from GHBot you have additional elements on parameters bot-related
+
+Usually GHBot events has 3 parameters: request (cb/msg), chat, user.
+
+On GHBot.onCallback() and GHBot.onMessage() if event comes from a group or callback data has a chat id, "chat" object will contain the full Custom Chat Object with chat.isGroup true, anyway the chat from where the request is coming is always avaiable in cb.chat or msg.chat
+
+user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: if cb.chat.isGroup is true, if callback.data contains a groupId, or on message if user.waitingReply is true and user.waitingReplyType contains a groupId
+
+NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
+Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
+
+<b>Targets</b>
+Any message object may contain an msg.target object if a command or message target user is found
+Also cb.target may exhist, builded up from user id after "?" in cb.data
+user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "?")
+
+NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database (var settingsChatId = cb.data.split(":")[1]; var settingsChat = db.chats.get(settingsChatId))
+
+You can find a comment referring security guards that you can use too in plugins/welcome.js
+
+
+## Language info
 
 The bot has a different language configuration both for users and group
-when LibreGroupHelp is added to a group (and add it to the database) the default group language will be inherited from the user who added the bot, (TODO. convert telegram user.language_code to LibreGroupHelp lang code, format on https://en.wikipedia.org/wiki/IETF_language_tag)
+when LibreGroupHelp is added to a group (and add it to the database) the default group language will be inherited from the user who added the bot, (TODO. convert function for telegram user.language_code to LibreGroupHelp lang code, format on https://en.wikipedia.org/wiki/IETF_language_tag)
 
 
+## Expect user messages
 
-<b>Callbacks and user callbacks data management</b>
+You can expect for user messages by set user.waitingReply to the chatId where you are expecting a reply, true for every chat
+Set user.waitingReplyType with callback data you will able to retrieve after (hirarchy in the section below)
+Then you need to update user object on database with db.users.update(user)
+
+When you receive a new message event user.waitingReply will be set true or false by main.js depending if it's the right chat
+Remember that if you make a new user.waitingReply in a certain point you will need also to disable that, otherwise other bot functions that want that bot is not waiting for any user reply will continue to not work
+
+
+## Callbacks and user callbacks data management (Hirarchy)
 
 Here is described the hirarchy of callbacks data.
 Giving right callaback data is essential to allow main.js to pre-set wanted values
+They are both avaiable on cb.data for buttons or on user.waitingReplyType for messages that bot is expecting (if user.waitingReply is true)
 
-
-callbacks events (buttons inteded):
+<b>Hirarchy</b>
 
 cb.data OR user.waitingReplyType = CALLBACK_NAME#editor_things|editorData:groupId?targetUserId
-works with less items still in same order: CALLBACK_NAME:groupId OR CALLBACK_NAME#editor?targetUserId OR CALLBACK_NAME:groupId?targetUserId
+
+Works with less items, same order only matters: CALLBACK_NAME:groupId OR CALLBACK_NAME#editor?targetUserId OR CALLBACK_NAME:groupId?targetUserId are all valid
 
 -CALLBACK_NAME: name of callback that you can use, be sure that not conflicts with other names, often plugins check if it's their match with string.startsWith()
 
@@ -49,18 +107,9 @@ works with less items still in same order: CALLBACK_NAME:groupId OR CALLBACK_NAM
 -targetUserId: that allow main.js to set a target user in various cases: cb.target, msg.userWaitingReplyTarget (target for text commands is not related with that, it's also avaiable on msg.target and it's based on msg.text instead of targetUserId)
 
 
+## Roles
 
-<b>Expect user messages</b>
-
-You can expect for user messages by set user.waitingReply to the chatId where you are expecting a reply and user.waitingReplyType with callback data you will able to retrieve after, set to true if you want to set it for every chat, then you need to update user object on database with db.users.update(user)
-When you receive a new message event user.waitingReply will be set true or false by main.js depending if it's the right chat
-Remember that if you make a new user.waitingReply in a certain point you will need also to disable that, otherwise other bot functions that want that bot is not waiting for any user reply may not work
-
-
-
-<b>Roles</b>
-
-Roles is managed by plugins/userHandler.js and api/rolesManager.js
+Roles is managed by plugins/usersHandler.js and api/rolesManager.js
 
 An user can have multiple roles at the same time
 Every role has a level, higher level means best role priority, an user inherits the level of the higher level on its roles
@@ -75,38 +124,57 @@ To set custom roles the command will be /setrole roleName
 User permissions data result of sumUserPerms() may be avaiable at target.perms or user.perms
 
 
+## LGH Objects
 
 <b>Custom Chat Object</b>
 
 Additional data of custom <i>chat</i> object:
-admins: array with known admins objects (user data anonymized)
-lang : current chat lang
-isGroup : result of (chat.type == "supergroup" || chat.type == "group")
-users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
-basePerms : base permissions applyed to every user
-adminPerms : base permissions applyed to admin
-roles : GHRole data about a specific role, full role Object if it's a custom role (key with a number)
-warns : warns.js plugin related data
-rules : rules.js plugin related data
-welcome : welcome.js plugin related data
-flood : flood.js plugin related data
+
+>admins: array with known admins objects (user data anonymized)
+
+>lang : current chat lang
+
+>isGroup : result of (chat.type == "supergroup" || chat.type == "group")
+
+>users : Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
+
+>basePerms : base permissions applyed to every user
+
+>adminPerms : base permissions applyed to admin
+
+>roles : GHRole data about a specific role, full role Object if it's a custom role (key with a number)
+
+>warns : warns.js plugin related data
+
+>rules : rules.js plugin related data
+
+>welcome : welcome.js plugin related data
+
+>flood : flood.js plugin related data
+
 -When you modify any of this data don't forget to update it with db.chats.update(chat)
 
 
 <b>Custom User Object</b>
 
 Additional data of custom <i>user</i> object:
-lang : current user lang
-waitingReply : set to true if the bot is expecting a message from the user
-waitingReplyType : additional data related to waitingReply
+
+>lang : current user lang
+
+>waitingReply : set to true if the bot is expecting a message from the user
+
+>waitingReplyType : additional data related to waitingReply
+
 -When you modify any of this data don't forget to update it with db.users.update(user)
 
 
 <b>Custom Message Object</b>
 
 Additional data of custom <i>msg</i> object:
-command : result of message text parsed with parseCommand()
-target : identified target of message, it's may be derived from the command or from replyed user
+
+>command : result of message text parsed with parseCommand()
+
+>target : identified target of message, it's may be derived from the command or from replyed user
 
 
 <b>Command Object</b>
@@ -123,6 +191,7 @@ You can get this object trough parseCommand(text)
 *target is not listed because that's set later by main.js
 
 
+## Commands
 
 Note: COMMAND_ prefix means that command can be solved in multiple languages
 @ prefix in command name gives the permission with private chat reply (example @COMMAND_RULES)

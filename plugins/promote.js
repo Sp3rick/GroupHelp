@@ -17,153 +17,153 @@ function main(args)
     GHbot.onMessage( async (msg, chat, user) => {
 
         var command = msg.command;
-        var lang = chat.lang;
+        var lang = msg.chat.lang;
         var target = user.waitingReplyTarget || msg.target;
         var text = false;
         var options = {parse_mode : "HTML"};
         var toSetRole = false;
         var toUnsetRole = false;
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_FREE", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_FREE", user.perms))
             toSetRole = "free";
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNFREE", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNFREE", user.perms))
             toUnsetRole = "free";
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_HELPER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_HELPER", user.perms))
             toSetRole = "helper";
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNHELPER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNHELPER", user.perms))
             toUnsetRole = "helper";
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_CLEANER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_CLEANER", user.perms))
             toSetRole = "cleaner"
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNCLEANER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNCLEANER", user.perms))
             toUnsetRole = "cleaner";
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_MUTER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_MUTER", user.perms))
             toSetRole = "muter";
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNMUTER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNMUTER", user.perms))
             toUnsetRole = "muter";
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_MODERATOR", user.perms, ["mod"]))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_MODERATOR", user.perms, ["mod"]))
             toSetRole = "moderator";
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNMODERATOR", user.perms, ["unmod"]))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNMODERATOR", user.perms, ["unmod"]))
             toUnsetRole = "moderator";
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_COFOUNDER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_COFOUNDER", user.perms))
             toSetRole = "cofounder"
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNCOFOUNDER", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNCOFOUNDER", user.perms))
             toUnsetRole = "cofounder";
 
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_ADMINISTRATOR", user.perms, ["admin"]))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_ADMINISTRATOR", user.perms, ["admin"]))
         {
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
             if(target.id == user.id)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
                 return;
             }
 
             try {
                 
-                await TGbot.promoteChatMember(chat.id, target.id, {can_manage_chat:true});
+                await TGbot.promoteChatMember(msg.chat.id, target.id, {can_manage_chat:true});
                 if(command.args.length > 0)
                 {
                     var title = command.args.substring(0,16);
                     try {
-                        await TGbot.setChatAdministratorCustomTitle(chat.id, target.id, title);
+                        await TGbot.setChatAdministratorCustomTitle(msg.chat.id, target.id, title);
                     } catch (error) {
-                        handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                        handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
                     }
                 }
 
-                var adminList = await getAdmins(TGbot, chat.id);
-                chat = RM.reloadAdmins(chat, adminList);
-                db.chats.update(chat);
+                var adminList = await getAdmins(TGbot, msg.chat.id);
+                msg.chat = RM.reloadAdmins(msg.chat, adminList);
+                db.chats.update(msg.chat);
 
                 var text = target.name+" "+bold(l[lang].HAS_BEEN_PROMOTED+"!");
-                var buttons = [[{text:l[lang].ADMIN_PERMS_BUTTON, callback_data: "ADMINPERM_MENU:"+chat.id+"?"+target.id}]];
-                GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
+                var buttons = [[{text:l[lang].ADMIN_PERMS_BUTTON, callback_data: "ADMINPERM_MENU:"+msg.chat.id+"?"+target.id}]];
+                GHbot.sendMessage(user.id, msg.chat.id, text, {parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
 
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
 
         }
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNADMINISTRATOR", user.perms, ["unadmin"]))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNADMINISTRATOR", user.perms, ["unadmin"]))
         {
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
             if(target.id == user.id)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
                 return;
             }
 
             try {
-                await TGbot.promoteChatMember(chat.id, target.id, removeAdminOpts)
+                await TGbot.promoteChatMember(msg.chat.id, target.id, removeAdminOpts)
 
-                var adminList = await getAdmins(TGbot, chat.id);
-                chat = RM.reloadAdmins(chat, adminList);
-                db.chats.update(chat);
+                var adminList = await getAdmins(TGbot, msg.chat.id);
+                msg.chat = RM.reloadAdmins(msg.chat, adminList);
+                db.chats.update(msg.chat);
 
                 var text = target.name+" "+l[lang].IS_NO_LONGER+" 👮"+l[lang].ADMINISTRATOR;
-                GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML"});
+                GHbot.sendMessage(user.id, msg.chat.id, text, {parse_mode:"HTML"});
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
 
         }
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_TITLE", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_TITLE", user.perms))
         {
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
             var title = command.args.length > 0 ? command.args.substring(0,16) : "";
             try {
-                await TGbot.setChatAdministratorCustomTitle(chat.id, target.id, title);
+                await TGbot.setChatAdministratorCustomTitle(msg.chat.id, target.id, title);
 
-                var adminList = await getAdmins(TGbot, chat.id);
-                chat = RM.reloadAdmins(chat, adminList);
-                db.chats.update(chat);
+                var adminList = await getAdmins(TGbot, msg.chat.id);
+                msg.chat = RM.reloadAdmins(msg.chat, adminList);
+                db.chats.update(msg.chat);
 
-                var newTitle = chat.users[target.id].title;
+                var newTitle = msg.chat.users[target.id].title;
                 var text = target.name+bold(l[lang].TITLE_CHANGED_TO)+" "+code(newTitle);
-                var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+target.id}]]}};
-                GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts)
+                var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].ADMIN_PERMS_BUTTON,callback_data:"ADMINPERM_MENU:"+msg.chat.id+"?"+target.id}]]}};
+                GHbot.sendMessage(user.id, msg.chat.id, text, changeTitleOpts)
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
 
         }
-        if( chat.isGroup && checkCommandPerms(command, "COMMAND_UNTITLE", user.perms))
+        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNTITLE", user.perms))
         {
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
 
             try {
-                await TGbot.setChatAdministratorCustomTitle(chat.id, target.id, "");
+                await TGbot.setChatAdministratorCustomTitle(msg.chat.id, target.id, "");
 
-                var adminList = await getAdmins(TGbot, chat.id);
-                chat = RM.reloadAdmins(chat, adminList);
-                db.chats.update(chat);
+                var adminList = await getAdmins(TGbot, msg.chat.id);
+                msg.chat = RM.reloadAdmins(msg.chat, adminList);
+                db.chats.update(msg.chat);
 
                 var text = target.name+bold(l[lang].TITLE_REMOVED);
-                GHbot.sendMessage(user.id, chat.id, text, {parse_mode:"HTML"});
+                GHbot.sendMessage(user.id, msg.chat.id, text, {parse_mode:"HTML"});
             } catch (error) {
-                handleTelegramGroupError(GHbot, user.id, chat.id, lang, error);
+                handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
 
         }
@@ -173,134 +173,128 @@ function main(args)
         {
             if(!user.perms.roles)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].MISSING_ROLE_PERM)
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].MISSING_ROLE_PERM)
                 return;
             }
             if(!target)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_TARGET);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_TARGET);
                 return;
             }
             if(target.id == user.id)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].CANT_CHANGE_YOUR_PERMS);
                 return;
             }
 
             var role = toSetRole ? toSetRole : toUnsetRole;
 
-            var userLevel = RM.getUserLevel(chat, user.id);
-            var roleLevel = RM.getRoleLevel(role, chat);
-            var targetLevel = RM.getUserLevel(chat, target.id);
+            var userLevel = RM.getUserLevel(msg.chat, user.id);
+            var roleLevel = RM.getRoleLevel(role, msg.chat);
+            var targetLevel = RM.getUserLevel(msg.chat, target.id);
 
             if(userLevel < roleLevel+1)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].TOO_LOW_LEVEL_SET_ROLE)
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].TOO_LOW_LEVEL_SET_ROLE)
                 return;
             }
             if(userLevel < targetLevel)
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].TOO_LOW_LEVEL_SET_USER)
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].TOO_LOW_LEVEL_SET_USER)
                 return;
             }
 
         }
         if(toSetRole)
         {
-            if(RM.getUserRoles(chat, user.id).includes(toSetRole))
+            if(RM.getUserRoles(msg.chat, user.id).includes(toSetRole))
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].ALREADY_IN_ROLE, options);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].ALREADY_IN_ROLE, options);
                 return;
             }
 
-            var oldUserLevel = RM.getUserLevel(chat, target.id);
+            var oldUserLevel = RM.getUserLevel(msg.chat, target.id);
             var oldPerms = JSON.stringify(target.perms);
-            RM.setRole(chat, target.id, toSetRole);
+            RM.setRole(msg.chat, target.id, toSetRole);
 
             //check if this new role is useless to user permissions
-            var newPerms = JSON.stringify(RM.sumUserPerms(chat, target.id));
-            var newUserLevel = RM.getUserLevel(chat, target.id);
+            var newPerms = JSON.stringify(RM.sumUserPerms(msg.chat, target.id));
+            var newUserLevel = RM.getUserLevel(msg.chat, target.id);
             if(config.preventSetUselessRoles && oldPerms == newPerms && oldUserLevel == newUserLevel)
             {
-                RM.unsetRole(chat, target.id, toSetRole);
-                GHbot.sendMessage(user.id, chat.id, l[lang].USELESS_ROLE);
+                RM.unsetRole(msg.chat, target.id, toSetRole);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].USELESS_ROLE);
                 return;
             }
 
-            text=target.name+" "+l[lang].HAS_BEEN_MADE+" "+RM.getFullRoleName(toSetRole, lang, chat);
-            GHbot.sendMessage(user.id, chat.id, text, options);
+            text=target.name+" "+l[lang].HAS_BEEN_MADE+" "+RM.getFullRoleName(toSetRole, lang, msg.chat);
+            GHbot.sendMessage(user.id, msg.chat.id, text, options);
         }
         if(toUnsetRole)
         {
-            if(!RM.getUserRoles(chat, target.id).includes(toUnsetRole))
+            if(!RM.getUserRoles(msg.chat, target.id).includes(toUnsetRole))
             {
-                GHbot.sendMessage(user.id, chat.id, l[lang].NOT_IN_ROLE, options);
+                GHbot.sendMessage(user.id, msg.chat.id, l[lang].NOT_IN_ROLE, options);
                 return;
             }
 
-            RM.unsetRole(chat, target.id, toUnsetRole);
-            text=target.name+" "+l[lang].IS_NO_LONGER+" "+RM.getFullRoleName(toUnsetRole, lang, chat);
-            GHbot.sendMessage(user.id, chat.id, text, options);
+            RM.unsetRole(msg.chat, target.id, toUnsetRole);
+            text=target.name+" "+l[lang].IS_NO_LONGER+" "+RM.getFullRoleName(toUnsetRole, lang, msg.chat);
+            GHbot.sendMessage(user.id, msg.chat.id, text, options);
         }
 
 
 
 
         //below from here handle set title
+        if(!msg.chat.isGroup) return;
         if( !(user.waitingReply && user.waitingReplyType.startsWith("ADMINTITLE")) ) return;
         if( !user.perms.commands.includes("COMMAND_TITLE") )
         {
             user.waitingReply = false;
-            GHbot.sendMessage(user.id, chat.id, l[lang].MISSING_PERMISSION);
+            GHbot.sendMessage(user.id, msg.chat.id, l[lang].MISSING_PERMISSION);
             db.users.update(user);
             return;
         }
 
-        var settingsChatId = user.waitingReplyType.split(":")[1].split("?")[0];
-        var settingsChat = Object.assign( {}, db.chats.get(settingsChatId), (chat.isGroup ? chat : {}) );
-        lang = settingsChat.lang;
+        var chat = Object.assign( {}, db.chats.get(chat.id), (msg.chat.isGroup ? msg.chat : {}) );
+        lang = chat.lang;
 
         var title = msg.text.length > 0 ? msg.text.substring(0,16) : "";
-        var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].CANCEL_BUTTON,callback_data:"ADMINPERM_MENU:"+settingsChatId+"?"+user.waitingReplyTarget.id}]]}};
+        var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].CANCEL_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+user.waitingReplyTarget.id}]]}};
         try {
-            await TGbot.setChatAdministratorCustomTitle(settingsChat.id, user.waitingReplyTarget.id, title);
+            await TGbot.setChatAdministratorCustomTitle(chat.id, user.waitingReplyTarget.id, title);
 
-            var adminList = await getAdmins(TGbot, settingsChat.id);
-            settingsChat = RM.reloadAdmins(settingsChat, adminList);
-            db.chats.update(settingsChat);
+            var adminList = await getAdmins(TGbot, chat.id);
+            chat = RM.reloadAdmins(chat, adminList);
+            db.chats.update(chat);
 
-            var newTitle = settingsChat.users[target.id].title;
+            var newTitle = chat.users[target.id].title;
             var text = user.waitingReplyTarget.name+bold(l[lang].TITLE_CHANGED_TO)+" "+code(newTitle);
             
-            GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts)
+            GHbot.sendMessage(user.id, msg.chat.id, text, changeTitleOpts)
 
             user.waitingReply = false;
             db.users.update(user);
         } catch (error) {
             var text = telegramErrorToText(lang, error);
-            GHbot.sendMessage(user.id, settingsChat.id, text, changeTitleOpts);
+            GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts);
         }
 
     } )
 
     GHbot.onCallback( async (cb, chat, user) => {
 
-        var settingsChatId = {};
-        var settingsChat = {};
-        if( cb.data.startsWith("ADMINPERM_") || cb.data.startsWith("ADMINTITLE") )
-        {
-            settingsChatId = cb.data.split(":")[1].split("?")[0];
-            settingsChat = db.chats.get(settingsChatId)
-        }
-        else return;
-
+        //security guards for settings
+        if(!chat.isGroup) return;
+        if(!cb.data.startsWith("ADMINPERM_") && !cb.data.startsWith("ADMINTITLE")) return;
         if(!cb.target)
         {
             console.log("LGH Error: ADMINPERM_ target has not been identified");
             return;
         }
 
-        var lang = settingsChat.lang;
+        var lang = chat.lang;
         var target = cb.target;
         var msg = cb.message;
 
@@ -338,22 +332,22 @@ function main(args)
             }
 
             //target still admin check
-            var admin = settingsChat.admins.filter((admin)=>{return admin.user.id == target.id})[0];
+            var admin = chat.admins.filter((admin)=>{return admin.user.id == target.id})[0];
             if(!admin)
             {
-                GHbot.editMessageText(user.id, l[lang].USER_NO_MORE_ADMIN, {chat_id:cb.message.chat.id, message_id:cb.message.message_id});
+                GHbot.editMessageText(user.id, l[lang].USER_NO_MORE_ADMIN, {chat_id:cb.chat.id, message_id:cb.message.message_id});
                 return;
             }
 
             //check if caller is admin
-            if(!isAdminOfChat(settingsChat, user.id))
+            if(!isAdminOfChat(chat, user.id))
             {
                 GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION,show_alert:true});
                 return;
             }
 
             //check if perm is already enabled due to base chat perms
-            var chatPerms = (await TGbot.getChat(settingsChatId)).permissions;
+            var chatPerms = (await TGbot.getChat(chat.id)).permissions;
             var permIsActiveByDefault = perm ? Object.keys(chatPerms).some((gPerm)=>{return gPerm == perm && chatPerms[gPerm]}) : false;
             if(permIsActiveByDefault)
             {
@@ -372,7 +366,7 @@ function main(args)
 
                 var oldPermState = (admin.hasOwnProperty(perm) && admin[perm]);
                 //check if the user that's changing this permission has this permission
-                if(!hasAdminPermission(settingsChat.admins, user.id, perm))
+                if(!hasAdminPermission(chat.admins, user.id, perm))
                 {
                     GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].MISSING_ADMIN_PERMISSION, show_alert:true});
                     return;
@@ -383,11 +377,11 @@ function main(args)
                 delete promoteOpts.status;
                 delete promoteOpts.user;
                 try {
-                    await TGbot.promoteChatMember(settingsChat.id, target.id, promoteOpts);
+                    await TGbot.promoteChatMember(chat.id, target.id, promoteOpts);
 
-                    var adminList = await getAdmins(TGbot, settingsChat.id);
-                    chat = RM.reloadAdmins(settingsChat, adminList);
-                    db.chats.update(settingsChat);
+                    var adminList = await getAdmins(TGbot, chat.id);
+                    chat = RM.reloadAdmins(chat, adminList);
+                    db.chats.update(chat);
                 } catch (error) {
                     admin[perm] = oldPermState;
                     var text = telegramErrorToText(lang, error);
@@ -401,19 +395,19 @@ function main(args)
             Object.keys(chatPerms).forEach((gPerm)=>{if(chatPerms[gPerm])displayAdmin[gPerm]=true;});
 
             var options = {
-                chat_id : cb.message.chat.id,
+                chat_id : cb.chat.id,
                 message_id : cb.message.message_id,
                 parse_mode : "HTML",
-                reply_markup : {inline_keyboard:genGroupAdminPermsKeyboard(lang, displayAdmin, settingsChat)}
+                reply_markup : {inline_keyboard:genGroupAdminPermsKeyboard(lang, displayAdmin, chat)}
             }
-            var text = genGroupAdminPermsText(lang, settingsChat, target.id);
+            var text = genGroupAdminPermsText(lang, chat, target.id);
             GHbot.editMessageText(user.id, text, options);
         }
 
         if(cb.data.startsWith("ADMINTITLE"))
         {
             //check if caller is admin
-            if(!isAdminOfChat(settingsChat, user.id))
+            if(!isAdminOfChat(chat, user.id))
             {
                 GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION,show_alert:true});
                 return;
@@ -427,11 +421,11 @@ function main(args)
             }
 
             //currently allowing to change title of any admin by other admins is wanted
-            user.waitingReply = chat.id;
-            user.waitingReplyType = "ADMINTITLE:"+settingsChatId+"?"+target.id;
+            user.waitingReply = cb.chat.id;
+            user.waitingReplyType = "ADMINTITLE:"+chat.id+"?"+target.id;
             db.users.update(user);
-            GHbot.editMessageText(user.id,  l[lang].SEND_NEW_TITLE, {message_id : msg.message_id, chat_id : cb.message.chat.id, parse_mode : "HTML",
-                reply_markup : {inline_keyboard :[[{text: l[lang].CANCEL_BUTTON, callback_data: "ADMINPERM_MENU:"+settingsChatId+"?"+target.id}]]} }
+            GHbot.editMessageText(user.id,  l[lang].SEND_NEW_TITLE, {message_id : msg.message_id, chat_id : cb.chat.id, parse_mode : "HTML",
+                reply_markup : {inline_keyboard :[[{text: l[lang].CANCEL_BUTTON, callback_data: "ADMINPERM_MENU:"+chat.id+"?"+target.id}]]} }
             )
         }
 

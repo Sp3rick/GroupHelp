@@ -93,6 +93,7 @@ async function main(config) {
      
         }
         chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
+        msg.chat = chat;
         
         //add any new chat user
         if(chat.users && !chat.users.hasOwnProperty(user.id))
@@ -101,17 +102,25 @@ async function main(config) {
             db.chats.update(chat);
         }
 
-        //configuring msg.command and msg.target
+        //configuring msg.command
         var command = parseCommand(msg.text || "");
         msg.command = command;
+        
+        //configuring msg.target
+        msg.target = false;
+        if(user.waitingReplyType.includes("?"))
+        {
+            var targetId = cb.data.split("?")[1];
+            msg.target = RM.userIdToTarget(TGbot, selectedChat, targetId, db);
+        }
         msg.target = await TR.getMessageTarget(msg, chat, TGbot, db);
 
-        //configuring user.perms
-        var selectedChat;
-        if( isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
+
+        //configure user.perms and the selected chat if avaiable (the incoming msg request chat object is kept on msg.chat)
+        if( chat.isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
         {
-            selectedChat = isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
-            user.perms = RM.sumUserPerms(selectedChat, user.id);
+            chat = chat.isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
+            user.perms = RM.sumUserPerms(chat, user.id);
         }
         
         //configuring waitingReply
@@ -161,13 +170,14 @@ async function main(config) {
         var from = cb.from;
         var chat = msg.chat;
         chat.isGroup = (chat.type == "group" || chat.type == "supergroup");
+        var chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
+        if(chat.isGroup && !db.chats.exhist( chat.id )) return; //drop callbacks from unknown groups
+        cb.chat = chat;
+        var user = Object.assign( {},  db.users.get( from.id ), from );
+
 
         if ( !db.users.exhist( from.id ) )
             db.users.add( from );
-
-        var user = Object.assign( {},  db.users.get( from.id ), from );
-        if(chat.isGroup && !db.chats.exhist( chat.id )) return; //drop callbacks from unknown groups
-        var chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
         
         //drop too old callbacks, prevent incompatible calls
         if(getUnixTime() - cb.message.date > config.maxCallbackAge) //86400 = 1 day
@@ -183,12 +193,11 @@ async function main(config) {
             db.users.update(user);
         }
 
-        //configure user.perms and selectedChat
-        var selectedChat;
+        //configure user.perms and the selected chat if avaiable (the incoming cb request chat object is kept on cb.chat)
         if(chat.isGroup || cb.data.includes(":"))
         {
-            selectedChat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("?")[0]);
-            user.perms = RM.sumUserPerms(selectedChat, user.id);
+            chat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("?")[0]);
+            user.perms = RM.sumUserPerms(chat, user.id);
         }
 
         //configure cb.target
