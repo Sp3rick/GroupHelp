@@ -97,12 +97,6 @@ function main(args) {
             var isQuotedChat = msg.hasOwnProperty("external_reply") && msg.external_reply.chat && msg.external_reply.chat.id == chat.id;
             if(!user.perms.quote && msg.hasOwnProperty("external_reply") && !isQuotedChat)
             {
-                /*if(msg.external_reply.chat && (msg.external_reply.chat.type == "group" || msg.external_reply.chat.type == "supergroup") )
-                {
-                    msg.external_reply.origin.type = "chat";
-                    msg.external_reply.chat.sender_chat = msg.external_reply.chat;
-                }*/
-                console.log(msg);
                 var punishType = originIsSpam(msg.external_reply.origin, chat.spam.quote, TGExceptions);
 
                 if(punishType)
