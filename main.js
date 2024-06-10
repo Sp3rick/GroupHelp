@@ -111,7 +111,7 @@ async function main(config) {
         if(user.waitingReplyType.includes("?"))
         {
             var targetId = cb.data.split("?")[1];
-            msg.target = RM.userIdToTarget(TGbot, selectedChat, targetId, db);
+            msg.target = RM.userIdToTarget(TGbot, chat, targetId, db);
         }
         msg.target = await TR.getMessageTarget(msg, chat, TGbot, db);
 
@@ -139,7 +139,7 @@ async function main(config) {
         if( user.waitingReply && user.waitingReplyType.includes("?") )
         {
             var wrTargetId = user.waitingReplyType.split("?")[1];
-            user.waitingReplyTarget = RM.userIdToTarget(TGbot, selectedChat, wrTargetId, db);
+            user.waitingReplyTarget = RM.userIdToTarget(TGbot, chat, wrTargetId, db);
         }
 
         try {
@@ -204,7 +204,7 @@ async function main(config) {
         if(cb.data.includes("?"))
         {
             var targetId = cb.data.split("?")[1];
-            cb.target = RM.userIdToTarget(TGbot, selectedChat, targetId, db);
+            cb.target = RM.userIdToTarget(TGbot, chat, targetId, db);
         }
 
         try {

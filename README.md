@@ -32,9 +32,63 @@ npm i chrono-node
 ## Contribute
 
 Useful links to contribute:
+
 [documentation.md](https://github.com/Sp3rick/GroupHelp/blob/main/documentation.md).
+
 [Create a plugin](https://github.com/Sp3rick/GroupHelp/blob/main/plugins.md).
 
+[TODO (good first issue)](https://github.com/Sp3rick/GroupHelp/contribute).
+
+
+## What is done
+
+✅ Completed and working
+
+🟡 Not fully implemented (work in progress)
+
+❌ Not implemented at all
+
+```
+✅ Roles and permissions hirarchy
+❌ Custom roles
+✅ Moderation commands
+❌ Support for anonymous admins
+🟡 Bot support
+❌ Bot help (how to use)
+✅ Langs and lang settings
+✅ Rules
+✅ Welcome
+✅ Anti-flood
+❌ Anti-spamm
+❌ Captcha
+❌ Checks settings
+❌ @Admin
+❌ Blocks settings
+❌ Media settings
+❌ Anti-NSFW
+✅ Warns settings
+❌ Nigth mode
+❌ Tag settings
+❌ Link settings
+❌ Approve mode
+❌ Message Deletion settings
+❌ Topics settings
+❌ Banned words
+❌ Recurring messages
+❌ Members management
+❌ Masked users settings
+❌ Discussion group settings
+❌ Personal commands
+❌ Magic Strickers/GIFs
+❌ Max message length settings
+❌ Log channel
+✅ General commands permissions editor
+✅ Remove user-data from group (/forget)
+❌ Remove user-data from bot
+❌ User privacy mode
+❌ Multiple bots support
+✅ Crypto prices external api
+```
 
 ## Updating
 To update the bot you need to backup ./database folder and ./config.json only, then repeat installation process and paste there the old database and config.json, you may need to add some config.json parameters manually
@@ -55,7 +109,6 @@ To update the bot you need to backup ./database folder and ./config.json only, t
     create a privacy setting where users can ask to esclude themself from tagResolver and replace his's first name in database with "Anonymous"
     allow to disable tagResolver log on group settings
     allow to mute only media, or specific media type or extras
-    once bot will be declared ready to use, add code versioning system to update database when user update it
     create a privacy option to allow a user deleting his data from the bot
     custom roles
     optimize database.get, .update and .save to store in temporal array most used users
@@ -95,4 +148,4 @@ To update the bot you need to backup ./database folder and ./config.json only, t
 
 ## Ask a question
 
-If you have any questions about LibreGroupHelp, feel free to open an issue or ask directly in our telegram group - [@LGHChat](https://t.me/LGHChat).
+If you have any questions about LibreGroupHelp, feel free to open an issue or ask directly in our telegram group [@LGHChat](https://t.me/LGHChat).

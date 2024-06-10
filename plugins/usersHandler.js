@@ -41,7 +41,7 @@ function main(args)
     GHbot.onMessage( async (msg, chat, user) => {
 
         if(!msg.chat.isGroup) return;
-
+        if(user.waitingReply) return;
         if(!msg.chat.users[user.id].firtJoin)
         {
             msg.chat.users[user.id].firtJoin = getUnixTime();

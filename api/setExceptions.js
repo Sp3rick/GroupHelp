@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { isNumber, genSetNumKeyboard, bold } = require("./utils.js");
+const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName } = require("./utils.js");
 
 /**
  * @callback ValidatorFunction
@@ -134,12 +134,14 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
     var foundStrings = false;
     var channelForward = msg.forward_origin && msg.forward_origin.type == "channel";
     var hUserForward = msg.forward_origin && msg.forward_origin.type == "hidden_user";
+    var userForward = msg.forward_origin && msg.forward_origin.type == "user";
+    var groupForward = msg.forward_origin && msg.forward_origin.type == "chat";
     if(channelForward)
     {
         var originChat = msg.forward_origin.chat;
 
-        //find for already matching @username or title:chatId (math chatId only)
-        var excIndex = exceptions.indexOf("@"+originChat.username);
+        //prevent adding channel by id if it's already added by username
+        /*var excIndex = exceptions.indexOf("@"+originChat.username);
         if(excIndex == -1)
         {
            var chatIdExcList = exceptions.filter((exc)=>{ return exc.includes(":") && exc.split(":")[1] == String(originChat.id) });
@@ -157,10 +159,17 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
         
         if(user.waitingReplyType.startsWith(prefix+"_REMOVE"))
             foundStrings = [exceptions[excIndex]];
+        */ //currently disabled, i think that if user forward want to store exactly the chatId, and never the username
+
+        foundStrings = [originChat.title+":"+originChat.id];
         
     }
     else if(hUserForward)
         foundStrings = [msg.forward_origin.sender_user_name+":|hidden"];
+    else if(userForward)
+        foundStrings = [fullName(msg.forward_origin.sender_user)+":"+msg.forward_origin.sender_user.id]
+    else if(groupForward)
+        foundStrings = [msg.forward_origin.sender_chat.title+":"+msg.forward_origin.sender_chat.id]
     else if (msg.text)
         foundStrings = msg.text.split(/\r?\n/);
 

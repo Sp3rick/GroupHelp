@@ -129,9 +129,9 @@ function getMessageTargetUserId(msg) {
         return getId(username);
     }
 
-    if (msg.hasOwnProperty("entities") && msg.entities.length > 1)
-        if (msg.entities[1].type == "text_mention")
-            return msg.entities[1].user.id;
+    if (msg.hasOwnProperty("entities") && msg.entities.length > 0)
+        if (msg.entities[0].type == "text_mention")
+            return msg.entities[0].user.id;
 
     return msg.from.id;
 }

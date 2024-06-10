@@ -93,6 +93,11 @@ function isValidHost(host) {
     return hostRegex.test(host);
 }
 
+function isValidId(id)
+{
+    return isNumber(id) && (id > 99999 || id < -9999) && id != Infinity;
+}
+
 //TODO: add translation system that replaces any word to english (like dictionary translation)
 //ATTENTION HERE: for error he may return both 0 or 1
 function parseHumanTime(text) {
@@ -941,6 +946,14 @@ function genPunishButtons(lang, punishment, prefix, chatId, deletion, delState)
     return buttons;
 }
 
+function fullName(user)
+{
+    var text = user.first_name || "";
+    if(user.hasOwnProperty("last_name"))
+        text = " "+user.last_name;
+    return text;
+}
+
 function usernameOrFullName(user)
 {
     if(user.hasOwnProperty("username"))
@@ -1163,9 +1176,111 @@ async function validateTelegramHTML(GHbot, userId, chatId, text)
     }
 })}
 
-module.exports = 
+function originToUsername(origin)
+{
+    if(origin.sender_user && origin.sender_user.username)
+        return origin.sender_user.username;
+    if(origin.chat && origin.chat.username)
+        return origin.chat.username;
+    return false;
+}
+
+function isChatWhitelisted(whitelist, chatId)
+{
+    var chatId = Number(chatId);
+    for(var i = 0; i<whitelist.length; i++)
+    {
+        var element = whitelist[i];
+
+        if(element == chatId) return true;
+        if(isString(element) && isNumber(element.split(":").at(-1)))
+        {
+            var iteratedChat = Number(element.split(":").at(-1));
+            if(iteratedChat == chatId) return true;
+        }
+    }
+    return false;
+}
+
+function isHiddenUserWhitelisted(whitelist, userName)
+{
+    for(var i = 0; i<whitelist.length; i++)
+    {
+        var element = whitelist[i];
+        if(!element.endsWith(":|hidden")) continue;
+        if(element.split(":|hidden").slice(0, -1).join(":|hidden") == userName) return true;
+    }
+    return false;
+}
+
+function isUsernameWhitelisted(whitelist, username)
+{
+    if(!isValidUsername(username))
+        return false;
+
+    for(var i = 0; i<whitelist.length; i++)
+    {
+        var element = whitelist[i];
+        if(!element.startsWith("@") || isValidId(element.split(":").at(-1))) continue;
+        if(element.replace("@","").toLowerCase() == username.toLowerCase()) return true;
+    }
+    return false;
+}
+
+/**
+ * @param {import('../GHbot.js').LGHChatBasedPunish} punishments
+ * 
+ * @returns {string|boolean} - returns false or "group" or "user" or "channel" or "bot"
+ */
+function originIsSpam(origin, punishments, exceptions)
 {
 
+    var type = origin.type;
+
+    var originUsername = originToUsername(origin);
+    if(originUsername && isUsernameWhitelisted(exceptions, originUsername))
+        return false;
+    
+    var usersP = punishments.users.punishment;
+    var botsP = punishments.bots.punishment;
+    var channelsP = punishments.channels.punishment;
+    var groupsP = punishments.groups.punishment;
+
+    if(usersP != 0 && type == "user")
+    {
+        if(isChatWhitelisted(exceptions, origin.sender_user.id))
+            return false;
+        
+        if(origin.sender_user.is_bot && botsP != 0)
+            return "bot";
+        if(origin.sender_user.is_bot)
+            return false;
+
+        return "user";
+    }
+    if(usersP != 0 && type == "hidden_user")
+    {
+        if(isHiddenUserWhitelisted(exceptions, origin.sender_user_name))
+            return false;
+        return "user";
+    }
+    if(groupsP != 0 && type == "chat")
+    {
+        if(isChatWhitelisted(exceptions, origin.sender_chat.id))
+            return false;
+        return "group";
+    }
+    if(channelsP != 0 && type == "channel")
+    {
+        if(isChatWhitelisted(exceptions, origin.chat.id))
+            return false;
+        return "channel";
+    }
+    
+}
+
+module.exports = 
+{
     bold : bold,
     code : code,
     tag : tag,
@@ -1179,6 +1294,7 @@ module.exports =
     randomInt : randomInt,
     keysArrayToObj : keysArrayToObj,
     chunkArray : chunkArray,
+    isValidId : isValidId,
     isValidHost : isValidHost,
     isValidChat : isValidChat,
     isValidUser : isValidUser,
@@ -1213,6 +1329,7 @@ module.exports =
     secondsToTime : secondsToTime,
     secondsToHumanTime : secondsToHumanTime,
     getUnixTime : getUnixTime,
+    fullName : fullName,
     usernameOrFullName : usernameOrFullName,
     LGHUserName : LGHUserName,
     anonymizeAdmins : anonymizeAdmins,
@@ -1228,4 +1345,6 @@ module.exports =
     getOwner : getOwner,
     isChatAllowed : isChatAllowed,
     validateTelegramHTML : validateTelegramHTML,
+    originToUsername : originToUsername,
+    originIsSpam : originIsSpam,
 }

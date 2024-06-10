@@ -11,7 +11,11 @@ function main(args)
 
     l = global.LGHLangs; //importing langs object
 
+    //commands
     GHbot.onMessage( async (msg, chat, user) => {
+
+        if(!msg.chat.isGroup) return;
+        if(user.waitingReply) return;
 
         var command = msg.command;
         var where;
@@ -19,6 +23,8 @@ function main(args)
         where = checkCommandPerms(command, "COMMAND_RULES", user.perms);
         if( msg.chat.isGroup && command && where )
         {
+            
+            
             var options = {reply_parameters: {chat_id:msg.chat.id, message_id: msg.message_id, allow_sending_without_reply:true}};
             if(msg.reply_to_message)
             {
@@ -28,6 +34,11 @@ function main(args)
             var func = (id) => {return MSGMK.sendMessage(GHbot, user, msg.chat, msg.chat.rules, l[msg.chat.lang].RULES_TITLE, options, id)};
             sendCommandReply(where, msg.chat.lang, GHbot, user, msg.chat.id, func);
         }
+
+    } )
+
+    //waitingReply handler
+    GHbot.onMessage( async (msg, chat, user) => {
 
         //security guards
         if(!chat.isGroup) return;

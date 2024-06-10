@@ -14,6 +14,7 @@ function main(args)
     GHbot.onMessage( (msg, chat, user) => {
 
         if(!msg.chat.isGroup) return;
+        if(user.waitingReply) return;
 
         var command = msg.command;
         var lang = msg.chat.lang;

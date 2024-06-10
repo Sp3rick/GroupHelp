@@ -17,6 +17,7 @@ function main(args)
         var lang = user.lang
 
         if(!msg.chat.isGroup) return;
+        if(user.waitingReply) return;
         if(user.perms.settings != 1) return;
 
         if( msg.chat.isGroup && checkCommandPerms(msg.command, "COMMAND_SETTINGS", user.perms ) )

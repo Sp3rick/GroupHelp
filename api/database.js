@@ -6,18 +6,19 @@ var RM = require("../api/rolesManager.js");
 function newSpamObj()
 {
     var obj = {
-        tgLinks: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:30 },
-        links: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:30 },
-        forward: { channels: {punishment: 0, PTime: 1800, delete: false},
-            groups: {punishment: 0, PTime: 1800, delete: false},
-            users: {punishment: 0, PTime: 1800, delete: false},
-            bots: {punishment: 0, PTime: 1800, delete: false},
+        tgLinks: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:0 },
+        links: { usernames:false, bots:false, exceptions:[], punishment:1, PTime:0 },
+        forward: {
+            channels: {punishment: 0, PTime: 0, delete: false},
+            groups: {punishment: 0, PTime: 0, delete: false},
+            users: {punishment: 0, PTime: 0, delete: false},
+            bots: {punishment: 0, PTime: 0, delete: false},
         },
         quote: {
-            channels: {punishment: 0, PTime: 1800, delete: false},
-            groups: {punishment: 0, PTime: 1800, delete: false},
-            users: {punishment: 0, PTime: 1800, delete: false},
-            bots: {punishment: 0, PTime: 1800, delete: false},
+            channels: {punishment: 0, PTime: 0, delete: false},
+            groups: {punishment: 0, PTime: 0, delete: false},
+            users: {punishment: 0, PTime: 0, delete: false},
+            bots: {punishment: 0, PTime: 0, delete: false},
         },
     }
 

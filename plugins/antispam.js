@@ -1,8 +1,10 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {bold, punishmentToText, punishmentToTextAndTime, handlePunishmentCallback, genPunishButtons, isNumber, isValidUsername, isValidHost, isString } = require("../api/utils.js");
+const {bold, punishmentToText, punishmentToTextAndTime, handlePunishmentCallback, genPunishButtons, isNumber, isValidUsername, isValidHost, isString, originToUsername, originIsSpam, isValidId } = require("../api/utils.js");
 const ST = require("../api/setTime.js");
 const SE = require("../api/setExceptions.js");
 const CBP = require("../api/setChatbasedPunish.js");
+const RM = require("../api/rolesManager.js");
+const { applyChatBasedPunish } = require("../api/punishment.js");
 
 function is8BitNumber(num)
 {
@@ -19,7 +21,7 @@ function tgLinkValidator(string)
 
     var splitted = string.split(":");
     var specialId = splitted[splitted.length-1];
-    if(string.includes(":") && (isNumber(specialId) || specialId == "|hidden"))
+    if(string.includes(":") && (isValidId(specialId) || specialId == "|hidden"))
         return string;
 
     if(string.includes("telegram.me/"))
@@ -75,16 +77,40 @@ function main(args) {
 
         //spam detection
         if(msg.chat.type != "private"){(()=>{
+
+            var TGExceptions = chat.spam.tgLinks.exceptions
             
             //unallowed forward detection
-            /*
-            if(!user.perms.forward && msg.hasOwnProperty("forward_origin"))
+            var isForwardedUser = msg.forward_origin && msg.forward_origin.type == "user" && msg.forward_origin.sender_user.id == user.id
+            if(!user.perms.forward && msg.hasOwnProperty("forward_origin") && !isForwardedUser)
             {
-                var forwardType = msg.forward_origin.type;
-                if(forwardType == "user" && msg.forward_origin.sender_user.is_bot) forwardType = "bot";
-                if(forwardType == "hidden_user") forwardType = "user";
+                var punishType = originIsSpam(msg.forward_origin, chat.spam.forward, TGExceptions);
 
-            }*/
+                if(punishType)
+                {
+                    var reason = l[chat.lang].FORWARD_PUNISHMENT;
+                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.forward, punishType, reason);
+                }
+            }
+
+            //unallowed quote detection
+            var isQuotedChat = msg.hasOwnProperty("external_reply") && msg.external_reply.chat && msg.external_reply.chat.id == chat.id;
+            if(!user.perms.quote && msg.hasOwnProperty("external_reply") && !isQuotedChat)
+            {
+                /*if(msg.external_reply.chat && (msg.external_reply.chat.type == "group" || msg.external_reply.chat.type == "supergroup") )
+                {
+                    msg.external_reply.origin.type = "chat";
+                    msg.external_reply.chat.sender_chat = msg.external_reply.chat;
+                }*/
+                console.log(msg);
+                var punishType = originIsSpam(msg.external_reply.origin, chat.spam.quote, TGExceptions);
+
+                if(punishType)
+                {
+                    var reason = l[chat.lang].QUOTE_PUNISHMENT;
+                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.quote, punishType, reason);
+                }
+            }
 
         })()}
 
@@ -157,7 +183,7 @@ function main(args) {
 
         //telegram exceptions
         var editTelegramExceptions = user.waitingReplyType.startsWith("S_TGLINKS#EXC") ||
-        user.waitingReplyType.startsWith("S_FORWARD#EXC") || user.waitingReplyType.startsWith("S_QUOTES#CBP");
+        user.waitingReplyType.startsWith("S_FORWARD#EXC") || user.waitingReplyType.startsWith("S_QUOTES#EXC");
         if (editTelegramExceptions) {
             var returnLocation = user.waitingReplyType.split("#EXC")[0].split("_").at(-1);
             var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_"+returnLocation+"#EXC_MENU:" + chat.id }]]

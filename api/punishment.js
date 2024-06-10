@@ -297,4 +297,48 @@ async function unpunishUser(GHbot, userId, chat, targetUser, punishment, reason)
 
 }
 
-module.exports = {genRevokePunishButton, genPunishText, silentPunish, punishUser, genUnpunishButtons, genUnpunishText, silentUnpunish, unpunishUser}
+
+//other special functions
+function applyChatBasedPunish(GHbot, userId, chat, targetUser, punishments, type, reason)
+{
+
+    reason = reason || "";
+    var punish = 0;
+    var PTime = false;
+
+    switch (type) {
+        case "user":
+            reason = reason.replace("{type}", l[chat.lang].USER);
+            punish = punishments.users.punishment;
+            PTime = punishments.users.PTime;
+            break;
+        case "bot":
+            reason = reason.replace("{type}", l[chat.lang].BOT);
+            punish = punishments.bots.punishment;
+            PTime = punishments.bots.PTime;
+            break;
+        case "group":
+            reason = reason.replace("{type}", l[chat.lang].GROUP);
+            punish = punishments.groups.punishment;
+            PTime = punishments.groups.PTime;
+            break;
+        case "channel":
+            reason = reason.replace("{type}", l[chat.lang].CHANNEL);
+            punish = punishments.channels.punishment;
+            PTime = punishments.channels.PTime;
+            break;
+    }
+
+    if(reason === "") reason = false;
+    if(punish == 0) return false;
+    
+    return punishUser(GHbot, userId, chat, targetUser, punish, PTime, reason);
+}
+
+module.exports = {
+    genRevokePunishButton, genPunishText,
+    silentPunish, punishUser,
+    genUnpunishButtons, genUnpunishText,
+    silentUnpunish, unpunishUser,
+    applyChatBasedPunish,
+}

@@ -14,7 +14,11 @@ function main(args)
 
     l = global.LGHLangs; //importing langs object
 
+    //commands
     GHbot.onMessage( async (msg, chat, user) => {
+
+        if(!msg.chat.isGroup) return;
+        if(user.waitingReply) return;
 
         var command = msg.command;
         var lang = msg.chat.lang;
@@ -241,12 +245,13 @@ function main(args)
             RM.unsetRole(msg.chat, target.id, toUnsetRole);
             text=target.name+" "+l[lang].IS_NO_LONGER+" "+RM.getFullRoleName(toUnsetRole, lang, msg.chat);
             GHbot.sendMessage(user.id, msg.chat.id, text, options);
-        }
+        }        
 
+    } )
 
+    //waitingReply handler
+    GHbot.onMessage( async (msg, chat, user) => {
 
-
-        //below from here handle set title
         if(!msg.chat.isGroup) return;
         if( !(user.waitingReply && user.waitingReplyType.startsWith("ADMINTITLE")) ) return;
         if( !user.perms.commands.includes("COMMAND_TITLE") )
@@ -256,9 +261,8 @@ function main(args)
             db.users.update(user);
             return;
         }
-
-        var chat = Object.assign( {}, db.chats.get(chat.id), (msg.chat.isGroup ? msg.chat : {}) );
-        lang = chat.lang;
+        
+        var lang = chat.lang;
 
         var title = msg.text.length > 0 ? msg.text.substring(0,16) : "";
         var changeTitleOpts = {parse_mode:"HTML", reply_markup: {inline_keyboard:[[{text:l[lang].CANCEL_BUTTON,callback_data:"ADMINPERM_MENU:"+chat.id+"?"+user.waitingReplyTarget.id}]]}};
@@ -280,8 +284,8 @@ function main(args)
             var text = telegramErrorToText(lang, error);
             GHbot.sendMessage(user.id, chat.id, text, changeTitleOpts);
         }
-
-    } )
+    
+    } );
 
     GHbot.onCallback( async (cb, chat, user) => {
 

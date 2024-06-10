@@ -14,8 +14,8 @@ const { pushUserRequest } = require("./api/SafeTelegram");
 //PUNISH
 /**
  * @typedef {Object} LGHPunish antispam.js settings Object.
- * @property {Number} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
- * @property {Number|0|1|2|3|4|null} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
+ * @property {Number|0|1|2|3|4} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
+ * @property {Number|null} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
  * @property {boolean|null} delete - True if deletion is enabled as side effect.
  */
 /**
