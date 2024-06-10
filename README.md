@@ -59,7 +59,7 @@ Useful links to contribute:
 ✅ Rules
 ✅ Welcome
 ✅ Anti-flood
-❌ Anti-spamm
+🟡 Anti-spam
 ❌ Captcha
 ❌ Checks settings
 ❌ @Admin
