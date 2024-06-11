@@ -2,6 +2,7 @@ const TelegramBot = require("node-telegram-bot-api");
 const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML} = require("./utils.js");
 const { pushUserRequest } = require("./SafeTelegram.js");
 const { substitute } = require("./substitutor.js");
+const GH = require("../GHbot.js");
 
 /** 
  * @typedef {Object} simpleMedia
@@ -21,8 +22,8 @@ const { substitute } = require("./substitutor.js");
  */
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} customMessage - MessageMaker object
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -350,8 +351,8 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} customMessage - MessageMaker object
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
@@ -493,9 +494,9 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHChat} user - LGHUser object
- * @param  {import("../GHbot.js").LGHUser} chat - LGHChat object
+ * @param  {GH} GHbot
+ * @param {GH.LGHChat} user - LGHUser object
+ * @param  {GH.LGHUser} chat - LGHChat object
  * @param  {customMessage} customMessage - MessageMaker object
  * @param  {String} messageTitle - title for when message is sent as entire
  * @param  {TelegramBot.SendMessageOptions} additionalOptions - Additional options for telegram

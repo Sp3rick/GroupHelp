@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToTextAndTime, chunkArray, textToPunishment, genPunishButtons, handlePunishmentCallback } = require("../api/utils.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, textToPunishment, genPunishButtons, handlePunishmentCallback } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 const RM = require("../api/rolesManager.js");
@@ -93,7 +93,7 @@ function main(args)
         {
 
             var punishment = chat.flood.punishment;
-            var punishmentText = punishmentToTextAndTime(lang, punishment, chat.flood.PTime)
+            var punishmentText = punishmentToFullText(lang, punishment, chat.flood.PTime, chat.flood.delete)
             var text = l[lang].ANTIFLOOD+"\n"+
             l[lang].ANTIFLOOD_DESCRIPTION.replace("{messages}",chat.flood.messages).replace("{seconds}",chat.flood.time)+"\n\n"+
             bold(l[lang].PUNISHMENT+": ")+punishmentText;

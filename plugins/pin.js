@@ -37,7 +37,7 @@ function main(args)
             }
             var text = l[lang].ASK_PIN_NOTIFY
             var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
+            sendCommandReply(where, lang, GHbot, user.id, msg.chat.id, func);
         }
 
     } )

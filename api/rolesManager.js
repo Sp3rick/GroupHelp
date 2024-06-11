@@ -1,40 +1,25 @@
 const {genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId, isAdminOfChat} = require("./utils.js");
+const GH = require("../GHbot.js");
+const TelegramBot = require("node-telegram-bot-api");
 l = global.LGHLangs;
 
 //Roles with string name is intended as a pre-made role
 //pre-made roles chat.roles[role] will contain only "users" array, data about the role are stored on global.roles[role]
 //TODO: add admin role that's the role given automaticallywith custom permissions based on telegram permissions bindings
-//So a function to convert telegram permissions to our customPerms object
-
-
-/** 
- * @typedef {Object} customPerms
- * @property {Array} commands - Array of allowed commands
- * @property {1|0|-1} immune - disallow from punish this user
- * @property {1|0|-1} flood - permission to flood messages
- * @property {1|0|-1} link - permission to send link
- * @property {1|0|-1} tgLink - permission to send telegram links/usernamess
- * @property {1|0|-1} forward - permission to forward messages from anywhere
- * @property {1|0|-1} quote - permission to quote from anywhere
- * @property {1|0|-1} porn - bypass porn/gore checks
- * @property {1|0|-1} night - bypass any night mode  limitation
- * @property {1|0|-1} media - bypass any media limitation
- * @property {1|0|-1} roles - permission to change roles of lower level users
- * @property {1|0|-1} settings - permission to change bot group settings
- */
+//So a function to convert telegram permissions to our GH.LGHPerms object
 
 /** 
  * @typedef {Object} userStatus
- * @property {customPerms} perms - customPerms object for all user-specific permissions
+ * @property {GH.LGHPerms} perms - GH.LGHPerms object for all user-specific permissions
  * @property {Array<String|Number>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
- * @property {customPerms} adminPerms - customPerms object for user permissions if admin
+ * @property {GH.LGHPerms} adminPerms - GH.LGHPerms object for user permissions if admin
  * @property {String} title - user administrator title
  */
 
 /** 
  * @typedef {Object} GHRole
  * @property {String} name - role name
- * @property {customPerms} perms - customPerms object applyed at lowest priority on any user in this role
+ * @property {GH.LGHPerms} perms - GH.LGHPerms object applyed at lowest priority on any user in this role
  * @property {Array<Number|String>} users - array of userId in this role
  */
 
@@ -45,8 +30,8 @@ l = global.LGHLangs;
 
 /**
  * 
- * @return {customPerms}
- *      Get a default customPerms object
+ * @return {GH.LGHPerms}
+ *      Get a default GH.LGHPerms object
  */
 function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
 {
@@ -169,11 +154,17 @@ function getRoleUsers(chat, role)
     return chat.roles[role].users;
 }
 
+/**
+ * @returns {GH.LGHPerms}
+ */
 function getUserPerms(chat, userId)
 {
     return chat.users[userId].perms;
 }
 
+/**
+ * @returns {GH.LGHPerms}
+ */
 function getAdminPerms(chat, userId)
 {
     return chat.users[userId].adminPerms;
@@ -194,6 +185,9 @@ function getUserLevel(chat, userId)
     return level;
 }
 
+/**
+ * @returns {GH.LGHPerms}
+ */
 function getRolePerms(role, chat) //Chat required only if role is number (custom role)
 {
     if(isString(role))
@@ -337,6 +331,9 @@ function addUser(chat, user)
 }
 
 //admin translation management
+/**
+ * @returns {GH.LGHPerms}
+ */
 function adminToPerms(admin)
 {
     //NOTE: other permissions may be avaiable for every admin on chat.adminPerms
@@ -370,6 +367,12 @@ function adminToPerms(admin)
     return perms;
 
 }
+/**
+ * 
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHAdminList} admins 
+ * @returns {GH.LGHChat}
+ */
 function reloadAdmins(chat, admins)
 {
     //clear adminPerms for every user
@@ -404,9 +407,9 @@ function reloadAdmins(chat, admins)
 }
 
 /**
- * @param {customPerms} perms1 - higest priority permission
- * @param {customPerms} perms2 - lower priority permission
- * @return {customPerms}
+ * @param {GH.LGHPerms} perms1 - higest priority permission
+ * @param {GH.LGHPerms} perms2 - lower priority permission
+ * @return {GH.LGHPerms}
  *      Sum two permissions object to get a single permission result
  */
 function sumPermsPriority(perms1, perms2)
@@ -449,7 +452,7 @@ function orderRolesByPriority(roles, chat) //Chat required only if role is numbe
     return newRoles;
 }
 /**
- * @return {customPerms}
+ * @return {GH.LGHPerms}
  *      Get complete object of effective user permissions counting her roles
  */
 function sumUserPerms(chat, userId)
@@ -517,11 +520,12 @@ function sumUserPerms(chat, userId)
 
 
 ////////////////////
+
 /**
- * @typedef {import('../GHbot.js').LGHChat} LGHChat
- */
-/**
- * @param {LGHChat} chat
+ * @param {string} lang 
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHDatabase} db 
+ * @returns {string}
  */
 function genStaffListMessage(lang, chat, db)
 {
@@ -560,6 +564,11 @@ function genStaffListMessage(lang, chat, db)
 
 }
 
+/**
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHUser} user 
+ * @returns {GH.TargetUser}
+ */
 function userToTarget(chat, user)
 {
     var id = user.id;
@@ -569,6 +578,13 @@ function userToTarget(chat, user)
     return {id, name, perms, user};
 }
 
+/**
+ * @param {TelegramBot} TGbot 
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @param {GH.LGHDatabase} db 
+ * @returns {GH.TargetUser}
+ */
 function userIdToTarget(TGbot, chat, userId, db)
 {  
     var tookUser = db.users.get(userId);

@@ -299,35 +299,42 @@ async function unpunishUser(GHbot, userId, chat, targetUser, punishment, reason)
 
 
 //other special functions
-function applyChatBasedPunish(GHbot, userId, chat, targetUser, punishments, type, reason)
+function applyChatBasedPunish(GHbot, userId, chat, targetUser, punishments, type, reason, messageId)
 {
 
     reason = reason || "";
     var punish = 0;
     var PTime = false;
+    var deletion = false;
 
     switch (type) {
         case "user":
             reason = reason.replace("{type}", l[chat.lang].USER);
             punish = punishments.users.punishment;
             PTime = punishments.users.PTime;
+            deletion = punishments.users.delete;
             break;
         case "bot":
             reason = reason.replace("{type}", l[chat.lang].BOT);
             punish = punishments.bots.punishment;
             PTime = punishments.bots.PTime;
+            deletion = punishments.bots.delete;
             break;
         case "group":
             reason = reason.replace("{type}", l[chat.lang].GROUP);
             punish = punishments.groups.punishment;
             PTime = punishments.groups.PTime;
+            deletion = punishments.groups.delete;
             break;
         case "channel":
             reason = reason.replace("{type}", l[chat.lang].CHANNEL);
             punish = punishments.channels.punishment;
             PTime = punishments.channels.PTime;
+            deletion = punishments.channels.delete;
             break;
     }
+
+    if(deletion) GHbot.TGbot.deleteMessages(chat.id, [messageId])
 
     if(reason === "") reason = false;
     if(punish == 0) return false;

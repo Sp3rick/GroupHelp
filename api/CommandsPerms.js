@@ -1,8 +1,9 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { tradCommand } = require("./utils.js");
+const GH = require("../GHbot.js");
 
 /** 
- * @param  {import("../GHbot.js").LGHChat} chat
+ * @param  {GH.LGHChat} chat
  */
 function genCommandButtonsLine(chat, commandKey, prefix, settingsChatId)
 {
@@ -21,12 +22,12 @@ function genCommandButtonsLine(chat, commandKey, prefix, settingsChatId)
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
- * @param  {import("../GHbot.js").LGHChat} settingsChat
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
+ * @param  {GH.LGHChat} settingsChat
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
- * @param  {import("../GHbot.js").LGHUser} user
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * 
@@ -125,12 +126,12 @@ function callbackEvent(GHbot, db, settingsChat, cb, chat, user, cb_prefix, retur
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
- * @param  {import("../GHbot.js").LGHChat} settingsChat
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
+ * @param  {GH.LGHChat} settingsChat
  * @param  {TelegramBot.Message} msg
- * @param  {import("../GHbot.js").LGHChat} chat
- * @param  {import("../GHbot.js").LGHUser} user
+ * @param  {GH.LGHChat} chat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * 
  * @return {customMessage|false}

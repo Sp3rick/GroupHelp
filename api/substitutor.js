@@ -1,5 +1,7 @@
 const { LGHUserName, tag, isNumber, replaceLast } = require("./utils");
 const cp = require("./cryptoPrices");
+const TelegramBot = require("node-telegram-bot-api");
+const GH = require("../GHbot.js");
 
 l = global.LGHLangs;
 
@@ -14,7 +16,13 @@ function hasSubstitution(text, prefix) {
     return result;
 }
 
-
+/**
+ * @param {string} text 
+ * @param {GH.LGHUser} user 
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHDatabase} db 
+ * @returns {string}
+ */
 function substitute(text, user, chat, db)
 {
 

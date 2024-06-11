@@ -1,17 +1,10 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {bold, punishmentToText, punishmentToTextAndTime, handlePunishmentCallback, genPunishButtons, isNumber, isValidUsername, isValidHost, isString, originToUsername, originIsSpam, isValidId } = require("../api/utils.js");
+const {bold, punishmentToText, punishmentToFullText, handlePunishmentCallback, genPunishButtons, isNumber, isValidUsername, isValidHost, isString, originToUsername, originIsSpam, isValidId, extractMedia, entitiesLinks, isIpAddress } = require("../api/utils.js");
 const ST = require("../api/setTime.js");
 const SE = require("../api/setExceptions.js");
 const CBP = require("../api/setChatbasedPunish.js");
 const RM = require("../api/rolesManager.js");
-const { applyChatBasedPunish } = require("../api/punishment.js");
-
-function is8BitNumber(num)
-{
-    if(isNumber(num) && num >= 0 && num <= 255)
-        return true;
-    return false;
-}
+const { applyChatBasedPunish, punishUser } = require("../api/punishment.js");
 
 //Be sure to store only t.me/path
 function tgLinkValidator(string)
@@ -43,6 +36,18 @@ function tgLinkValidator(string)
     return false;
 }
 
+function isTelegramLink(string)
+{
+    var tgLink = tgLinkValidator(string);
+
+    if(!tgLink) return false;
+
+    if(tgLink.startsWith("@") && (!string.includes("/") && !string.startsWith("@")))
+        return false;
+
+    return true;
+}
+
 //Be sure to store hostname only (www.google.com) or a full link with path when given (https://www.youtube.com/watch?v=dQw4w9WgXcQ)
 function linksValidator(string)
 {
@@ -57,12 +62,59 @@ function linksValidator(string)
         return string;
 
     var doms = host.split(".");
-    if(doms.length == 4 && is8BitNumber(doms[0]) && is8BitNumber(doms[1]) && is8BitNumber(doms[2]) && is8BitNumber(doms[3]))
+    if(doms.length == 4 && isIpAddress(host))
         return doms.join(".");
+    else if(doms.length == 4)
+        return false;
     if(doms.length > 2)
         return doms[doms.length-3]+"."+doms[doms.length-2]+"."+doms[doms.length-1] //max to subdomain
     if(host.length < 256)
         return host;
+    return false;
+}
+
+/**
+ * @param {string} string - hostname or full link, all without protocol (no http/https/ftp)
+ * @param {Array<string>} whitelist - array of allowed links
+ * @returns {Boolean}
+ */
+function isLinkWhitelisted(string, whitelist)
+{
+    var isIp = isIpAddress(string.split("/")[0]);
+    if(!isIp && string.split("/")[0].split(".").length == 4) return true;
+    if(isIp && whitelist.includes(string.split("/")[0])) return true
+
+    string = string.toLowerCase();
+    var SSplit = string.split(".");
+    if(SSplit.length < 2) return false;
+    var top = SSplit.at(-1).split("/")[0];
+    var domain = SSplit.at(-2);
+    for (var i = 0; i < whitelist.length; i++) {
+
+        var link = whitelist[i].toLowerCase();
+
+        var isEntireLink = link.includes("/");
+        if(isEntireLink && string == link) return true
+        else if(isEntireLink) continue;
+
+        var linkSplit = link.split(".");
+        var linkTop = linkSplit.at(-1);
+        var linkDomain = linkSplit.at(-2);
+
+        if(linkTop != top || linkDomain != domain) continue;
+
+        if(linkSplit.length == 2) return true;
+
+        if(linkSplit.length == 3)
+        {
+            if(SSplit.length != 3) continue;
+            var subdomain = SSplit.at(-3);
+            var linkSubdomain = linkSplit.at(-3);
+            if(subdomain == linkSubdomain) return true;
+        }
+        
+    }
+
     return false;
 }
 
@@ -85,11 +137,11 @@ function main(args) {
             if(!user.perms.forward && msg.hasOwnProperty("forward_origin") && !isForwardedUser)
             {
                 var punishType = originIsSpam(msg.forward_origin, chat.spam.forward, TGExceptions);
-
                 if(punishType)
                 {
                     var reason = l[chat.lang].FORWARD_PUNISHMENT;
-                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.forward, punishType, reason);
+                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.forward, punishType, reason, msg.message_id);
+                    return;
                 }
             }
 
@@ -98,14 +150,62 @@ function main(args) {
             if(!user.perms.quote && msg.hasOwnProperty("external_reply") && !isQuotedChat)
             {
                 var punishType = originIsSpam(msg.external_reply.origin, chat.spam.quote, TGExceptions);
-
                 if(punishType)
                 {
                     var reason = l[chat.lang].QUOTE_PUNISHMENT;
-                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.quote, punishType, reason);
+                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.quote, punishType, reason, msg.message_id);
+                    return;
                 }
             }
 
+            var text = msg.text || msg.caption || false;
+            if(!text) return;
+            var words = text.split(" ");
+            if(msg.entities) words = words.concat(entitiesLinks(msg.entities));
+            if(msg.caption_entities) words = words.concat(entitiesLinks(msg.caption_entities));
+
+            //search for unwanted links on text
+            for(var i = 0; i < words.length; i++)
+            {
+                var word = words[i];
+
+                //unallowed tgLink detection
+                var tgLink = isTelegramLink(word);
+                if(user.perms.tgLink && tgLink)
+                    return;
+                if(!user.perms.tgLink && tgLink)
+                {
+                    var punish = true;
+                    if(!chat.spam.tgLinks.bots && tgLink.startsWith("@") && tgLink.endsWith("bot"))
+                        punish = false;
+                    if(!chat.spam.tgLinks.usernames && tgLink.startsWith("@") && !tgLink.endsWith("bot"))
+                        punish = false;
+
+                    if(!punish) return;
+                    if(chat.spam.tgLinks.exceptions.includes(tgLink)) return;
+
+                    if(chat.spam.tgLinks.delete)
+                        TGbot.deleteMessages(chat.id, [msg.message_id]);
+
+                    var reason = l[chat.lang].TGLINK_PUNISHMENT;
+                    punishUser(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.tgLinks.punishment, chat.spam.tgLinks.PTime, reason);
+                    return;
+                }
+
+                //unallowed link detection
+                var link = linksValidator(word);
+                if(!user.perms.link && link && !isLinkWhitelisted(link, chat.spam.links.exceptions))
+                {
+                    if(chat.spam.links.delete)
+                        TGbot.deleteMessages(chat.id, [msg.message_id]);
+                    
+                    var reason = l[chat.lang].LINK_PUNISHMENT;
+                    punishUser(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.links.punishment, chat.spam.links.PTime, reason);
+                    return;
+                }
+                
+            }
+            
         })()}
 
         //security guards
@@ -300,7 +400,7 @@ function main(args) {
             buttons.push([{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + chat.id },
             { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_TGLINKS#EXC_MENU:" + chat.id }])
 
-            var punishmentText = punishmentToTextAndTime(lang, punishment, pTime);
+            var punishmentText = punishmentToFullText(lang, punishment, pTime, deletion);
             var deletionText = chat.spam.tgLinks.delete ? l[lang].YES_EM : l[lang].NO_EM;
             var text = l[lang].ANTISPAM_TGLINKS_DESCRIPTION.replace("{punishment}", punishmentText).replace("{deletion}", deletionText);
             GHbot.editMessageText(user.id, text, {
@@ -364,7 +464,7 @@ function main(args) {
             buttons.push([{ text: l[lang].BACK_BUTTON, callback_data: "S_ANTISPAM_BUTTON:" + chat.id },
             { text: l[lang].EXCEPTIONS_BUTTON, callback_data: "S_LINKS#EXC_MENU:" + chat.id }])
 
-            var punishmentText = punishmentToTextAndTime(lang, punishment, pTime);
+            var punishmentText = punishmentToFullText(lang, punishment, pTime, deletion);
             var deletionText = chat.spam.links.delete ? l[lang].YES_EM : l[lang].NO_EM;
             var text = l[lang].ANTISPAM_LINKS_DESCRIPTION.replace("{punishment}", punishmentText).replace("{deletion}", deletionText);
             GHbot.editMessageText(user.id, text, {

@@ -1,11 +1,12 @@
 const TelegramBot = require("node-telegram-bot-api");
 const ST = require("../api/setTime.js");
-const {handlePunishmentCallback, genPunishButtons, punishmentToTextAndTime, punishmentToText} = require("./utils.js");
+const {handlePunishmentCallback, genPunishButtons, punishmentToFullText, punishmentToText} = require("./utils.js");
+const GH = require("../GHbot.js");
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param  {import("../GHbot.js").LGHDatabase} db - database
- * @param  {import("../GHbot.js").LGHChatBasedPunish} CBP
+ * @param  {GH} GHbot
+ * @param  {GH.LGHDatabase} db - database
+ * @param  {GH.LGHChatBasedPunish} CBP
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user
@@ -104,10 +105,10 @@ function callbackEvent(GHbot, db, CBP, cb, chat, user, cb_prefix, returnButtons,
         returnButtons.forEach((line)=>{buttons.push(line)});
 
         var text = title+"\n"+l[lang].CHAT_BASED_PERMS
-        .replace("{channels}", punishmentToTextAndTime(lang, channels.punishment, channels.PTime))
-        .replace("{groups}", punishmentToTextAndTime(lang, groups.punishment, groups.PTime))
-        .replace("{users}", punishmentToTextAndTime(lang, users.punishment, users.PTime))
-        .replace("{bots}", punishmentToTextAndTime(lang, bots.punishment, bots.PTime));
+        .replace("{channels}", punishmentToFullText(lang, channels.punishment, channels.PTime, channels.delete))
+        .replace("{groups}", punishmentToFullText(lang, groups.punishment, groups.PTime, groups.delete))
+        .replace("{users}", punishmentToFullText(lang, users.punishment, users.PTime, users.delete))
+        .replace("{bots}", punishmentToFullText(lang, bots.punishment, bots.PTime, bots.delete));
         GHbot.editMessageText( user.id, text, {
             message_id : msg.message_id,
             chat_id : chat.id,
@@ -121,8 +122,8 @@ function callbackEvent(GHbot, db, CBP, cb, chat, user, cb_prefix, returnButtons,
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param  {import("../GHbot.js").LGHChatBasedPunish} CBP
+ * @param  {GH} GHbot
+ * @param  {GH.LGHChatBasedPunish} CBP
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat
  * @param  {TelegramBot.User} user

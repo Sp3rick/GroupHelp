@@ -102,7 +102,7 @@ function main(args)
             } 
 
             var func = (id) => {return GHbot.sendMessage(user.id, id, RM.genStaffListMessage(msg.chat.lang, msg.chat, db), options)};
-            sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
+            sendCommandReply(where, lang, GHbot, user.id, msg.chat.id, func);
         }
 
         where = checkCommandPerms(command, "COMMAND_INFO", user.perms, ["info"]);
@@ -128,7 +128,7 @@ function main(args)
                 var member = await TGbot.getChatMember(msg.chat.id, target.id);
                 var memberAndUser = Object.assign({}, member.user, msg.chat.users[target.id]);
                 var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(msg.chat.lang, msg.chat, memberAndUser, member), options)};
-                sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
+                sendCommandReply(where, lang, GHbot, user.id, msg.chat.id, func);
             } catch (error) {
                 handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
@@ -154,7 +154,7 @@ function main(args)
                 var memberAndUser = Object.assign({}, member.user, msg.chat.users[user.id]);
                 
                 var func = (id) => {return GHbot.sendMessage(user.id, id, genMemberInfoText(msg.chat.lang, msg.chat, memberAndUser, member), options)};
-                await sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
+                await sendCommandReply(where, lang, GHbot, user.id, msg.chat.id, func);
             } catch (error) {
                 handleTelegramGroupError(GHbot, user.id, msg.chat.id, lang, error);
             }
@@ -192,7 +192,7 @@ function main(args)
 
 
             var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply(where, lang, GHbot, user, msg.chat.id, func);
+            sendCommandReply(where, lang, GHbot, user.id, msg.chat.id, func);
         }
 
         if(checkCommandPerms(command, "COMMAND_FORGOT", user.perms))

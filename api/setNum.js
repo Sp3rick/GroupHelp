@@ -1,9 +1,10 @@
 const TelegramBot = require("node-telegram-bot-api");
 const {isNumber, genSetNumKeyboard} = require("./utils.js");
+const GH = require("../GHbot.js");
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} currentNumber
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -104,7 +105,7 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
+ * @param  {GH} GHbot
  * @param  {customMessage} customMessage
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat

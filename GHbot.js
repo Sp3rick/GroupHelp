@@ -13,8 +13,17 @@ const { pushUserRequest } = require("./api/SafeTelegram");
 
 //PUNISH
 /**
+ * @typedef {0|1|2|3|4} Punishment
+ * @description Punishment to apply
+ * - 0: off
+ * - 1: warn
+ * - 2: kick
+ * - 3: mute
+ * - 4: ban
+ */
+/**
  * @typedef {Object} LGHPunish antispam.js settings Object.
- * @property {Number|0|1|2|3|4} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
+ * @property {Punishment} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
  * @property {Number|null} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
  * @property {boolean|null} delete - True if deletion is enabled as side effect.
  */
@@ -74,7 +83,10 @@ const { pushUserRequest } = require("./api/SafeTelegram");
 
 //CUSTOM CHAT DECLARATIONS
 /**
- * @typedef {Array.<TelegramBot.ChatAdministratorRights & {user: AnonTGUser} & {status: TelegramBot.ChatMemberStatus}>} LGHAdminList
+ * @typedef {TelegramBot.ChatAdministratorRights & {user: AnonTGUser} & {status: TelegramBot.ChatMemberStatus}} LGHAdmin
+ */
+/**
+ * @typedef {Array<LGHAdmin>} LGHAdminList
  */
 
 /**
@@ -349,7 +361,7 @@ testObject()
 /**
  * @class
  * @classdesc
- * @param {LibreGHelp} LibreGHelp -Test
+ * @param {LibreGHelp} LibreGHelp - Libre Group Help telegram bot handler
  */
 class main {
     constructor(LibreGHelp) {

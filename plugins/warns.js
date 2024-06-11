@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { genPunishmentTimeSetButton, punishmentToText, punishmentToTextAndTime, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns, textToPunishment } = require("../api/utils.js");
+const { genPunishmentTimeSetButton, punishmentToText, punishmentToFullText, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns, textToPunishment } = require("../api/utils.js");
 const SN = require("../api/setNum.js");
 const ST = require("../api/setTime.js");
 
@@ -36,7 +36,7 @@ function main(args)
 
         if( user.waitingReplyType.startsWith("S_WARN_LIMIT#SNUM")  )
         {
-            var punishmentText = punishmentToTextAndTime(user.lang, chat.warns.punishment, chat.warns.PTime);
+            var punishmentText = punishmentToFullText(user.lang, chat.warns.punishment, chat.warns.PTime);
             var title = l[user.lang].WARNS_DESCRIPTION.replaceAll("{punishmentText}",punishmentText).replaceAll("{limit}",bold("{number}"));
             var num = SN.messageEvent(GHbot, chat.flood.messages, msg, msg.chat, user, "S_WARN_LIMIT", returnButtons, title, config.minWarns, config.maxWarns);
             if(num != -1 && num != chat.flood.messages)
@@ -73,7 +73,7 @@ function main(args)
             chat.warns.punishment = toSetPunishment;
             db.chats.update(chat)
         }
-        var punishmentText = punishmentToTextAndTime(lang, chat.warns.punishment, chat.warns.PTime);
+        var punishmentText = punishmentToFullText(lang, chat.warns.punishment, chat.warns.PTime);
         if(cb.data.startsWith("S_WARN_BUTTON"))
         {
             var punishment = chat.warns.punishment;

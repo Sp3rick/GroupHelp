@@ -1,5 +1,6 @@
 const chrono = require('chrono-node');
 const TelegramBot = require('node-telegram-bot-api');
+const GH = require("../GHbot.js");
 l = global.LGHLangs;
 
 function cleanHTML(text)
@@ -59,10 +60,26 @@ function isNumber(str) {
     return !isNaN(str) && !isNaN(parseFloat(str)) 
 }
 
+function is8BitNumber(num)
+{
+    if(isNumber(num) && num >= 0 && num <= 255)
+        return true;
+    return false;
+}
+
+/**
+ * @param {Number} min 
+ * @param {Number} max 
+ * @returns {Number}
+ */
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/**
+ * @param {Array} array 
+ * @returns {Object}
+ */
 function keysArrayToObj(array)
 {
     var obj = {};
@@ -70,6 +87,11 @@ function keysArrayToObj(array)
     return obj;
 }
 
+/**
+ * @param {Array} arr 
+ * @param {Number} chunkSize 
+ * @returns {Array<Array>}
+ */
 function chunkArray(arr, chunkSize) {
     var result = [];
 
@@ -81,25 +103,51 @@ function chunkArray(arr, chunkSize) {
     return result;
 }
 
+/**
+ * @returns {Number}
+ */
 function getUnixTime() {
     const currentTimeMillis = new Date().getTime();
     const currentTimeSeconds = Math.floor(currentTimeMillis / 1000);
     return currentTimeSeconds;
 }
 
+/**
+ * @param {string} host 
+ * @returns {Boolean}
+ */
 function isValidHost(host) {
     host = host.toLowerCase();
     var hostRegex = /^(((?!-))(xn--|_)?[a-z0-9-]{0,61}[a-z0-9]{1,1}\.)*(xn--)?([a-z0-9][a-z0-9\-]{0,60}|[a-z0-9-]{1,30}\.[a-z]{2,})$/;
     return hostRegex.test(host);
 }
 
+/**
+ * @param {string} host 
+ * @returns {Boolean}
+ */
+function isIpAddress(host)
+{
+    var doms = host.split(".");
+    if(doms.length == 4 && is8BitNumber(doms[0]) && is8BitNumber(doms[1]) && is8BitNumber(doms[2]) && is8BitNumber(doms[3]))
+        return true
+    return false;
+}
+
+/**
+ * @param {TelegramBot.ChatId} id 
+ * @returns {Boolean}
+ */
 function isValidId(id)
 {
     return isNumber(id) && (id > 99999 || id < -9999) && id != Infinity;
 }
 
 //TODO: add translation system that replaces any word to english (like dictionary translation)
-//ATTENTION HERE: for error he may return both 0 or 1
+/**
+ * @param {string} text 
+ * @returns {Number} - error if returns 0 or 1, 2 and more seconds only allowed
+ */
 function parseHumanTime(text) {
     text = text+" from now";
     const parsedDate = chrono.parseDate(text);
@@ -109,6 +157,10 @@ function parseHumanTime(text) {
     var totalSeconds = Math.floor(millisecondsDifference / 1000);
     return ++totalSeconds;
 }
+/**
+ * @param {Number} seconds 
+ * @returns 
+ */
 function secondsToTime(seconds) {
     const days = Math.floor(seconds / 86400);
     const remainingHours = seconds % 86400;
@@ -124,6 +176,11 @@ function secondsToTime(seconds) {
         seconds: remainingSeconds
     };
 }
+/**
+ * @param {string} lang 
+ * @param {Number} seconds 
+ * @returns {string}
+ */
 function secondsToHumanTime(lang, seconds)
 {
     var l = global.LGHLangs;
@@ -173,10 +230,8 @@ function secondsToHumanTime(lang, seconds)
 
 
 /** 
- * @param  {string} text
- *         Raw message text.
- * @return {Command|false} 
- *         Parsed command object, false if is not a command
+ * @param  {string} text - Raw message text.
+ * @return {Command|false} - Parsed command object, false if is not a command
  */
 function parseCommand(text){
 
@@ -228,6 +283,11 @@ function parseCommand(text){
 
 }
 
+/**
+ * @param {string} lang 
+ * @param {TelegramBot.ChatId} chatId 
+ * @returns {Array<Array<TelegramBot.KeyboardButton>>}
+ */
 function genSettingsKeyboard(lang, chatId)
 {
     var l = global.LGHLangs;
@@ -268,6 +328,11 @@ function genSettingsKeyboard(lang, chatId)
 
 }
 
+/**
+ * @param {string} lang 
+ * @param {TelegramBot.ChatId} chatId 
+ * @returns {string}
+ */
 function genSettingsText(lang, chat)
 {
     return bold(l[lang].SETTINGS.toUpperCase())+"\n"+
@@ -276,6 +341,11 @@ function genSettingsText(lang, chat)
     l[lang].SETTINGS_SELECT;
 }
 
+/**
+ * @param {string} lang 
+ * @param {TelegramBot.ChatId} chatId 
+ * @returns {Array<Array<TelegramBot.KeyboardButton>>}
+ */
 function genSettings2Keyboard(lang, chatId)
 {
     var l = global.LGHLangs;
@@ -304,6 +374,11 @@ function genSettings2Keyboard(lang, chatId)
 
 }
 
+/**
+ * @param {string} cb_prefix 
+ * @param {TelegramBot.ChatId} settingsChatId 
+ * @returns {Array<Array<TelegramBot.KeyboardButton>>}
+ */
 function genSetNumKeyboard(cb_prefix, settingsChatId)
 {
 
@@ -339,6 +414,12 @@ function genSetNumKeyboard(cb_prefix, settingsChatId)
 
 }
 
+/**
+ * @param {string} lang 
+ * @param {GH.LGHAdmin} admin 
+ * @param {TelegramBot.Chat} chat 
+ * @returns {Array<Array<TelegramBot.KeyboardButton>>}
+ */
 function genGroupAdminPermsKeyboard(lang, admin, chat)
 {
     var prefix = "ADMINPERM_";
@@ -406,6 +487,12 @@ function genGroupAdminPermsKeyboard(lang, admin, chat)
     return [line1, line2, line3, line4, line5, line6, line7, line8];
 }
 
+/**
+ * @param {string} lang 
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {string}
+ */
 function genGroupAdminPermsText(lang, chat, userId)
 {
     var text = 
@@ -415,6 +502,12 @@ function genGroupAdminPermsText(lang, chat, userId)
     return text;
 }
 
+/**
+ * @param {Array<TelegramBot.ChatId>} userIds 
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHDatabase} db 
+ * @returns {string}
+ */
 function genUserList(userIds, chat, db)
 {
     var text = "";
@@ -442,8 +535,9 @@ function genUserList(userIds, chat, db)
 }
 
 /**
- * @param {LGHChat} chat
+ * @param {GH.LGHChat} chat
  * @param {TelegramBot.ChatMember} member
+ * @returns {string}
  */
 function memberToChatStatus(lang, member)
 {
@@ -478,11 +572,11 @@ function memberToChatStatus(lang, member)
 }
 
 /**
- * @typedef {import('../GHbot.js').LGHUser} LGHUser
+ * @typedef {GH.LGHUser} LGHUser
  */
 /**
- * @param {LGHChat} chat
- * @param {LGHUser} user
+ * @param {GH.LGHChat} chat
+ * @param {GH.LGHUser} user
  * @param {TelegramBot.ChatMember} member
  */
 function genMemberInfoText(lang, chat, user, member)
@@ -508,6 +602,10 @@ function genMemberInfoText(lang, chat, user, member)
     return text;
 }
 
+/**
+ * @param {GH.LGHPerms} perm 
+ * @returns {"✅"|"➖"|"❌"}
+ */
 function stateToEmoji(perm)
 {
     switch(perm)
@@ -518,6 +616,11 @@ function stateToEmoji(perm)
     }
 }
 
+/**
+ * @param {string} lang 
+ * @param {string} commandKey 
+ * @returns {string} - translated command
+ */
 function tradCommand(lang, commandKey)
 {
     var translated = "";
@@ -530,6 +633,11 @@ function tradCommand(lang, commandKey)
 }
 
 //TODO due to code here, we should force every custom command alias to be characters/numbers only, or it may inflict with html formatting or "COMMAND_" could search for unexhisting command
+/**
+ * @param {string} lang 
+ * @param {GH.LGHPerms} perms 
+ * @returns {string}
+ */
 function genPermsReport(lang, perms)
 {
 
@@ -565,6 +673,11 @@ function genPermsReport(lang, perms)
 
 }
 
+/**
+ * @param {GH.LGHAdminList} admins 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {Boolean}
+ */
 function isAdmin(admins, userId)
 {
     for(var i=0; i < admins.length; i++)
@@ -576,11 +689,22 @@ function isAdmin(admins, userId)
     return false;
 }
 
+/**
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {Boolean}
+ */
 function isAdminOfChat(chat, userId)
 {if(chat.hasOwnProperty("admins")){
     return isAdmin(chat.admins, userId);
 }else return false;}
 
+/**
+ * @param {GH.LGHAdminList} admins 
+ * @param {TelegramBot.ChatId} userId 
+ * @param {GH.LGHPerms} perm 
+ * @returns {Boolean}
+ */
 function hasAdminPermission(admins, userId, perm)
 {
     if(!isAdmin(admins, userId)) return false;
@@ -596,6 +720,10 @@ function hasAdminPermission(admins, userId, perm)
     return hasPermission;
 }
 
+/**
+ * @param {Object} chat 
+ * @returns {Boolean}
+ */
 function isValidChat(chat){
 
     if ( !chat.hasOwnProperty("id") || !chat.hasOwnProperty("title") || !chat.hasOwnProperty("type")){
@@ -607,6 +735,10 @@ function isValidChat(chat){
 
 }
 
+/**
+ * @param {Object} user 
+ * @returns {Boolean}
+ */
 function isValidUser(user){
 
     if ( !user.hasOwnProperty("id") || user.hasOwnProperty("type") ){
@@ -618,6 +750,10 @@ function isValidUser(user){
 
 }
 
+/**
+ * @param {string} string - supports also links
+ * @returns {string|false} -returns the username without link and "@"
+ */
 function isValidUsername(string)
 {
     var username = false;
@@ -636,6 +772,10 @@ function isValidUsername(string)
     return false;
 }
 
+/**
+ * @param {string} optionName 
+ * @returns {Boolean}
+ */
 function exhistInsideAnyLanguage(optionName)
 {
     var l = global.LGHLangs;
@@ -656,6 +796,12 @@ function exhistInsideAnyLanguage(optionName)
     return false;
 }
 
+/**
+ * @param {string} text 
+ * @param {string} optionName 
+ * @param {Boolean} caseSensitive 
+ * @returns {string|false}
+ */
 function getCommandMatchLang(text, optionName, caseSensitive)
 {
     var l = global.LGHLangs;
@@ -682,6 +828,12 @@ function getCommandMatchLang(text, optionName, caseSensitive)
     return false;
 }
 
+/**
+ * @param {string} text 
+ * @param {string} optionName - option to check if a specific option key exhist in any language
+ * @param {Boolean} caseSensitive
+ * @returns {Boolean}
+ */
 function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 {
     var match = getCommandMatchLang(text, optionName, caseSensitive);
@@ -689,6 +841,10 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
     return false;
 }
 
+/**
+ * @param {string} text 
+ * @returns {Array<Array<TelegramBot.KeyboardButton>>}
+ */
 function parseTextToInlineKeyboard(text)
 {
 
@@ -751,6 +907,16 @@ function parseTextToInlineKeyboard(text)
     
 }
 
+/**
+ * @typedef {Object} extractMediaReturn
+ * @property {TelegramBot.MessageType} type
+ * @property {string} fileId
+ * @property {TelegramBot.FileOptions} options
+ */
+/**
+ * @param {string} msg 
+ * @returns {extractMediaReturn}
+ */
 function extractMedia(msg)
 {
 
@@ -814,6 +980,10 @@ function extractMedia(msg)
 
 }
 
+/**
+ * @param {TelegramBot.MessageType} type 
+ * @returns {string}
+ */
 function mediaTypeToMethod(type)
 {
 
@@ -829,6 +999,10 @@ function mediaTypeToMethod(type)
 
 }
 
+/**
+ * @param {string} text 
+ * @returns {GH.LGHPunish}
+ */
 function textToPunishment(text)
 {
     switch (text) {
@@ -841,6 +1015,11 @@ function textToPunishment(text)
     }
 }
 
+/**
+ * @param {string} lang 
+ * @param {GH.Punishment} punishment 
+ * @returns {string}
+ */
 function punishmentToText(lang, punishment)
 {
     var l = global.LGHLangs;
@@ -855,7 +1034,14 @@ function punishmentToText(lang, punishment)
     }
 }
 
-function punishmentToTextAndTime(lang, punishment, time)
+/**
+ * @param {string} lang 
+ * @param {GH.Punishment} punishment 
+ * @param {Number} time - time in seconds
+ * @param {Boolean} deletion
+ * @returns 
+ */
+function punishmentToFullText(lang, punishment, time, deletion)
 {
     var l = global.LGHLangs;
     time = time || 0;
@@ -864,9 +1050,18 @@ function punishmentToTextAndTime(lang, punishment, time)
 
     if((punishment == 1 || punishment == 3 || punishment == 4) && time != 0)
         text+=" "+l[lang].FOR_HOW_MUCH+" "+secondsToHumanTime(lang, time);
+
+    if(deletion)
+        text+=" + "+l[lang].DELETE;
+
     return text;
 }
 
+/**
+ * @param {string} lang 
+ * @param {GH.Punishment} punishment 
+ * @returns {string}
+ */
 function punishmentToSetTimeButtonText(lang, punishment)
 {
     var l = global.LGHLangs;
@@ -883,11 +1078,11 @@ function punishmentToSetTimeButtonText(lang, punishment)
 
 /**
  * Handles a punishment callback identified and splitted by "_P_"
- * @param {*} GHbot 
- * @param {*} cb 
- * @param {*} userId 
- * @param {*} punishment 
- * @returns {Number} - returns new punishment number
+ * @param {GH} GHbot 
+ * @param {TelegramBot.CallbackQuery} cb 
+ * @param {TelegramBot.ChatId} userId 
+ * @param {GH.Punishment} punishment
+ * @returns {GH.Punishment} - returns new punishment number
  */
 function handlePunishmentCallback(GHbot, cb, userId, punishment)
 {
@@ -903,10 +1098,15 @@ function handlePunishmentCallback(GHbot, cb, userId, punishment)
     return punishment;
 }
 
+/**
+ * @param {string} lang 
+ * @param {GH.Punishment} punishment - [0:off|1:warn|2:kick|3:mute|4:ban]. 
+ * @param {string} prefix
+ * @param {TelegramBot.ChatId} chatId 
+ * @returns {Array<TelegramBot.KeyboardButton>} - Returns buttons with callback data prefix+"#STIME":"+chatId;
+ */
 function genPunishmentTimeSetButton(lang, punishment, prefix, chatId)
 {
-    var l = global.LGHLangs;
-
     var timeButtonText = punishmentToSetTimeButtonText(lang, punishment);
     switch(punishment)
     {
@@ -918,11 +1118,12 @@ function genPunishmentTimeSetButton(lang, punishment, prefix, chatId)
 }
 
 /**
- * 
- * @param {*} lang 
- * @param {*} punishment 
- * @param {*} prefix 
- * @param {*} chatId 
+ * @param {string} lang 
+ * @param {GH.Punishment} punishment - [0:off|1:warn|2:kick|3:mute|4:ban]. 
+ * @param {string} prefix
+ * @param {TelegramBot.ChatId} chatId 
+ * @param {Boolean} deletion - generate a button for deletion? if true set also delState
+ * @param {Boolean|null} delState - is deletion enabled?
  * @returns {Array<Array<TelegramBot.KeyboardButton>>} - Returns buttons with callback data prefix+"_P_"+punishmentText+":"+chatId;
  */
 function genPunishButtons(lang, punishment, prefix, chatId, deletion, delState)
@@ -946,6 +1147,10 @@ function genPunishButtons(lang, punishment, prefix, chatId, deletion, delState)
     return buttons;
 }
 
+/**
+ * @param {TelegramBot.User} user
+ * @returns {string}
+ */
 function fullName(user)
 {
     var text = user.first_name || "";
@@ -954,6 +1159,10 @@ function fullName(user)
     return text;
 }
 
+/**
+ * @param {TelegramBot.User} user 
+ * @returns {string} 
+ */
 function usernameOrFullName(user)
 {
     if(user.hasOwnProperty("username"))
@@ -966,7 +1175,11 @@ function usernameOrFullName(user)
     return text;
 }
 
-//return @UsernameOrName [Id923295] html formatted, needs at least user.id, db to allow take things from database if not avaiable
+/**
+ * @param {TelegramBot.UnbanOptions} user - at least user.id needed
+ * @param {GH.LGHDatabase|null} db - optional, may help if data are not avaiable on user object
+ * @returns {user} - @UsernameOrFullname [Id923295] html formatted
+ */
 function LGHUserName(user, db)
 {
     db = db || false;
@@ -981,6 +1194,10 @@ function LGHUserName(user, db)
     return fullName+"["+code(user.id)+"] ";
 }
 
+/**
+ * @param {GH.LGHAdminList} adminList 
+ * @returns {Array<TelegramBot.ChatAdministratorRights>}
+ */
 function anonymizeAdmins(adminList)
 {
     for(var i=0; i < adminList.length; ++i)
@@ -995,10 +1212,10 @@ function anonymizeAdmins(adminList)
 
 /**
  * 
- * @param {*} command 
- * @param {*} commandKey 
- * @param {*} perms 
- * @param {*} literalNames 
+ * @param {Command} command 
+ * @param {string} commandKey - name of the command as translation key
+ * @param {GH.LGHPerms} perms - permissions to check in
+ * @param {Array<string>} literalNames - other names for the command that's not depending from the lang
  * @returns {Boolean|1} Returns 1 if should be sent on private chat, true for public chat, false for missing permissions
  */
 function checkCommandPerms(command, commandKey, perms, literalNames)
@@ -1024,11 +1241,20 @@ function checkCommandPerms(command, commandKey, perms, literalNames)
     return false;
 }
 
-async function sendCommandReply(where, lang, GHbot, user, chatId, func)
-{return new Promise(async (resolve, reject)=>{
+/**
+ * 
+ * @param {Boolean|1} where - 1 if should be sent on private chat, true for public chat
+ * @param {string} lang 
+ * @param {GH} GHbot 
+ * @param {TelegramBot.ChatId} userId - private chat case
+ * @param {TelegramBot.ChatId} chatId - group chat case
+ * @param {Function} func - runs your function giving as parameter the wanted chat id, intentend to be here the sendMessage
+ * @returns {Promise<TelegramBot.Message>|false} - sent message or false if where is invalid or false
+ */
+async function sendCommandReply(where, lang, GHbot, userId, chatId, func)
+{if(!where) return false; return new Promise(async (resolve, reject)=>{
 
     var l = global.LGHLangs;
-    var userId = user.id;
 
     var sendId = (where === 1) ? userId : chatId;
     var privateLink = "https://t.me/"+GHbot.TGbot.me.username;
@@ -1050,6 +1276,11 @@ async function sendCommandReply(where, lang, GHbot, user, chatId, func)
 
 })}
 
+/**
+ * @param {string} lang 
+ * @param {Error} error 
+ * @returns {string}
+ */
 function telegramErrorToText(lang, error)
 {
     if(error.code != "ETELEGRAM")
@@ -1093,18 +1324,37 @@ function telegramErrorToText(lang, error)
     return text;
 }
 
+/**
+ * @param {GH} GHbot 
+ * @param {TelegramBot.ChatId} userId 
+ * @param {TelegramBot.ChatId} chatId 
+ * @param {string} lang 
+ * @param {Error} error 
+ * @description - send a message alerting about an error occurred on group about the bot
+ */
 function handleTelegramGroupError(GHbot, userId, chatId, lang, error)
 {
     var text = telegramErrorToText(lang, error);
     GHbot.sendMessage(userId, chatId, text);
 }
 
+/**
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {Number}
+ */
 function getUserWarns(chat, userId)
 {
     if(!chat.warns.count.hasOwnProperty(userId)) return 0;
     else return chat.warns.count[userId];
 }
 
+
+/**
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {GH.LGHChat}
+ */
 function warnUser(chat, userId)
 {
     if(!chat.warns.count.hasOwnProperty(userId)) chat.warns.count[userId] = 0;
@@ -1112,6 +1362,11 @@ function warnUser(chat, userId)
     return chat;
 }
 
+/**
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {GH.LGHChat}
+ */
 function unwarnUser(chat, userId)
 {
     if(!chat.warns.count.hasOwnProperty(userId)) chat.warns.count[userId] = 0;
@@ -1121,13 +1376,25 @@ function unwarnUser(chat, userId)
     return chat;
 }
 
+/**
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.ChatId} userId 
+ * @returns {GH.LGHChat}
+ */
 function clearWarns(chat, userId)
 {
     chat.warns.count[userId] = 0;
     return chat;
 }
 
-//db is optional
+/**
+ * 
+ * @param {TelegramBot} TGbot 
+ * @param {TelegramBot.ChatId} chatId 
+ * @param {TelegramBot.ChatId} userId 
+ * @param {GH.LGHDatabase|null} db 
+ * @returns 
+ */
 async function loadChatUserId(TGbot, chatId, userId, db)
 {
     try {
@@ -1139,6 +1406,10 @@ async function loadChatUserId(TGbot, chatId, userId, db)
     }
 }
 
+/**
+ * @param {Array<TelegramBot.ChatMember>} members 
+ * @returns {TelegramBot.ChatMember}
+ */
 function getOwner(members)
 {
     var creator = false;
@@ -1148,6 +1419,12 @@ function getOwner(members)
     return creator;
 }
 
+/**
+ * @param {*} config - LGH Configuration object
+ * @param {TelegramBot.ChatId} chatId 
+ * @returns {Boolean}
+ * @description - check if chat is allowed based on configuration whitelists and blacklists
+ */
 function isChatAllowed(config, chatId)
 {
     var whitelist = config.chatWhitelist;
@@ -1165,6 +1442,14 @@ function isChatAllowed(config, chatId)
     return true;
 }
 
+/**
+ * @param {GH} GHbot 
+ * @param {TelegramBot.ChatId} userId 
+ * @param {TelegramBot.ChatId} chatId - chat to use to send the test message
+ * @param {string} text 
+ * @returns {Promise<Boolean>}
+ * @description - Check if a telegram HTML message is allowed by telegram
+ */
 async function validateTelegramHTML(GHbot, userId, chatId, text)
 {return new Promise(async (resolve, reject)=>{
     try {
@@ -1176,6 +1461,10 @@ async function validateTelegramHTML(GHbot, userId, chatId, text)
     }
 })}
 
+/**
+ * @param {Object} origin 
+ * @returns {string|false}
+ */
 function originToUsername(origin)
 {
     if(origin.sender_user && origin.sender_user.username)
@@ -1185,6 +1474,11 @@ function originToUsername(origin)
     return false;
 }
 
+/**
+ * @param {Array<string>} whitelist 
+ * @param {TelegramBot.ChatId} chatId 
+ * @returns {Boolean}
+ */
 function isChatWhitelisted(whitelist, chatId)
 {
     var chatId = Number(chatId);
@@ -1202,6 +1496,11 @@ function isChatWhitelisted(whitelist, chatId)
     return false;
 }
 
+/**
+ * @param {Array<string>} whitelist 
+ * @param {string} userName 
+ * @returns {Boolean}
+ */
 function isHiddenUserWhitelisted(whitelist, userName)
 {
     for(var i = 0; i<whitelist.length; i++)
@@ -1213,6 +1512,11 @@ function isHiddenUserWhitelisted(whitelist, userName)
     return false;
 }
 
+/**
+ * @param {Array<string>} whitelist 
+ * @param {string} username 
+ * @returns {Boolean}
+ */
 function isUsernameWhitelisted(whitelist, username)
 {
     if(!isValidUsername(username))
@@ -1228,9 +1532,11 @@ function isUsernameWhitelisted(whitelist, username)
 }
 
 /**
- * @param {import('../GHbot.js').LGHChatBasedPunish} punishments
+ * @param {Object} origin
+ * @param {GH.LGHChatBasedPunish} punishments
+ * @param {Array<string>} exceptions
  * 
- * @returns {string|boolean} - returns false or "group" or "user" or "channel" or "bot"
+ * @returns {"user"|"bot"|"group"|"channel"|boolean} - returns false or "user"/"bot"/"group"/"channel"
  */
 function originIsSpam(origin, punishments, exceptions)
 {
@@ -1246,37 +1552,49 @@ function originIsSpam(origin, punishments, exceptions)
     var channelsP = punishments.channels.punishment;
     var groupsP = punishments.groups.punishment;
 
-    if(usersP != 0 && type == "user")
+    if(type == "user")
     {
         if(isChatWhitelisted(exceptions, origin.sender_user.id))
             return false;
         
-        if(origin.sender_user.is_bot && botsP != 0)
-            return "bot";
         if(origin.sender_user.is_bot)
-            return false;
+            return "bot";
 
         return "user";
     }
-    if(usersP != 0 && type == "hidden_user")
+    if(type == "hidden_user")
     {
         if(isHiddenUserWhitelisted(exceptions, origin.sender_user_name))
             return false;
         return "user";
     }
-    if(groupsP != 0 && type == "chat")
+    if(type == "chat")
     {
         if(isChatWhitelisted(exceptions, origin.sender_chat.id))
             return false;
         return "group";
     }
-    if(channelsP != 0 && type == "channel")
+    if(type == "channel")
     {
         if(isChatWhitelisted(exceptions, origin.chat.id))
             return false;
         return "channel";
     }
     
+}
+
+/**
+ * @param {Array<TelegramBot.MessageEntity>} entities 
+ * @returns {Array<string>}
+ */
+function entitiesLinks(entities)
+{
+    var links = [];
+    entities.forEach((entity)=>{
+        if(entity.hasOwnProperty("url"))
+            links.push(entity.url)
+    })
+    return links;
 }
 
 module.exports = 
@@ -1296,6 +1614,7 @@ module.exports =
     chunkArray : chunkArray,
     isValidId : isValidId,
     isValidHost : isValidHost,
+    isIpAddress : isIpAddress,
     isValidChat : isValidChat,
     isValidUser : isValidUser,
     isValidUsername : isValidUsername,
@@ -1324,7 +1643,7 @@ module.exports =
     genPunishButtons : genPunishButtons,
     textToPunishment : textToPunishment,
     punishmentToText : punishmentToText,
-    punishmentToTextAndTime : punishmentToTextAndTime,
+    punishmentToFullText : punishmentToFullText,
     parseHumanTime : parseHumanTime,
     secondsToTime : secondsToTime,
     secondsToHumanTime : secondsToHumanTime,
@@ -1347,4 +1666,5 @@ module.exports =
     validateTelegramHTML : validateTelegramHTML,
     originToUsername : originToUsername,
     originIsSpam : originIsSpam,
+    entitiesLinks : entitiesLinks,
 }

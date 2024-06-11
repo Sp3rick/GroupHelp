@@ -1,9 +1,10 @@
 const TelegramBot = require("node-telegram-bot-api");
 const {parseHumanTime, secondsToHumanTime} = require("./utils.js");
+const GH = require("../GHbot.js");
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} currentNumber
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -72,7 +73,7 @@ function callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, return
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
+ * @param  {GH} GHbot
  * @param  {TelegramBot.Message} currentTime
  * @param  {TelegramBot.Message} msg
  * @param  {TelegramBot.Chat} chat

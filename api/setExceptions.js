@@ -1,5 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName } = require("./utils.js");
+const GH = require("../GHbot.js");
 
 /**
  * @callback ValidatorFunction
@@ -9,8 +10,8 @@ const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName } = requ
 
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
  * @param  {Array<String>} exceptions
  * @param  {TelegramBot.CallbackQuery} cb
  * @param  {TelegramBot.Chat} chat
@@ -106,8 +107,8 @@ function callbackEvent(GHbot, db, exceptions, cb, chat, user, cb_prefix, returnB
 }
 
 /** 
- * @param  {import("../GHbot.js")} GHbot
- * @param {import("../GHbot.js").LGHDatabase} db - database
+ * @param  {GH} GHbot
+ * @param {GH.LGHDatabase} db - database
  * @param  {Array<String>} exceptions
  * @param  {ValidatorFunction} validator
  * @param  {TelegramBot.Message} msg

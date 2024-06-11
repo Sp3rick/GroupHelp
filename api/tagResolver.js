@@ -1,6 +1,8 @@
 const fs = require( "fs" );
 const { usernameOrFullName, isNumber, code, loadChatUserId } = require("./utils");
 const RM = require("./rolesManager");
+const TelegramBot = require("node-telegram-bot-api");
+const GH = require("../GHbot.js");
 
 if(!global.LGHTagToId) global.LGHTagToId = {};
 if(!global.LGHIdToTag) global.LGHIdToTag = {};
@@ -143,9 +145,13 @@ function LGHUserNameByTarget(msg, userId) {
     return LGHUserName;
 }
 
-//chat and TGbot are needed to allow getting the user from telegram getChatMember
-//chat object is needed for target.perms
-//msg.command is needed to get target from text that's a command
+/**
+ * @param {TelegramBot.Message} msg msg.command is needed to get target from text that's a command
+ * @param {GH.LGHChat} chat - is needed for target.perms
+ * @param {TelegramBot} TGbot - needed to allow getting the user from telegram getChatMember
+ * @param {GH.LGHDatabase} db 
+ * @returns {GH.TargetUser}
+ */
 async function getMessageTarget(msg, chat, TGbot, db)
 {
     var targetId = getMessageTargetUserId(msg);
@@ -170,6 +176,10 @@ async function getMessageTarget(msg, chat, TGbot, db)
     return target;
 }
 
+/** 
+ * @param {Array<TelegramBot.ChatMember>} members 
+ * @param {GH.LGHDatabase} db
+ */
 function storeMembers(members, db)
 {
     members.forEach((member)=>{
@@ -178,7 +188,13 @@ function storeMembers(members, db)
     })
 }
 
-//currently not use GHbot, getAdmins seems to be already safe
+//currently it does not use GHbot, getAdmins seems to be already safe
+/**
+ * @param {TelegramBot} TGbot 
+ * @param {TelegramBot.ChatId} chatId 
+ * @param {GH.LGHDatabase} db 
+ * @returns 
+ */
 async function getAdmins(TGbot, chatId, db) {
     var adminList = await TGbot.getChatAdministrators(chatId);
     logMembers(adminList);

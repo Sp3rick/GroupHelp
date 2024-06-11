@@ -32,7 +32,7 @@ function main(args)
                 options.reply_parameters.chat_id = msg.chat.id;
             }
             var func = (id) => {return MSGMK.sendMessage(GHbot, user, msg.chat, msg.chat.rules, l[msg.chat.lang].RULES_TITLE, options, id)};
-            sendCommandReply(where, msg.chat.lang, GHbot, user, msg.chat.id, func);
+            sendCommandReply(where, msg.chat.lang, GHbot, user.id, msg.chat.id, func);
         }
 
     } )

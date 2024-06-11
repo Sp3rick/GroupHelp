@@ -35,11 +35,15 @@ function forceHandleRequest(bot, method, ...args)
 {return new Promise( async (resolve, reject) =>{
     while(true)
     {
+        var retryes = 0;
+        if(retryes > 10){resolve(false); return;}
+
         try {
             var result = await bot[method](...args);
             resolve(result);
             return;
         } catch (error) {
+            //console.log(error) //uncomment this to handle undiscovered loop traps
             if(error.code != "ETELEGRAM")
             {
                 console.log("Unknown error in forceHandleRequest()");
@@ -47,14 +51,16 @@ function forceHandleRequest(bot, method, ...args)
                 return;
             }
             var errDescription = error.response.body.description;
-            if(errDescription.includes("Too Many Requests"))
-                return;
-            if(errDescription.includes("query is too old"))
+            console.log("SafeTelegram.js loop error: " +errDescription); //uncomment to futher debug
+            if(errDescription.includes("Too Many Requests")){}
+            else if(errDescription.includes("query is too old"))
                 {resolve(false); return;}
-
-            reject(error);
+            else
+                {reject(error); return;}
         }
-        await sleep(1000);
+
+        ++retryes;
+        await sleep(5000);
     }
 } )}
 
