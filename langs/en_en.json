@@ -48,7 +48,7 @@
     "SETTINGS_PRIVATE_ERROR" : "⚠️ Please start me in private chat to use this function",
     "S_RULES_BUTTON" : "📜 Rules",
     "S_WELCOME_BUTTON" : "💬 Welcome",
-    "S_CAPTCHA_BUTTON" : "🧠 Captcha 🟥",
+    "S_CAPTCHA_BUTTON" : "🧠 Captcha 🟨",
     "S_ADMIN_BUTTON" : "🆘 @Admin 🟥",
     "S_MEDIA_BUTTON" : "📸 Media 🟥",
     "S_WARN_BUTTON" : "❗️ Warns",
