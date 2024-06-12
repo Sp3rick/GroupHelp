@@ -185,6 +185,9 @@ function secondsToHumanTime(lang, seconds)
 {
     var l = global.LGHLangs;
 
+    if(seconds == 0)
+        return "✖️";
+
     var time = secondsToTime(seconds);
 
     var text = "";
@@ -1538,7 +1541,7 @@ function isUsernameWhitelisted(whitelist, username)
  * 
  * @returns {"user"|"bot"|"group"|"channel"|boolean} - returns false or "user"/"bot"/"group"/"channel"
  */
-function originIsSpam(origin, punishments, exceptions)
+function originIsSpam(origin, exceptions)
 {
 
     var type = origin.type;
@@ -1546,11 +1549,6 @@ function originIsSpam(origin, punishments, exceptions)
     var originUsername = originToUsername(origin);
     if(originUsername && isUsernameWhitelisted(exceptions, originUsername))
         return false;
-    
-    var usersP = punishments.users.punishment;
-    var botsP = punishments.bots.punishment;
-    var channelsP = punishments.channels.punishment;
-    var groupsP = punishments.groups.punishment;
 
     if(type == "user")
     {

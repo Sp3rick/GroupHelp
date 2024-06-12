@@ -1,8 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js")
 const {bold, punishmentToText, punishmentToFullText, handlePunishmentCallback, genPunishButtons, isNumber, isValidUsername, isValidHost, isString, originToUsername, originIsSpam, isValidId, extractMedia, entitiesLinks, isIpAddress } = require("../api/utils.js");
-const ST = require("../api/setTime.js");
-const SE = require("../api/setExceptions.js");
-const CBP = require("../api/setChatbasedPunish.js");
+const ST = require("../api/editors/setTime.js");
+const SE = require("../api/editors/setExceptions.js");
+const CBP = require("../api/editors/setChatbasedPunish.js");
 const RM = require("../api/rolesManager.js");
 const { applyChatBasedPunish, punishUser } = require("../api/punishment.js");
 
@@ -136,7 +136,7 @@ function main(args) {
             var isForwardedUser = msg.forward_origin && msg.forward_origin.type == "user" && msg.forward_origin.sender_user.id == user.id
             if(!user.perms.forward && msg.hasOwnProperty("forward_origin") && !isForwardedUser)
             {
-                var punishType = originIsSpam(msg.forward_origin, chat.spam.forward, TGExceptions);
+                var punishType = originIsSpam(msg.forward_origin, TGExceptions);
                 if(punishType)
                 {
                     var reason = l[chat.lang].FORWARD_PUNISHMENT;
@@ -149,7 +149,7 @@ function main(args) {
             var isQuotedChat = msg.hasOwnProperty("external_reply") && msg.external_reply.chat && msg.external_reply.chat.id == chat.id;
             if(!user.perms.quote && msg.hasOwnProperty("external_reply") && !isQuotedChat)
             {
-                var punishType = originIsSpam(msg.external_reply.origin, chat.spam.quote, TGExceptions);
+                var punishType = originIsSpam(msg.external_reply.origin, TGExceptions);
                 if(punishType)
                 {
                     var reason = l[chat.lang].QUOTE_PUNISHMENT;

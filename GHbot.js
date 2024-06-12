@@ -167,7 +167,19 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHSpamQuote} quote - rules and exceptions for all quoted messages considered as spam
  */
 
+/**
+ * @typedef {Object} LGHCaptcha - captcha.js settings
+ * @property {Boolean} state - True if welcome is enabled (default false).
+ * @property {string} mode - Type of captcha, can be "image" (default "image").
+ * @property {Number} time - Time limit to solve the captcha
+ * @property {boolean} once - True if should be sent only at first user join (from welcome.js) (default false).
+ * @property {boolean} fails - True if captcha should notify on group that someone failed the captcha (default false).
+ * @property {Punishment} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
+ * @property {Number} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
+ */
 
+
+// LGHCHAT COMPLETING
 /**
  * @typedef {Object} CustomChat - Additional chat elements for chat object by LibreGroupHelp
  * @property {LGHAdminList|null} admins - array with known admins objects (user data anonymized)
@@ -183,6 +195,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHWelcome|null} welcome - welcome.js plugin related data
  * @property {LGHFlood|null} flood - antiflood.js plugin related data
  * @property {LGHSpam|null} spam - antispam.js plugin related data
+ * @property {LGHCaptcha|null} captcha - captcha.js plugin related data
  */
 
 /**

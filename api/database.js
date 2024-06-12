@@ -25,6 +25,22 @@ function newSpamObj()
     return obj;
 }
 
+function newCaptchaObj()
+{
+    var obj = {
+        state: false,
+        mode: "image",
+        time: 3600,
+        once: false,
+        fails: false,
+        punishment: 2,
+        PTime: 0,
+    }
+
+    return obj;
+}
+
+
 function updateDatabase(version, versionFile, chatsDir, usersDir)
 {
     if(version == "0.2")
@@ -63,6 +79,20 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
                 delete chat.spam.exceptions;
             }
 
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
+    }
+
+    if(version == "0.2.4")
+    {
+        version = "0.2.4.0";
+        console.log("\tupdating from 0.2.4 to 0.2.4.0 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+            chat.captcha = newCaptchaObj();
             fs.writeFileSync(file, JSON.stringify(chat));
         })
     }

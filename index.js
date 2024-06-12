@@ -1,3 +1,5 @@
+process.env.NTBA_FIX_319 = 1;
+process.env.NTBA_FIX_350 = 0;
 global.LGHVersion = "0.2.3.1";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");

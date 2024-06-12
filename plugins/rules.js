@@ -1,7 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js")
 const {checkCommandPerms, sendCommandReply} = require( "../api/utils.js" );
-const MSGMK = require( "../api/MessageMaker.js" )
-const CMDPerms = require("../api/CommandsPerms.js")
+const MSGMK = require( "../api/editors/MessageMaker.js" )
+const CMDPerms = require("../api/editors/CommandsPerms.js")
 
 function main(args)
 {

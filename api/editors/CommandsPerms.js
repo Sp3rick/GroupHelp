@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { tradCommand } = require("./utils.js");
-const GH = require("../GHbot.js");
+const { tradCommand } = require("../utils.js");
+const GH = require("../../GHbot.js");
 
 /** 
  * @param  {GH.LGHChat} chat

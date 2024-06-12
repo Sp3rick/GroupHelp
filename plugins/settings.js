@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 const {genSettingsKeyboard, bold, checkCommandPerms, code, genSettingsText, genSettings2Keyboard, link} = require( "../api/utils.js" );
-const CMDPerms = require("../api/CommandsPerms.js")
+const CMDPerms = require("../api/editors/CommandsPerms.js")
 
 function main(args)
 {

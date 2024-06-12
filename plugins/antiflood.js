@@ -1,7 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
 const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, textToPunishment, genPunishButtons, handlePunishmentCallback } = require("../api/utils.js");
-const SN = require("../api/setNum.js");
-const ST = require("../api/setTime.js");
+const SN = require("../api/editors/setNum.js");
+const ST = require("../api/editors/setTime.js");
 const RM = require("../api/rolesManager.js");
 const { punishUser } = require("../api/punishment.js");
 

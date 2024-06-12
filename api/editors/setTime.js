@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseHumanTime, secondsToHumanTime} = require("./utils.js");
-const GH = require("../GHbot.js");
+const {parseHumanTime, secondsToHumanTime} = require("../utils.js");
+const GH = require("../../GHbot.js");
 
 /** 
  * @param  {GH} GHbot
@@ -119,17 +119,17 @@ function messageEvent(GHbot, currentTime, msg, chat, user, cb_prefix, returnButt
         } 
     }
 
-    if(time != 0)
-            options.reply_markup.inline_keyboard.push([{text: l[user.lang].DISABLE_DURATION_BUTTON, callback_data: cb_prefix+"#STIME_ZERO:"+settingsChatId}])
-    returnButtons.forEach(button => {
-        options.reply_markup.inline_keyboard.push( button );
-    })
-
     if( user.waitingReplyType.startsWith(cb_prefix+"#STIME:") )
     {
         var time = parseHumanTime(text)
         var minTimeHuman = secondsToHumanTime(user.lang, min);
         var maxTimeHuman = secondsToHumanTime(user.lang, max);
+
+        if(time != 0)
+            options.reply_markup.inline_keyboard.push([{text: l[user.lang].DISABLE_DURATION_BUTTON, callback_data: cb_prefix+"#STIME_ZERO:"+settingsChatId}])
+        returnButtons.forEach(button => {
+            options.reply_markup.inline_keyboard.push( button );
+        })
 
         var errorMessage = -1;
         if(time === 0 || time === 1)

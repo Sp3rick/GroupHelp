@@ -115,13 +115,6 @@ async function main(config) {
         }
         msg.target = await TR.getMessageTarget(msg, chat, TGbot, db);
 
-
-        //configure user.perms and the selected chat if avaiable (the incoming msg request chat object is kept on msg.chat)
-        if( chat.isGroup || (user.waitingReply == true &&  user.waitingReplyType.includes(":")) )
-        {
-            chat = chat.isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
-            user.perms = RM.sumUserPerms(chat, user.id);
-        }
         
         //configuring waitingReply
         if(user.waitingReply)
@@ -135,12 +128,20 @@ async function main(config) {
             }
         }
 
+        //configure user.perms and the selected chat if avaiable (the incoming msg request chat object is kept on msg.chat)
+        if( chat.isGroup || (user.waitingReply && user.waitingReplyType.includes(":")) )
+        {
+            chat = chat.isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
+            user.perms = RM.sumUserPerms(chat, user.id);
+        }
+
         //configuring user.waitingReplyTarget 
         if( user.waitingReply && user.waitingReplyType.includes("?") )
         {
             var wrTargetId = user.waitingReplyType.split("?")[1];
             user.waitingReplyTarget = RM.userIdToTarget(TGbot, chat, wrTargetId, db);
         }
+
 
         try {
             GroupHelpBot.emit( "message", msg, chat, user );

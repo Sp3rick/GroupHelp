@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName } = require("./utils.js");
-const GH = require("../GHbot.js");
+const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName } = require("../utils.js");
+const GH = require("../../GHbot.js");
 
 /**
  * @callback ValidatorFunction
