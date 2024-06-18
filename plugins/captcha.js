@@ -1,9 +1,9 @@
 var LGHelpTemplate = require("../GHbot.js");
 const GH = require("../GHbot.js");
-const { genPunishButtons, bold, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, fullName, tag, usernameOrFullName, welcomeNewUser } = require("../api/utils.js");
+const { genPunishButtons, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, tag, usernameOrFullName, welcomeNewUser } = require("../api/utils.js");
 const ST = require("../api/editors/setTime.js");
 const MSGMK = require( "../api/editors/MessageMaker.js" )
-const { applyChatBasedPunish, punishUser, silentPunish } = require("../api/punishment.js");
+const { punishUser, silentPunish } = require("../api/punishment.js");
 
 const svg = require("svg-captcha");
 const canvas = require("canvas");
@@ -112,7 +112,10 @@ function captchaFailed(GHbot, db, chat, user)
 
     var id = chat.id+"_"+user.id;
     GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
-    if(global.LGHCaptcha[id]) delete global.LGHCaptcha[id];
+    if(global.LGHCaptcha[id]){
+        GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
+        delete global.LGHCaptcha[id];
+    }
 }
 
 /**
@@ -130,8 +133,10 @@ function captchaSuccess(GHbot, db, chat, user)
     db.users.update(user);
 
     var id = chat.id+"_"+user.id;
-    GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
-    if(global.LGHCaptcha[id]) delete global.LGHCaptcha[id];
+    if(global.LGHCaptcha[id]){
+        GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
+        delete global.LGHCaptcha[id];
+    }
 }
 
 //{[chatId_userId]: {messageId: msg.message_id, within: expiryUnixTimeSeconds, solution: text}}
@@ -165,6 +170,12 @@ function main(args)
 
         //handle new members
         if(chat.type != "private" && chat.captcha.state && msg.hasOwnProperty("new_chat_members")){msg.new_chat_members.forEach(async(newUser)=>{
+
+            if(chat.captcha.once && (chat.welcome.joinList.includes(Number(newUser.id)) || chat.welcome.joinList.includes(String(newUser.id))) )
+            {
+                captchaSuccess(GHbot, db, chat, newUser);
+                return;
+            }
 
             if(chat.captcha.mode == "image")
             {            

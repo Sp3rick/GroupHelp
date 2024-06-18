@@ -40,6 +40,19 @@ function newCaptchaObj()
     return obj;
 }
 
+function newGoodbyeObj()
+{
+    var obj = {
+        group: false,
+        clear: false,
+        lastId: false,
+        gMsg: {},
+        private: false,
+        pMsg: {},
+    }
+
+    return obj;
+}
 
 function updateDatabase(version, versionFile, chatsDir, usersDir)
 {
@@ -96,6 +109,20 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
             fs.writeFileSync(file, JSON.stringify(chat));
         })
     }
+
+    if(version == "0.2.4.1")
+        {
+            version = "0.2.5";
+            console.log("\tupdating from 0.2.4.1 to 0.2.5 ...");
+    
+            var chatFiles = fs.readdirSync(chatsDir);
+            chatFiles.forEach((fileName)=>{
+                var file = chatsDir+"/"+fileName;
+                var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+                chat.goodbye = newGoodbyeObj();
+                fs.writeFileSync(file, JSON.stringify(chat));
+            })
+        }
 
     //add new if here to update from latest dbVersion to new
 
@@ -189,6 +216,7 @@ function getDatabase(config) {
                 chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true }
                 chat.spam = newSpamObj();
                 chat.captcha = newCaptchaObj();
+                chat.goodbye = newGoodbyeObj();
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -289,6 +317,9 @@ function getDatabase(config) {
                 if(chat.hasOwnProperty("rules")) global.DBCHATS[chat.id].rules = chat.rules;
                 if(chat.hasOwnProperty("welcome")) global.DBCHATS[chat.id].welcome = chat.welcome;
                 if(chat.hasOwnProperty("flood")) global.DBCHATS[chat.id].flood = chat.flood;
+                if(chat.hasOwnProperty("spam")) global.DBCHATS[chat.id].spam = chat.spam;
+                if(chat.hasOwnProperty("captcha")) global.DBCHATS[chat.id].captcha = chat.captcha;
+                if(chat.hasOwnProperty("goodbye")) global.DBCHATS[chat.id].goodbye = chat.goodbye;
 
                 global.DBCHATS[chat.id].lastUse = now;
 

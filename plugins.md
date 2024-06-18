@@ -319,6 +319,89 @@ LGHFlood Object:
 
 
 
+## Anti-Spam Plugin
+
+>Depends on api/punishment.js
+>Depends on api/utils.js
+>Depends on api/setNum.js
+>Depends on api/setExceptions.js
+>Depends on api/setChatBasedPunishment.js
+>Depends on api/rolesManager.js
+
+Adds on chat.flood a custom object "LGHSpam"
+
+LGHSpam Object:
+
+>tgLinks: rules and exceptions for telegram links considered as spam
+>
+>links: rules and exceptions for all links considered as spam
+>
+>forward: rules and exceptions for all forwarded messages considered as spam
+>
+>quote: rules and exceptions for all quoted messages considered as spam
+
+
+
+
+
+## Captcha Plugin
+
+>Depends on api/punishment.js
+>Depends on api/utils.js
+>Depends on api/setTime.js
+>Depends on api/MessageMaker.js
+>Depends on svg-captcha
+>Depends on canvas
+>Depends on canvg
+>Depends on @xmldom/xmldom
+>Depends on node-fetch
+
+Adds on chat.captcha a custom object "LGHCaptcha"
+
+LGHSpam Object:
+
+>state: True if welcome is enabled (default false).
+>
+>mode: Type of captcha, can be "image" (default "image")
+>
+>time: Time limit to solve the captcha
+>
+>once: True if should be sent only at first user join (from welcome.js) (default false).
+>
+>fails: True if captcha should notify on group that someone failed the captcha (default false).
+>
+>punishment: Punishment to apply [1:warn|2:kick|3:mute|4:ban].
+>
+>PTime: Available if punishment is set to warn/mute/ban, contains seconds of punishment
+
+
+
+
+
+## Goodbye Plugin
+
+>Depends on api/MessageMaker.js
+
+Adds on chat.goodbye a custom object "LGHGoodbye"
+
+LGHSpam Object:
+
+>group: True if goodbye should be sent on group
+>
+>clear: True if last goodbye message should be deleted before sending a new one
+>
+>lastId: messageId of last goodbye message sent on group
+>
+>gMsg: Goodbye message to send on group
+>
+>private: True if goodbye should be sent on private chat
+>
+>pMsg: Goodbye message to send on private chat
+
+
+
+
+
 ## warns.js
 
 >Depends on api/utils.js

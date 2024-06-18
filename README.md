@@ -60,7 +60,7 @@ Useful links to contribute:
 ✅ Welcome
 ✅ Anti-flood
 ✅ Anti-spam
-❌ Goodbye
+✅ Goodbye
 ❌ Alphabets
 ✅ Captcha (1 mode)
 ❌ Checks settings

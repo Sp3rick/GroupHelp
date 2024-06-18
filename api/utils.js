@@ -303,6 +303,9 @@ function genSettingsKeyboard(lang, chatId)
         [{text: l[lang].S_WELCOME_BUTTON, callback_data: "S_WELCOME_BUTTON:"+chatId},
         {text: l[lang].S_ANTIFLOOD_BUTTON, callback_data: "S_FLOOD_M_:"+chatId}],
 
+        [{text: l[lang].S_GOODBYE_BUTTON, callback_data: "S_GOODBYE_BUTTON:"+chatId},
+        {text: l[lang].S_ALPHABETS_BUTTON, callback_data: "S_ALPHABETS_BUTTON:"+chatId}],
+
         [{text: l[lang].S_CAPTCHA_BUTTON, callback_data: "S_CAPTCHA_BUTTON:"+chatId},
         {text: l[lang].S_CHECKS_BUTTON, callback_data: "S_CHECKS_BUTTON:"+chatId}],
 

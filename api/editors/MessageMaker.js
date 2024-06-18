@@ -13,12 +13,12 @@ const GH = require("../../GHbot.js");
 
 /** 
  * @typedef {Object} customMessage
- * @property {String} text - Text of messsage
+ * @property {String|undefined} text - Text of messsage
  * @property {TelegramBot.MessageEntity} entities - Telegram entities of text
  * @property {Boolean} format - True if message should be formatted (enabled by default), mean that entities will be passed on sendMessage function
- * @property {simpleMedia} media
- * @property {String} buttons - Can me transformed in inline_keyboard with parseTextToInlineKeyboard()
- * @property {TelegramBot.KeyboardButton} buttonsParsed - Specified bot name (ex. "usernamebot")
+ * @property {simpleMedia|undefined} media
+ * @property {String|undefined} buttons - Can be transformed in inline_keyboard with parseTextToInlineKeyboard()
+ * @property {TelegramBot.KeyboardButton} buttonsParsed - Ready to use buttons already parsed for telegram
  */
 
 /** 
@@ -498,7 +498,7 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
  * @param {GH.LGHChat} user - LGHUser object
  * @param  {GH.LGHUser} chat - LGHChat object
  * @param  {customMessage} customMessage - MessageMaker object
- * @param  {String} messageTitle - title for when message is sent as entire
+ * @param  {String} messageTitle - title for sent message
  * @param  {TelegramBot.SendMessageOptions} additionalOptions - Additional options for telegram
  * @param  {TelegramBot.ChatId} sendId - set a specific chat to message (default on chat.id)
  * 
@@ -561,10 +561,22 @@ function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalO
 
 }
 
+/**
+ * @param {customMessage} customMessage 
+ * @returns {Boolean}
+ */
+function isEmpty(customMessage)
+{
+    var hasText = customMessage.hasOwnProperty("text");
+    var hasMedia = customMessage.hasOwnProperty("media");
+
+    return (hasText || hasMedia)
+}
+
 module.exports = {
 
     callbackEvent : callbackEvent,
     messageEvent : messageEvent,
     sendMessage : sendMessage,
-
+    isEmpty : isEmpty,
 }

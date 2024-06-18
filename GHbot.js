@@ -108,6 +108,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  */
 
 //PLUGINS DECLARATIONS
+//warns
 /**
  * @typedef {Object} LGHWarns - warns.js plugin related data
  * @property {Object.<string, Number>} timed - ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over
@@ -117,6 +118,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {Number|null} PTime - avaiable if punishment is set to warn/mute/ban, contains seconds of punishment
  */
 
+//welcome
 /**
  * @typedef {Object} LGHWelcome - welcome.js settings Object.
  * @property {boolean} state - True if welcome is enabled (default false).
@@ -127,6 +129,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {customMessage} message - CustomMessage object.
  */
 
+//antiflood
 /**
  * @typedef {Object} LGHFloodAdds - antiflood.js settings additional Object elements.
  * @property {Number} messages - Number of messages needed to trigger the Antiflood.
@@ -136,6 +139,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @typedef {LGHFloodAdds & LGHPunish} LGHFlood - antiflood.js settings Object.
  */
 
+//antispam
 /**
  * @typedef {Object} LGHSpamTgLinksAdds - antispam.js settings Object additional items.
  * @property {Boolean} usernames - True if usernames should be considered as spam.
@@ -158,7 +162,6 @@ const { pushUserRequest } = require("./api/SafeTelegram");
 /**
  * @typedef {LGHChatBasedPunish} LGHSpamQuote - antispam.js settings about quote.
  */
-
 /**
  * @typedef {Object} LGHSpam - antispam.js settings Object.
  * @property {LGHSpamTgLinks} tgLinks - rules and exceptions for telegram links considered as spam
@@ -167,6 +170,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHSpamQuote} quote - rules and exceptions for all quoted messages considered as spam
  */
 
+//captcha
 /**
  * @typedef {Object} LGHCaptcha - captcha.js settings
  * @property {Boolean} state - True if welcome is enabled (default false).
@@ -176,6 +180,17 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {boolean} fails - True if captcha should notify on group that someone failed the captcha (default false).
  * @property {Punishment} punishment - Punishment to apply [1:warn|2:kick|3:mute|4:ban].
  * @property {Number} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
+ */
+
+//goodbye
+/**
+ * @typedef {Object} LGHGoodbye - goodbye.js settings
+ * @property {Boolean} group - True if goodbye should be sent on group
+ * @property {Boolean} clear - True if last goodbye message should be deleted before sending a new one
+ * @property {TelegramBot.MessageId} lastId - messageId of last goodbye message sent on group
+ * @property {CustomMessage} gMsg - Goodbye message to send on group
+ * @property {Boolean} private - True if goodbye should be sent on private chat
+ * @property {CustomMessage} pMsg - Goodbye message to send on private chat
  */
 
 
@@ -196,6 +211,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHFlood|null} flood - antiflood.js plugin related data
  * @property {LGHSpam|null} spam - antispam.js plugin related data
  * @property {LGHCaptcha|null} captcha - captcha.js plugin related data
+ * @property {LGHGoodbye|null} goodbye - goodbye.js plugin related data
  */
 
 /**
