@@ -174,7 +174,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {Number} time - Time limit to solve the captcha
  * @property {boolean} once - True if should be sent only at first user join (from welcome.js) (default false).
  * @property {boolean} fails - True if captcha should notify on group that someone failed the captcha (default false).
- * @property {Punishment} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
+ * @property {Punishment} punishment - Punishment to apply [1:warn|2:kick|3:mute|4:ban].
  * @property {Number} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
  */
 
@@ -429,12 +429,49 @@ class main {
      * @param {number|string} chatId - chat where message should be sent
      * @param {String} text - text of message
      * @param {TelegramBot.SendMessageOptions} options - additional telegram options
-     * @returns {Promise<Boolean>} - returns true on success, false if request has been dropped out
+     * @returns {Boolean|Promise<TelegramBot.Message>} - returns true on success, false if request has been dropped out
      */
     sendMessage(userId, chatId, text, options)
     {return new Promise( async (resolve, reject) => {
         try {
             var result = await pushUserRequest(this.TGbot, "sendMessage", userId, chatId, text, options);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * LGHbot safely send message under user request limit
+     * @param 
+     * @param {number|string} chatId - chat where message should be sent
+     * @param {TelegramBot.InputMediaPhoto} photo - photo
+     * @param {TelegramBot.SendPhotoOptions} options - additional telegram options
+     * @param {TelegramBot.FileOptions} fileOptions - file metadata
+     * @returns {Boolean|Promise<TelegramBot.Message>} - returns true on success, false if request has been dropped out
+     */
+    sendPhoto(userId, chatId, photo, options, fileOptions)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "sendPhoto", userId, chatId, photo, options, fileOptions);
+            resolve(result);
+        } catch (error) {
+            reject(error);
+        }
+        return;
+    } )}
+
+    /**
+     * @param {number|string} userId - id of user that's the cause of your request
+     * @param {TelegramBot.InputMedia} media - input media
+     * @param {TelegramBot.EditMessageMediaOptions} options 
+     * @returns {Boolean|Promise<TelegramBot.Message>} - returns true on success, false if request has been dropped out
+     */
+    editMessageMedia(userId, media, options)
+    {return new Promise( async (resolve, reject) => {
+        try {
+            var result = await pushUserRequest(this.TGbot, "editMessageMedia", userId, media, options);
             resolve(result);
         } catch (error) {
             reject(error);

@@ -1,5 +1,5 @@
 const LGHelpTemplate = require("../GHbot.js")
-const { getUnixTime } = require( "../api/utils.js" );
+const { getUnixTime, welcomeNewUser } = require( "../api/utils.js" );
 const MSGMK = require( "../api/editors/MessageMaker.js" )
 
 function main(args)
@@ -13,24 +13,12 @@ function main(args)
     GHbot.onMessage(async (msg, chat, user) => {
 
         //NOTE: deactivate this when captcha is enabled +create a function that handle a welcome message
-        if(msg.chat.isGroup && msg.chat.welcome.state && msg.hasOwnProperty("new_chat_members") )
+        if(msg.chat.isGroup && chat.welcome.state && !chat.captcha.state && msg.hasOwnProperty("new_chat_members") )
         {
-            var options = {reply_parameters: { message_id: msg.message_id, chat_id: msg.chat.id }};
             msg.new_chat_members.forEach(async (newUser) => {
 
-                if(newUser.is_bot) return;
-                if(msg.chat.welcome.once && msg.chat.welcome.joinList.includes(newUser.id)) return;
-
-                if(msg.chat.welcome.clean && msg.chat.welcome.lastWelcomeId != false)
-                    TGbot.deleteMessages(msg.chat.id, [msg.chat.welcome.lastWelcomeId]);
-
-                var sentMessage = await MSGMK.sendMessage(GHbot, newUser, msg.chat, msg.chat.welcome.message, false, options);
-                if(sentMessage)
-                {
-                    msg.chat.welcome.joinList.push(newUser.id);
-                    msg.chat.welcome.lastWelcomeId = sentMessage.message_id;
-                }
-                db.chats.update(msg.chat);
+                var options = {reply_parameters: { message_id: msg.message_id, chat_id: msg.chat.id }};
+                welcomeNewUser(GHbot, db, MSGMK, chat, newUser, options);
                 
             });
         }
@@ -95,12 +83,7 @@ function main(args)
         }
         if( cb.data.startsWith("S_WELCOME_ONCE:") )
         {
-            if(chat.welcome.once == true)
-            {
-                GHbot.answerCallbackQuery(user.id, cb.id);
-                return;
-            }
-            chat.welcome.once = true;
+            chat.welcome.once = !chat.welcome.once ;
             db.chats.update(chat)
         }
         if( cb.data.startsWith("S_WELCOME_DELETESWITCH:") )

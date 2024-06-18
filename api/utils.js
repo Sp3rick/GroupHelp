@@ -1595,6 +1595,34 @@ function entitiesLinks(entities)
     return links;
 }
 
+/**
+ * 
+ * @param {GH.LibreGHelp} GHbot 
+ * @param {GH.LGHDatabase} db 
+ * @param {Object} MSGMK - MessageMaker object
+ * @param {GH.LGHChat} chat 
+ * @param {TelegramBot.User} newUser 
+ * @param {TelegramBot.SendMessageOptions|null} options
+ * @returns 
+ */
+async function welcomeNewUser(GHbot, db, MSGMK, chat, newUser, options)
+{
+    options = options || {};
+    if(newUser.is_bot) return;
+    if(chat.welcome.once && chat.welcome.joinList.includes(newUser.id)) return;
+
+    if(chat.welcome.clean && chat.welcome.lastWelcomeId != false)
+        GHbot.TGbot.deleteMessages(chat.id, [chat.welcome.lastWelcomeId]);
+
+    var sentMessage = await MSGMK.sendMessage(GHbot, newUser, chat, chat.welcome.message, false, options);
+    if(sentMessage)
+    {
+        chat.welcome.joinList.push(newUser.id);
+        chat.welcome.lastWelcomeId = sentMessage.message_id;
+    }
+    db.chats.update(chat);
+}
+
 module.exports = 
 {
     bold : bold,
@@ -1665,4 +1693,5 @@ module.exports =
     originToUsername : originToUsername,
     originIsSpam : originIsSpam,
     entitiesLinks : entitiesLinks,
+    welcomeNewUser : welcomeNewUser,
 }

@@ -62,7 +62,7 @@ Useful links to contribute:
 ✅ Anti-spam
 ❌ Goodbye
 ❌ Alphabets
-🟡 Captcha
+✅ Captcha (1 mode)
 ❌ Checks settings
 ❌ @Admin
 ❌ Blocks settings

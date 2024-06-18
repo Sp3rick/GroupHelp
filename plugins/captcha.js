@@ -1,6 +1,9 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { genPunishButtons, bold, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText } = require("../api/utils.js");
+const GH = require("../GHbot.js");
+const { genPunishButtons, bold, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, fullName, tag, usernameOrFullName, welcomeNewUser } = require("../api/utils.js");
 const ST = require("../api/editors/setTime.js");
+const MSGMK = require( "../api/editors/MessageMaker.js" )
+const { applyChatBasedPunish, punishUser, silentPunish } = require("../api/punishment.js");
 
 const svg = require("svg-captcha");
 const canvas = require("canvas");
@@ -8,6 +11,7 @@ const {Canvg, presets} = require("canvg");
 const color = require("randomcolor");
 const {DOMParser} = require("@xmldom/xmldom");
 const fetch = require("node-fetch");
+const { userToTarget } = require("../api/rolesManager.js");
 
 l = global.LGHLangs; //importing langs object
 
@@ -73,31 +77,138 @@ async function newCaptchaImage()
     return {text: captcha.text, png};
 }
 
+function isCaptchaExpired(id)
+{
+    return global.LGHCaptcha[id].within < getUnixTime();
+}
+
+/**
+ * @param {GH.LibreGHelp} GHBot 
+ * @param {GH.LGHDatabase} db
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHUser} user 
+ */
+function captchaFailed(GHbot, db, chat, user)
+{
+    if(chat.captcha.fails)
+    {
+        var reason = l[chat.lang].CAPTCHA_PUNISHMENT;
+        punishUser(GHbot, user.id, chat, userToTarget(chat, user), chat.captcha.punishment, chat.captcha.PTime, reason);
+    }
+    else
+    {
+        silentPunish(GHbot, user.id, chat, user.id, chat.captcha.punishment, chat.captcha.PTime);
+    }
+
+    //if punishment is warn, after the warn, captcha should be considered solved
+    if(chat.captcha.punishment == 1)
+    {
+        captchaSuccess(GHbot, db, chat, user);
+        return;
+    }
+
+    user.waitingReply = false;
+    db.users.update(user);
+
+    var id = chat.id+"_"+user.id;
+    GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
+    if(global.LGHCaptcha[id]) delete global.LGHCaptcha[id];
+}
+
+/**
+ * @param {GH.LibreGHelp} GHbot 
+ * @param {GH.LGHDatabase} db
+ * @param {GH.LGHChat} chat 
+ * @param {GH.LGHUser} user 
+ */
+function captchaSuccess(GHbot, db, chat, user)
+{
+    if(chat.welcome.state)
+        welcomeNewUser(GHbot, db, MSGMK, chat, user);
+
+    user.waitingReply = false;
+    db.users.update(user);
+
+    var id = chat.id+"_"+user.id;
+    GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
+    if(global.LGHCaptcha[id]) delete global.LGHCaptcha[id];
+}
+
+//{[chatId_userId]: {messageId: msg.message_id, within: expiryUnixTimeSeconds, solution: text}}
+global.LGHCaptcha = {};
+
 function main(args)
 {
 
     const GHbot = new LGHelpTemplate(args);
     const {TGbot, db, config} = GHbot;
 
-    //here your plugin code//
+    //clear and punish expired captchas
+    setInterval(()=>{
+        var keys = Object.keys(global.LGHCaptcha);
+        keys.forEach((id)=>{
+            if(isCaptchaExpired(id))
+            {
+                var chat = db.chats.get(id.split("_")[0]);
+                var user = db.users.get(id.split("_")[1]);
+                GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
+                captchaFailed(GHbot, db, chat, user);
+            }
+        }
+    )},1000)
 
+    //min and max settings
     var minimumTimeLimit = 5;
     var maxTimeLimit = (60*60*24)
 
-    GHbot.onMessage( (msg, chat, user) => {
+    GHbot.onMessage( async (msg, chat, user) => {
 
-        if(chat.type != "private"){(async () => {
+        //handle new members
+        if(chat.type != "private" && chat.captcha.state && msg.hasOwnProperty("new_chat_members")){msg.new_chat_members.forEach(async(newUser)=>{
 
-            /*var captcha = await newCaptchaImage();
-            
+            if(chat.captcha.mode == "image")
+            {            
+                var captcha = await newCaptchaImage();
 
-            GHbot.TGbot.sendPhoto(msg.chat.id, captcha.png, {caption:"Text to send " + captcha.text});*/
+                var buttons = [[{text:l[chat.lang].CHANGE_IMAGE_BUTTON, callback_data:"CAPTCHA_CHANGEIMAGE:"+chat.id}]];
+                var text = l[chat.lang].CAPTCHA_IMAGE_QUESTION
+                .replace("{mention}", tag(usernameOrFullName(newUser), newUser.id))
+                .replace("{time}",secondsToHumanTime(chat.lang, chat.captcha.time));
 
-        })()}
+                var sentMsg = await GHbot.sendPhoto(newUser.id, chat.id, captcha.png, {caption:text, parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
+                
+                var id = chat.id+"_"+newUser.id;
+                var within = getUnixTime() + chat.captcha.time;
+                var solution = captcha.text;
+                global.LGHCaptcha[id] = {messageId: sentMsg.message_id, within, solution};
+                
+                newUser.waitingReply = chat.id;
+                newUser.waitingReplyType = "CAPTCHA_IMAGE_GUESS:"+chat.id;
+                db.users.update(newUser);
+            }
+
+        })}
+
+        //prevent messages from users under captcha
+        if(user.waitingReply && user.waitingReplyType.startsWith("CAPTCHA_"))
+            GHbot.TGbot.deleteMessages(chat.id, [msg.message_id]);
+
+        //captcha image guess
+        if (user.waitingReply && user.waitingReplyType.startsWith("CAPTCHA_IMAGE_GUESS"))
+        {
+            var id = chat.id+"_"+user.id;
+            if(!global.LGHCaptcha[id]) return;
+            var isCorrectSolution = msg.text && (global.LGHCaptcha[id].solution.toLowerCase() == msg.text.toLowerCase());
+
+            if(isCorrectSolution && !isCaptchaExpired(id))
+                captchaSuccess(GHbot, db, chat, user);
+            else if(!isCorrectSolution)
+                captchaFailed(GHbot, db, chat, user)
+        }
 
         //security guards
         if (!(user.waitingReply)) return;
-        var myCallback = user.waitingReplyType.startsWith("S_CAPTCHA");
+        var myCallback = user.waitingReplyType.startsWith("S_CAPTCHA") || user.waitingReplyType.startsWith("S_CAPTCHA");
         if (!myCallback) return;
         if (msg.chat.isGroup && chat.id != msg.chat.id) return;//additional security guard
         if (!(user.perms && user.perms.settings)) return;
@@ -114,7 +225,6 @@ function main(args)
                 db.chats.update(chat);
             }
         }
-
         //punishment time
         if (user.waitingReplyType.startsWith("S_CAPTCHA_BUTTON_PTIME#STIME")) {
             var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_CAPTCHA_BUTTON:" + chat.id }]]
@@ -130,18 +240,47 @@ function main(args)
 
     } )
 
-    GHbot.onCallback((cb, chat, user) => {
+    GHbot.onCallback( async (cb, chat, user) => {
 
         var msg = cb.message;
         var lang = user.lang;
 
-        var myCallback = cb.data.startsWith("S_CAPTCHA");
+        var id = false;
+        if(chat.isGroup && cb.data.startsWith("CAPTCHA"))
+        {
+            id = chat.id+"_"+user.id;
+            if(!(global.LGHCaptcha.hasOwnProperty(id) && global.LGHCaptcha[id].messageId == msg.message_id))
+            {
+                GHbot.answerCallbackQuery(user.id, cb.id, {text:l[user.lang].NOT_YOUR_CAPTCHA,show_alert:true})
+                return;
+            }
+        }
+        /*
+        currently this does not work due to node-telegram-bot-api library
+        im waiting for they to approve my pull
+        if (cb.data.startsWith("CAPTCHA_CHANGEIMAGE")) 
+        {
+            //global.LGHCaptcha[id].retryes++;
+            var captcha = await newCaptchaImage();
+            global.LGHCaptcha[id].solution = captcha.text;
+
+            var buttons =  global.LGHCaptcha[id].retryes <= 3 ?
+                [[{text:l[chat.lang].CHANGE_IMAGE_BUTTON, callback_data:"CAPTCHA_CHANGEIMAGE:"+chat.id}]] :  [];
+
+            var text = l[chat.lang].CAPTCHA_IMAGE_QUESTION
+            .replace("{mention}", tag(usernameOrFullName(user), user.id))
+            .replace("{time}",secondsToHumanTime(chat.lang, chat.captcha.time));
+            var opts = {/*reply_markup:{inline_keyboard:buttons}, chat_id:-1001699286116, message_id:9661};
+            GHbot.editMessageMedia(user.id, {media:"attach://"+captcha.png.toString(),type:"photo", parse_mode:"HTML"}, opts)
+        }*/
 
         //security guards for settings
+        var myCallback = cb.data.startsWith("S_CAPTCHA");
         if(!chat.isGroup) return;
         if (!myCallback) return;
         if (!(user.perms && user.perms.settings)) return;
         if (cb.chat.isGroup && chat.id != cb.chat.id) return;
+
 
         //punishment
         if (cb.data.startsWith("S_CAPTCHA_BUTTON_P_")) {

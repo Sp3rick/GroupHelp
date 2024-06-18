@@ -23,21 +23,15 @@ function main(args)
         if( msg.chat.isGroup && checkCommandPerms(msg.command, "COMMAND_SETTINGS", user.perms ) )
         {
 
-            GHbot.sendMessage( user.id, msg.chat.id, l[lang].SETTINGS_WHERE_OPEN, 
-                {
+            GHbot.sendMessage( user.id, msg.chat.id, l[lang].SETTINGS_WHERE_OPEN, {
                     message_id : msg.message_id,
                     chat_id : msg.chat.id,
                     parse_mode : "HTML",
-                    reply_markup : 
-                    {
-                        inline_keyboard :
-                        [
+                    reply_markup : {inline_keyboard :[
                             [{text: l[lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+msg.chat.id}],
                             [{text: l[lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+msg.chat.id}],
-                        ] 
-                    } 
-                }
-            )
+                    ]}
+            })
 
         }
 
@@ -53,7 +47,7 @@ function main(args)
         if(isGroup) isSettingsAdmin = user.perms.settings == 1;
 
         //settings security guards
-        if(!isSettingsAdmin && isGroup )
+        if(!isSettingsAdmin && isGroup && cb.data.startsWith("S_"))
         {
             GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION, show_alert:true});
             return;

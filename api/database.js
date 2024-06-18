@@ -83,10 +83,10 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
         })
     }
 
-    if(version == "0.2.4")
+    if(version == "0.2.4" || version == "0.2.4.0")
     {
-        version = "0.2.4.0";
-        console.log("\tupdating from 0.2.4 to 0.2.4.0 ...");
+        version = "0.2.4.1";
+        console.log("\tupdating from 0.2.4 to 0.2.4.1 ...");
 
         var chatFiles = fs.readdirSync(chatsDir);
         chatFiles.forEach((fileName)=>{
@@ -188,6 +188,7 @@ function getDatabase(config) {
                 chat.welcome = { state:false, once:false, clean:false, joinList:[], lastWelcomeId:false, message:{} };
                 chat.flood = { messages:3, time:5, punishment:1, PTime: 1800, delete:true }
                 chat.spam = newSpamObj();
+                chat.captcha = newCaptchaObj();
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -370,8 +371,8 @@ function getDatabase(config) {
                 if( user.hasOwnProperty("waitingReplyType") ) newUser.waitingReplyType = user.waitingReplyType;
 
 
-                var userFile = database.usersDir + "/" + user.id + ".json";
-                console.log( "updating user to database lang:" + user.lang );
+                var userFile = database.usersDir + "/" + newUser.id + ".json";
+                console.log( "updating user to database lang:" + newUser.lang );
                 fs.writeFileSync( userFile, JSON.stringify(newUser) );
                 return true;
 
