@@ -55,13 +55,14 @@ Useful links to contribute:
 ❌ Support for anonymous admins
 🟡 Bot support
 ❌ Bot help (how to use)
+❌ Bot clones support
 ✅ Langs and lang settings
 ✅ Rules
 ✅ Welcome
 ✅ Anti-flood
 ✅ Anti-spam
 ✅ Goodbye
-❌ Alphabets
+✅ Alphabets
 ✅ Captcha (1 mode)
 ❌ Checks settings
 ❌ @Admin
@@ -84,11 +85,12 @@ Useful links to contribute:
 ❌ Magic Strickers/GIFs
 ❌ Max message length settings
 ❌ Log channel
+❌ Staff group
+❌ Group statistics
 ✅ General commands permissions editor
 ✅ Remove user-data from group (/forget)
 ❌ Remove user-data from bot
 ❌ User privacy mode
-❌ Multiple bots support
 ✅ Crypto prices external api
 ```
 
@@ -136,7 +138,19 @@ To update the bot you need to backup ./database folder and ./config.json only, t
     allow to warn only usersIds who exhist on telegram, it can be checked if applyng a restriction returns true
     add config to allow/disallow adding bot from non-admin users
     ?identify reply_parameters and add everytime allow_sending_without_reply? (GHBot.js)
-
+    /geturl, by replying to a message (via reply) and writing this command, you receive the link that refers directly to that message.
+    /inactives [days] sends in private chat the list of users who have not sent a message in the last [days], with the possibility of punish them.
+    /pin [message] - sends the message through the Bot and pins it.
+    /editpin [message] - edits the current pinned message (if sent from the Bot).
+    /delpin - removes the pinned message.
+    /repin - removes and pins again the current pinned message, with notification!
+    /pinned - refers to the current pinned message.
+    /list - sends in private chat the list of users of the group with the number of messages sent by them.
+    /list roles - sends in private chat the list of all the special roles assigned to users
+    /graphic - sends a graph showing the trend of the group members.
+    /trend - sends the group's growth statistics.
+    /logdel - deletes the selected message and sends it to the Log Channel
+    /send - permits to send a post through the Bot with parse mode support
 
 ## Known possible bugs:
 -sometimes db.chats.update in plugins may be not used at all because you can still edit the global object cause to reference, not using it may cause some issue. +if global reference get cleared too early code may try to access and inexistent variable
@@ -146,6 +160,8 @@ To update the bot you need to backup ./database folder and ./config.json only, t
 -if you add a new permission on userPerms object, every userPerms object should be updated adding that, otherwise this may cause incorrect result in sumUserPerms
 
 -in some unkown cases you may get stuck in exceptions menu and SafeGram.js will block any user request due too high accumulated volume of something pending
+
+-permissions setup on first bot adding to groups is not the same as using /reload that's more complete
 
 
 ## Ask a question

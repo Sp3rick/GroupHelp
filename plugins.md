@@ -38,6 +38,12 @@ This plugin manages users data and roles in the group
 >
 >media: bypass any media limitation [1/0/-1]
 >
+>alphabets: Bypass any alphabets characters limitations [1/0/-1]
+>
+>words: Bypass banned words limitations [1/0/-1]
+>
+>length: Bypass message length limitations [1/0/-1]
+>
 >roles: permission to change roles of lower level users [1/0/-1]
 >
 >settings: permission to change bot group settings [1/0/-1]

@@ -33,7 +33,7 @@ l = global.LGHLangs;
  * @return {GH.LGHPerms}
  *      Get a default GH.LGHPerms object
  */
-function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
+function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, alphabets, words, length, roles, settings)
 {
     commands = commands || [];
     immune = immune || 0;
@@ -45,6 +45,9 @@ function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, n
     porn = porn || 0;
     night = night || 0;
     media = media || 0;
+    alphabets = alphabets || 0;
+    words = words || 0;
+    length = length || 0;
     roles = roles || 0;
     settings = settings || 0;
     
@@ -57,6 +60,9 @@ function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, n
     porn = (porn === false) ? -1 : porn;
     night = (night === false) ? -1 : night;
     media = (media === false) ? -1 : media;
+    alphabets = (alphabets === false) ? -1 : alphabets;
+    words = (words === false) ? -1 : words;
+    length = (length === false) ? -1 : length;
     roles = (roles === false) ? -1 : roles;
     settings = (settings === false) ? -1 : settings;
 
@@ -72,6 +78,9 @@ function newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, n
         porn: porn,
         night : night,
         media: media,
+        alphabets: alphabets,
+        words: words,
+        length: length,
         roles : roles,
         settings: settings,
     }
@@ -346,7 +355,7 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
-        perms = newPerms(["@COMMAND_ME"],1,1,1,1,1,1,1,1,1);
+        perms = newPerms(["@COMMAND_ME"],1,1,1,1,1,1,1,1,1,1,1,1,0,0);
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -420,7 +429,7 @@ function sumPermsPriority(perms1, perms2)
     perms2.commands.forEach(command => {commands.push(command)});
     commands = commands.filter((item,pos)=>{return commands.indexOf(item)==pos}) //remove duplicates
 
-    var immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings;
+    var immune, flood, link, tgLink, forward, quote, porn, night, media, alphabets, words, length, roles, settings;
 
     immune = (perms1.immune == 0) ? perms2.immune : perms1.immune; //if perms1 is neutral inherit from second
     flood = (perms1.flood == 0) ? perms2.flood : perms1.flood;
@@ -431,10 +440,13 @@ function sumPermsPriority(perms1, perms2)
     porn = (perms1.porn == 0) ? perms2.porn : perms1.porn;
     night = (perms1.night == 0) ? perms2.night : perms1.night;
     media = (perms1.media == 0) ? perms2.media : perms1.media;
+    alphabets = (perms1.alphabets == 0) ? perms2.alphabets : perms1.alphabets;
+    words = (perms1.words == 0) ? perms2.words : perms1.words;
+    length = (perms1.length == 0) ? perms2.length : perms1.length;
     roles = (perms1.roles == 0) ? perms2.roles : perms1.roles;
     settings = (perms1.settings == 0) ? perms2.settings : perms1.settings;
 
-    return newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, roles, settings)
+    return newPerms(commands, immune, flood, link, tgLink, forward, quote, porn, night, media, alphabets, words, length, roles, settings)
 
 }
 function orderRolesByPriority(roles, chat) //Chat required only if role is number (custom role)

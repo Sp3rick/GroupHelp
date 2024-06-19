@@ -19,14 +19,14 @@ function main(args)
     "COMMAND_FREE", "COMMAND_HELPER", "COMMAND_CLEANER", "COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_COFOUNDER", "COMMAND_ADMINISTRATOR",
     "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNCLEANER", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR", "COMMAND_UNCOFOUNDER", "COMMAND_UNADMINISTRATOR",
     "COMMAND_TITLE", "COMMAND_UNTITLE", "COMMAND_FORGOT"]
-    var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     var modCommands = ["COMMAND_RULES", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN",
     "COMMAND_DELETE","COMMAND_UNBAN", "COMMAND_UNMUTE", "COMMAND_UNWARN",]
-    var modPerms = RM.newPerms(modCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-    var muterPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_MUTE", "COMMAND_UNMUTE"], 1, 1, 1, 1, 1, 1, 1, 1, 1);
-    var cleanerPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_DELETE"], 1);
-    var helperPerms = RM.newPerms(["COMMAND_RULES"], 1);
-    var freePerms = RM.newPerms([], 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    var modPerms = RM.newPerms(modCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    var muterPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_MUTE", "COMMAND_UNMUTE"]);
+    var cleanerPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_DELETE"]);
+    var helperPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_INFO"]);
+    var freePerms = RM.newPerms([], 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     global.roles = {
         founder : RM.newRole("FOUNDER", "👑", 100, founderPerms),

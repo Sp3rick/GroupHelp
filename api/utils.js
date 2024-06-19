@@ -304,7 +304,7 @@ function genSettingsKeyboard(lang, chatId)
         {text: l[lang].S_ANTIFLOOD_BUTTON, callback_data: "S_FLOOD_M_:"+chatId}],
 
         [{text: l[lang].S_GOODBYE_BUTTON, callback_data: "S_GOODBYE_BUTTON:"+chatId},
-        {text: l[lang].S_ALPHABETS_BUTTON, callback_data: "S_ALPHABETS_BUTTON:"+chatId}],
+        {text: l[lang].S_ALPHABETS_BUTTON, callback_data: "S_ALPHABETS#ABP:"+chatId}],
 
         [{text: l[lang].S_CAPTCHA_BUTTON, callback_data: "S_CAPTCHA_BUTTON:"+chatId},
         {text: l[lang].S_CHECKS_BUTTON, callback_data: "S_CHECKS_BUTTON:"+chatId}],
@@ -672,6 +672,9 @@ function genPermsReport(lang, perms)
     bold(l[lang].PORN+": ")+stateToEmoji(perms.porn)+"\n"+
     bold(l[lang].NIGHT+": ")+stateToEmoji(perms.night)+"\n"+
     bold(l[lang].MEDIA+": ")+stateToEmoji(perms.media)+"\n"+
+    bold(l[lang].ALPHABETS+": ")+stateToEmoji(perms.media)+"\n"+
+    bold(l[lang].BAN_WORDS+": ")+stateToEmoji(perms.media)+"\n"+
+    bold(l[lang].LONG_MESSAGES+": ")+stateToEmoji(perms.media)+"\n"+
     bold(l[lang].ROLES+": ")+stateToEmoji(perms.roles)+"\n"+
     bold(l[lang].SETTINGS+": ")+stateToEmoji(perms.settings)+"\n";
 

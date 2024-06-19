@@ -126,7 +126,7 @@ function main(args)
                     inline_keyboard:
                         [[{text: groupButton, callback_data: "S_GOODBYE_BUTTON_GROUP:" + chat.id },
                         {text: l[lang].SET_MESSAGE_SHORT, callback_data: "S_GOODBYE_GROUP#MSGMK:" + chat.id }],
-                        [{text: deleteLastGoodbyeButton, callback_data: "S_GOODBYE_BUTTON_ONCE"}],
+                        [{text: deleteLastGoodbyeButton, callback_data: "S_GOODBYE_BUTTON_ONCE:" + chat.id}],
                         [{text: privateButton, callback_data: "S_GOODBYE_BUTTON_PRIVATE:" + chat.id },
                         {text: l[lang].SET_MESSAGE_SHORT, callback_data: "S_GOODBYE_PRIVATE#MSGMK:" + chat.id}],
                         [{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:" + chat.id}]]

@@ -34,6 +34,13 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHPunish} users - Punish to apply for users.
  * @property {LGHPunish} bots - Punish to apply for bots.
  */
+/**
+ * @typedef {Object} LGHAlphabetBasedPunish - Object to reresent different punish settings for messages containing various Alphabets
+ * @property {LGHPunish} arabic - Punish to apply for messages containing arabic characters.
+ * @property {LGHPunish} cyrillic - Punish to apply for messages containing cyrillic (russian) characters.
+ * @property {LGHPunish} chinese - Punish to apply for messages containing chinese characters.
+ * @property {LGHPunish} latin - Punish to apply for messages containing latin characters.
+ */
 
 //TARGETUSER
 /**
@@ -58,6 +65,9 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {1|0|-1} porn - Bypass porn/gore checks [1/0/-1].
  * @property {1|0|-1} night - Bypass any night mode limitation [1/0/-1].
  * @property {1|0|-1} media - Bypass any media limitation [1/0/-1].
+ * @property {1|0|-1} alphabets - Bypass any alphabets characters limitations [1/0/-1].
+ * @property {1|0|-1} words - Bypass banned words limitations [1/0/-1].
+ * @property {1|0|-1} length - Bypass message length limitations [1/0/-1].
  * @property {1|0|-1} roles - Permission to change roles of lower level users [1/0/-1].
  * @property {1|0|-1} settings - Permission to change bot group settings [1/0/-1].
  */
@@ -170,6 +180,19 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHSpamQuote} quote - rules and exceptions for all quoted messages considered as spam
  */
 
+//goodbye
+/**
+ * @typedef {Object} LGHGoodbye - goodbye.js settings
+ * @property {Boolean} group - True if goodbye should be sent on group
+ * @property {Boolean} clear - True if last goodbye message should be deleted before sending a new one
+ * @property {TelegramBot.MessageId} lastId - messageId of last goodbye message sent on group
+ * @property {CustomMessage} gMsg - Goodbye message to send on group
+ * @property {Boolean} private - True if goodbye should be sent on private chat
+ * @property {CustomMessage} pMsg - Goodbye message to send on private chat
+ */
+
+//alphabets
+
 //captcha
 /**
  * @typedef {Object} LGHCaptcha - captcha.js settings
@@ -180,17 +203,6 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {boolean} fails - True if captcha should notify on group that someone failed the captcha (default false).
  * @property {Punishment} punishment - Punishment to apply [1:warn|2:kick|3:mute|4:ban].
  * @property {Number} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
- */
-
-//goodbye
-/**
- * @typedef {Object} LGHGoodbye - goodbye.js settings
- * @property {Boolean} group - True if goodbye should be sent on group
- * @property {Boolean} clear - True if last goodbye message should be deleted before sending a new one
- * @property {TelegramBot.MessageId} lastId - messageId of last goodbye message sent on group
- * @property {CustomMessage} gMsg - Goodbye message to send on group
- * @property {Boolean} private - True if goodbye should be sent on private chat
- * @property {CustomMessage} pMsg - Goodbye message to send on private chat
  */
 
 
@@ -212,6 +224,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHSpam|null} spam - antispam.js plugin related data
  * @property {LGHCaptcha|null} captcha - captcha.js plugin related data
  * @property {LGHGoodbye|null} goodbye - goodbye.js plugin related data
+ * @property {LGHAlphabetBasedPunish|null} alphabets - alphabets.js plugin related data
  */
 
 /**

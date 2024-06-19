@@ -54,6 +54,25 @@ function newGoodbyeObj()
     return obj;
 }
 
+function newAlphabetsObj()
+{
+    var obj = {
+        arabic: {punishment: 0, PTime: 0, delete: false},
+        cyrillic: {punishment: 0, PTime: 0, delete: false},
+        chinese: {punishment: 0, PTime: 0, delete: false},
+        latin: {punishment: 0, PTime: 0, delete: false},
+    }
+
+    return obj;
+}
+function update2d5Perms(perms)
+{
+    perms.alphabets = 0;
+    perms.words = 0;
+    perms.length = 0;
+    return perms;
+}
+
 function updateDatabase(version, versionFile, chatsDir, usersDir)
 {
     if(version == "0.2")
@@ -111,18 +130,43 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
     }
 
     if(version == "0.2.4.1")
-        {
-            version = "0.2.5";
-            console.log("\tupdating from 0.2.4.1 to 0.2.5 ...");
-    
-            var chatFiles = fs.readdirSync(chatsDir);
-            chatFiles.forEach((fileName)=>{
-                var file = chatsDir+"/"+fileName;
-                var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
-                chat.goodbye = newGoodbyeObj();
-                fs.writeFileSync(file, JSON.stringify(chat));
+    {
+        version = "0.2.5";
+        console.log("\tupdating from 0.2.4.1 to 0.2.5 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+            chat.goodbye = newGoodbyeObj();
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
+    }
+
+    if(version == "0.2.5")
+    {
+        version = "0.2.6";
+        console.log("\tupdating from 0.2.5 to 0.2.6 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+            chat.alphabets = newAlphabetsObj();
+            chat.basePerms = update2d5Perms(chat.basePerms);
+            chat.adminPerms = update2d5Perms(chat.adminPerms);
+            Object.keys(chat.users).forEach(userId=>{
+                chat.users[userId].perms = update2d5Perms(chat.users[userId].perms);
+                chat.users[userId].adminPerms = update2d5Perms(chat.users[userId].adminPerms);
             })
-        }
+            Object.keys(chat.roles).forEach(role=>{
+                if(chat.roles[role].perms) chat.roles[role].perms = update2d5Perms(chat.roles[role].perms);
+            })
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
+    }
+
+
 
     //add new if here to update from latest dbVersion to new
 
@@ -217,6 +261,7 @@ function getDatabase(config) {
                 chat.spam = newSpamObj();
                 chat.captcha = newCaptchaObj();
                 chat.goodbye = newGoodbyeObj();
+                chat.alphabets = newAlphabetsObj();
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -320,6 +365,7 @@ function getDatabase(config) {
                 if(chat.hasOwnProperty("spam")) global.DBCHATS[chat.id].spam = chat.spam;
                 if(chat.hasOwnProperty("captcha")) global.DBCHATS[chat.id].captcha = chat.captcha;
                 if(chat.hasOwnProperty("goodbye")) global.DBCHATS[chat.id].goodbye = chat.goodbye;
+                if(chat.hasOwnProperty("alphabets")) global.DBCHATS[chat.id].alphabets = chat.alphabets;
 
                 global.DBCHATS[chat.id].lastUse = now;
 
