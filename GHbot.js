@@ -191,8 +191,6 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {CustomMessage} pMsg - Goodbye message to send on private chat
  */
 
-//alphabets
-
 //captcha
 /**
  * @typedef {Object} LGHCaptcha - captcha.js settings
@@ -203,6 +201,54 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {boolean} fails - True if captcha should notify on group that someone failed the captcha (default false).
  * @property {Punishment} punishment - Punishment to apply [1:warn|2:kick|3:mute|4:ban].
  * @property {Number} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
+ */
+
+//media
+/**
+ * @typedef {Object} LGHMedia - media.js settings, if LGHPunish is disabled the object will be deleted (undefinied)
+ * @property {LGHPunish|undefined} photo
+ * @property {LGHPunish|undefined} video
+ * @property {LGHPunish|undefined} album
+ * @property {LGHPunish|undefined} gif
+ * @property {LGHPunish|undefined} voice
+ * @property {LGHPunish|undefined} audio
+ * @property {LGHPunish|undefined} sticker
+ * @property {LGHPunish|undefined} sticker_video
+ * @property {LGHPunish|undefined} dice
+ * @property {LGHPunish|undefined} emoji_video
+ * @property {LGHPunish|undefined} emoji_premium
+ * @property {LGHPunish|undefined} video_note
+ * @property {LGHPunish|undefined} file
+ * @property {LGHPunish|undefined} game
+ * @property {LGHPunish|undefined} contact
+ * @property {LGHPunish|undefined} poll
+ * @property {LGHPunish|undefined} location
+ * @property {LGHPunish|undefined} capital
+ * @property {LGHPunish|undefined} payment
+ * @property {LGHPunish|undefined} via_bot
+ * @property {LGHPunish|undefined} story
+ * @property {LGHPunish|undefined} spoiler
+ * @property {LGHPunish|undefined} spoiler_media
+ * @property {LGHPunish|undefined} giveaway
+ * @property {LGHPunish|undefined} mention
+ * @property {LGHPunish|undefined} text_mention
+ * @property {LGHPunish|undefined} hashtag
+ * @property {LGHPunish|undefined} cashtag
+ * @property {LGHPunish|undefined} command
+ * @property {LGHPunish|undefined} url
+ * @property {LGHPunish|undefined} email
+ * @property {LGHPunish|undefined} number
+ * @property {LGHPunish|undefined} bold
+ * @property {LGHPunish|undefined} italic
+ * @property {LGHPunish|undefined} underline
+ * @property {LGHPunish|undefined} striketrough
+ * @property {LGHPunish|undefined} quoteblock
+ * @property {LGHPunish|undefined} closed_blockquote
+ * @property {LGHPunish|undefined} code
+ * @property {LGHPunish|undefined} pre_code
+ * @property {LGHPunish|undefined} textlink
+ * @property {LGHPunish|undefined} scheduled
+ * @property {LGHPunish|undefined} effect
  */
 
 
@@ -225,6 +271,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHCaptcha|null} captcha - captcha.js plugin related data
  * @property {LGHGoodbye|null} goodbye - goodbye.js plugin related data
  * @property {LGHAlphabetBasedPunish|null} alphabets - alphabets.js plugin related data
+ * @property {LGHMedia|null} media - media.js plugin related data
  */
 
 /**

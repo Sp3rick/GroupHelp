@@ -94,7 +94,7 @@ They are both avaiable on cb.data for buttons or on user.waitingReplyType for me
 
 <b>Hirarchy</b>
 
-cb.data OR user.waitingReplyType = CALLBACK_NAME#editor_things|editorData:groupId?targetUserId
+cb.data OR user.waitingReplyType = CALLBACK_NAME!data#editor_things|editorData:groupId?targetUserId
 
 Works with less items, same order only matters: CALLBACK_NAME:groupId OR CALLBACK_NAME#editor?targetUserId OR CALLBACK_NAME:groupId?targetUserId are all valid
 

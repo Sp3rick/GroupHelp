@@ -312,7 +312,7 @@ function genSettingsKeyboard(lang, chatId)
         [{text: l[lang].S_ADMIN_BUTTON, callback_data: "S_ADMIN_BUTTON:"+chatId},
         {text: l[lang].S_BLOCKS_BUTTON, callback_data: "S_BLOCKS_BUTTON:"+chatId}],
 
-        [{text: l[lang].S_MEDIA_BUTTON, callback_data: "S_MEDIA_BUTTON:"+chatId},
+        [{text: l[lang].S_MEDIA_BUTTON, callback_data: "S_MEDIA_PAGE1:"+chatId},
         {text: l[lang].S_PORN_BUTTON, callback_data: "S_PORN_BUTTON:"+chatId}],
 
         [{text: l[lang].S_WARN_BUTTON, callback_data: "S_WARN_BUTTON:"+chatId},
@@ -1010,7 +1010,7 @@ function mediaTypeToMethod(type)
 
 /**
  * @param {string} text 
- * @returns {GH.LGHPunish}
+ * @returns {0|1|2|3|4|-1}
  */
 function textToPunishment(text)
 {

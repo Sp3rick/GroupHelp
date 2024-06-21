@@ -166,6 +166,19 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
         })
     }
 
+    if(version == "0.2.6")
+    {
+        version = "0.2.7";
+        console.log("\tupdating from 0.2.6 to 0.2.7 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+            chat.media = {};
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
+    }
 
 
     //add new if here to update from latest dbVersion to new
@@ -262,6 +275,7 @@ function getDatabase(config) {
                 chat.captcha = newCaptchaObj();
                 chat.goodbye = newGoodbyeObj();
                 chat.alphabets = newAlphabetsObj();
+                chat.media = {};
                 
                 var chatFile = database.chatsDir + "/" + chat.id + ".json";
                 console.log( "adding chat to database lang: " + chat.lang );
@@ -366,6 +380,7 @@ function getDatabase(config) {
                 if(chat.hasOwnProperty("captcha")) global.DBCHATS[chat.id].captcha = chat.captcha;
                 if(chat.hasOwnProperty("goodbye")) global.DBCHATS[chat.id].goodbye = chat.goodbye;
                 if(chat.hasOwnProperty("alphabets")) global.DBCHATS[chat.id].alphabets = chat.alphabets;
+                if(chat.hasOwnProperty("media")) global.DBCHATS[chat.id].media = chat.media;
 
                 global.DBCHATS[chat.id].lastUse = now;
 

@@ -26,6 +26,11 @@ function clearExpiredUserWarns(chat, targetId)
 }
 
 
+function newPunishObj()
+{
+    return {punishment:0, PTime:0, delete:false};
+}
+
 //punish related functions//
 function genRevokePunishButton(lang, targetId, punishment)
 {
@@ -343,6 +348,7 @@ function applyChatBasedPunish(GHbot, userId, chat, targetUser, punishments, type
 }
 
 module.exports = {
+    newPunishObj,
     genRevokePunishButton, genPunishText,
     silentPunish, punishUser,
     genUnpunishButtons, genUnpunishText,
