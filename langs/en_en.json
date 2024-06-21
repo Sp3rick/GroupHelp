@@ -254,6 +254,7 @@
     "MEDIA:textlink": "Text link",
     "MEDIA:scheduled": "Scheduled",
     "MEDIA:effect": "Effect",
+    "UNALLOWED_MEDIA_PUNISHMENT" : "Media, user sent {types} media",
     "PAGE_LEFT_BUTTON" : "◀️ Page",
     "PAGE_RIGHT_BUTTON" : "▶️ Page",
     "WARNS_DESCRIPTION" : "<b>❗️ User warnings</b>\nThe warnings system allows you to give warnings to user for incorrect bahaivor in your group, before acutally punishing them.\n\nFrom this menu you can set:\n• The punishment to apply when warnings limit is hit\n• the maximum number of warns\n\n{punishmentText}\n<b>Max Warns allowed:</b> {limit}",

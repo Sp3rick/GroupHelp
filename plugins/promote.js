@@ -273,7 +273,7 @@ function main(args)
             chat = RM.reloadAdmins(chat, adminList);
             db.chats.update(chat);
 
-            var newTitle = chat.users[target.id].title;
+            var newTitle = chat.users[user.waitingReplyTarget.id].title;
             var text = user.waitingReplyTarget.name+bold(l[lang].TITLE_CHANGED_TO)+" "+code(newTitle);
             
             GHbot.sendMessage(user.id, msg.chat.id, text, changeTitleOpts)

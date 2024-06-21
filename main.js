@@ -108,11 +108,6 @@ async function main(config) {
         
         //configuring msg.target
         msg.target = false;
-        if(user.waitingReplyType.includes("?"))
-        {
-            var targetId = cb.data.split("?")[1];
-            msg.target = RM.userIdToTarget(TGbot, chat, targetId, db);
-        }
         msg.target = await TR.getMessageTarget(msg, chat, TGbot, db);
 
         

@@ -1,9 +1,156 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, genPunishButtons, handlePunishmentCallback, textToPunishment } = require("../api/utils.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, genPunishButtons, handlePunishmentCallback, textToPunishment, isArray, isString } = require("../api/utils.js");
 const RM = require("../api/rolesManager.js");
-const { punishUser, newPunishObj } = require("../api/punishment.js");
+const { punishUser, newPunishObj, sumPunishObj, isPunishGreater } = require("../api/punishment.js");
 const ST = require("../api/editors/setTime.js");
 
+const LATIN_REGEX = /[a-zA-Z]/;
+function isLatin(text)
+{
+    if(!isString(text)) return false;
+    return text.match(LATIN_REGEX);
+}
+
+//exceptions to handle trough special code: album (media_group_id), emoji_video (single emoji), scheduled, sticker and sticker_video
+const mapping = {
+    "photo": "photo",
+    "video": "video",
+    "animation": "gif",
+    "voice": "voice",
+    "audio": "audio",
+    "dice": "dice",
+    "video_note": "video_note",
+    "document": "file",
+    "game": "game",
+    "contact": "contact",
+    "poll": "poll",
+    "location": "location",
+    "invoice": "payment",
+    "via_bot": "via_bot",
+    "story": "story",
+    "has_media_spoiler": "spoiler_media",
+    "effect_id": "effect"
+};
+const entityMapping = {
+    "custom_emoji" : "emoji_premium",
+    "mention": "mention",
+    "hashtag": "hashtag",
+    "cashtag": "cashtag",
+    "bot_command": "command",
+    "url": "url",
+    "email": "email",
+    "phone_number": "number",
+    "bold": "bold",
+    "italic": "italic",
+    "underline": "underline",
+    "strikethrough": "striketrough",
+    "spoiler" : "spoiler",
+    "blockquote": "quoteblock",
+    "expandable_blockquote": "closed_blockquote",
+    "code": "code",
+    "pre": "pre_code",
+    "text_link": "textlink"
+};
+function sumPunishMessageMedia(punish, punishList, media, msg, mapping) {
+    for (let key in mapping) {
+        if (media.hasOwnProperty(mapping[key]) && msg.hasOwnProperty(key)) {
+            punish = sumPunishObj(punish, media[mapping[key]]);
+            punishList.push(mapping[key]);
+        }
+    }
+    return punish;
+}
+function sumPunishEntitiesMedia(chat, msg, punish, punishList) {
+    if (msg.entities) {
+        for (let entity of msg.entities) {
+            if (entityMapping.hasOwnProperty(entity.type) && chat.media.hasOwnProperty(entityMapping[entity.type])) {
+                punish = sumPunishObj(punish, chat.media[entityMapping[entity.type]]);
+                punishList.push(entityMapping[entity.type]);
+            }
+        }
+    }
+    return punish;
+}
+
+/*
+Table with list of emoji that if alone in a message is going to be animated
+That should be updated if telegram add more in future
+Made with https://emojis.wiki/telegram/ and ChatGPT
+*/
+const emojiTable = {
+    "😀": true, "😃": true, "😄": true, "😁": true, "😆": true, "😅": true, "🤣": true, "😂": true, "🙂": true, "🙃": true,
+    "🫠": true, "😉": true, "😊": true, "😇": true, "🥰": true, "😍": true, "🤩": true, "😘": true, "😗": true, "☺️": true,
+    "😚": true, "😙": true, "🥲": true, "😋": true, "😛": true, "😜": true, "🤪": true, "😝": true, "🤑": true, "🤗": true,
+    "🤭": true, "🫢": true, "🫣": true, "🤫": true, "🤔": true, "🫡": true, "🤐": true, "🤨": true, "😐": true, "😑": true,
+    "😶": true, "🫥": true, "😶‍🌫️": true, "😏": true, "😒": true, "🙄": true, "😬": true, "😮‍💨": true, "🤥": true, "😌": true,
+    "😔": true, "😪": true, "🤤": true, "😴": true, "😷": true, "🤒": true, "🤕": true, "🤢": true, "🤮": true, "🤧": true,
+    "🥵": true, "🥶": true, "🥴": true, "😵": true, "😵‍💫": true, "🤯": true, "🤠": true, "🥳": true, "🥸": true, "😎": true,
+    "🤓": true, "🧐": true, "😕": true, "🫤": true, "😟": true, "🙁": true, "☹️": true, "😮": true, "😯": true, "😲": true,
+    "😳": true, "🥺": true, "🥹": true, "😦": true, "😧": true, "😨": true, "😰": true, "😥": true, "😢": true, "😭": true,
+    "😱": true, "😖": true, "😣": true, "😞": true, "😓": true, "😩": true, "😫": true, "🥱": true, "😤": true, "😡": true,
+    "😠": true, "🤬": true, "😈": true, "👿": true, "💀": true, "☠️": true, "💩": true, "🤡": true, "👹": true, "👺": true,
+    "👻": true, "👽": true, "👾": true, "🤖": true, "😺": true, "😸": true, "😹": true, "😻": true, "😼": true, "😽": true,
+    "🙀": true, "😿": true, "😾": true, "🙈": true, "🙉": true, "🙊": true, "💋": true, "💌": true, "💘": true, "💝": true,
+    "💖": true, "💗": true, "💓": true, "💞": true, "💕": true, "💟": true, "❣️": true, "💔": true, "❤️‍🔥": true, "❤️‍🩹": true,
+    "❤️": true, "🧡": true, "💛": true, "💚": true, "💙": true, "💜": true, "🤎": true, "🖤": true, "🤍": true, "💯": true,
+    "💢": true, "💥": true, "💫": true, "💬": true, "🗯️": true, "💭": true, "💤": true, "🤷": true, "👋": true, "🤚": true,
+    "🖐️": true, "✋": true, "🖖": true, "🫱": true, "🫲": true, "🫳": true, "🫴": true, "👌": true, "🤌": true, "🤏": true,
+    "✌️": true, "🤞": true, "🫰": true, "🤟": true, "🤘": true, "🤙": true, "👈": true, "👉": true, "👆": true, "🖕": true,
+    "☝️": true, "🫵": true, "👍": true, "👎": true, "✊": true, "👊": true, "🤛": true, "🤜": true, "👏": true, "🙌": true,
+    "🫶": true, "👐": true, "🤲": true, "🤝": true, "🙏": true, "✍️": true, "💅": true, "💪": true, "🦾": true, "🦿": true,
+    "🦵": true, "🦶": true, "👂": true, "🦻": true, "👃": true, "🦷": true, "🦴": true, "👀": true, "👁️": true, "👅": true,
+    "👄": true, "🫦": true, "👶": true, "👵": true, "🤦": true, "🤦‍♂️": true, "🤦‍♀️": true, "🤷": true, "🤷‍♂️": true,
+    "🤷‍♀️": true, "👨‍⚕️": true, "👩‍⚕️": true, "👨‍🏫": true, "🧑‍💻": true, "👨‍💻": true, "👩‍💻": true, "👮‍♂️": true,
+    "👮‍♀️": true, "🤰": true, "🎅": true, "🤶": true, "🧑‍🎄": true, "🧟": true, "🧟‍♂️": true, "🧟‍♀️": true, "💃": true,
+    "🕺": true, "👨‍👩‍👧‍👦": true, "🗣️": true, "👤": true, "👥": true, "🫂": true, "👣": true, "🐼": true, "🐵": true,
+    "🦍": true, "🐶": true, "🦊": true, "🦝": true, "🐱": true, "🐯": true, "🐅": true, "🐆": true, "🐴": true, "🐎": true,
+    "🦄": true, "🦓": true, "🦌": true, "🦬": true, "🐂": true, "🐄": true, "🐷": true, "🐽": true, "🦙": true, "🐭": true,
+    "🐹": true, "🐰": true, "🐇": true, "🦇": true, "🐻": true, "🐻‍❄️": true, "🐨": true, "🐼": true, "🦘": true, "🐾": true,
+    "🐔": true, "🐣": true, "🐤": true, "🐥": true, "🐦": true, "🐧": true, "🕊️": true, "🦆": true, "🦢": true, "🦉": true,
+    "🦜": true, "🐢": true, "🐍": true, "🐳": true, "🦭": true, "🐟": true, "🐠": true, "🐙": true, "🐌": true, "🦋": true,
+    "🪲": true, "🐞": true, "🪳": true, "🕷️": true, "🕸️": true, "🦟": true, "🦠": true, "🌸": true, "🌹": true, "🌺": true,
+    "🌼": true, "🌷": true, "🌱": true, "🌲": true, "🌳": true, "🌴": true, "🌵": true, "🌿": true, "🍀": true, "🍕": true,
+    "🍌": true, "🍓": true, "🥨": true, "🥞": true, "🍖": true, "🍗": true, "🍔": true, "🍟": true, "🍕": true, "🌭": true,
+    "🥪": true, "🌮": true, "🥙": true, "🍳": true, "🍿": true, "🥫": true, "🍱": true, "🍘": true, "🍙": true, "🍢": true,
+    "🍣": true, "🍥": true, "🍡": true, "🦞": true, "🦐": true, "🍦": true, "🍩": true, "🍪": true, "🎂": true, "🍰": true,
+    "🧁": true, "🥧": true, "🍫": true, "🍭": true, "🍮": true, "☕": true, "🍾": true, "🍷": true, "🍸": true, "🍹": true,
+    "🥂": true, "🥃": true, "🫗": true, "🥤": true, "🧋": true, "🧃": true, "🧉": true, "🌇": true, "🧭": true, "🏕️": true,
+    "🏖️": true, "🏝️": true, "🏛️": true, "🏠": true, "♨️": true, "🎢": true, "🚂": true, "🚑": true, "🚓": true, "🚕": true,
+    "🛥️": true, "✈️": true, "🚀": true, "🧳": true, "⌛": true, "⏳": true, "🌑": true, "🌒": true, "🌓": true, "🌔": true,
+    "🌕": true, "🌖": true, "🌗": true, "🌘": true, "🌚": true, "🌛": true, "🌜": true, "🌡️": true, "☀️": true, "🌝": true,
+    "🌞": true, "⭐": true, "🌟": true, "☁️": true, "⛅": true, "🌤️": true, "🌥️": true, "🌦️": true, "🌧️": true, "🌨️": true,
+    "🌩️": true, "⚡": true, "❄️": true, "☃️": true, "⛄": true, "🔥": true, "🎈": true, "🎃": true, "🎄": true, "🎆": true,
+    "🎇": true, "🧨": true, "✨": true, "🎈": true, "🎉": true, "🎊": true, "🎗️": true, "🎟️": true, "🎫": true, "🎖️": true,
+    "🏆": true, "🏅": true, "🥇": true, "🥈": true, "🥉": true, "⚽": true, "🏀": true, "🛷": true, "🔮": true, "🪄": true,
+    "🎮": true, "🪩": true, "🎭": true, "🎨": true, "📮": true, "💣": true, "👛": true, "👜": true, "🛍️": true, "👠": true,
+    "👑": true, "🎩": true, "🎓": true, "🪖": true, "💄": true, "💎": true, "📣": true, "🎵": true, "🎶": true, "🎙️": true,
+    "🎤": true, "📱": true, "☎️": true, "📞": true, "💻": true, "🖨️": true, "⌨️": true, "🧮": true, "🎬": true, "📺": true,
+    "🔍": true, "🔎": true, "💡": true, "📖": true, "📚": true, "📰": true, "💰": true, "🪙": true, "💸": true, "✉️": true,
+    "📤": true, "📥": true, "📭": true, "🗳️": true, "📝": true, "💼": true, "📁": true, "📂": true, "🗂️": true, "📆": true,
+    "📈": true, "📉": true, "📊": true, "🔐": true, "🔑": true, "🗝️": true, "🧰": true, "🧪": true, "🔬": true, "🔭": true,
+    "💉": true, "💊": true, "🩺": true, "🧻": true, "🧼": true, "🧽": true, "🛒": true, "⚰️": true, "🗿": true, "💯": true,
+    "🚹": true, "🚺": true, "🚼": true, "🛃": true, "🔞": true, "🔝": true, "♐": true, "♑": true, "♒": true, "♓": true,
+    "⛎": true, "‼️": true, "⁉️": true, "❓": true, "❔": true, "❕": true, "❗": true, "💱": true, "✅": true, "☑️": true,
+    "✔️": true, "❌": true, "🆒": true, "🆓": true, "🆕": true, "🆗": true, "🆙": true, "🇺🇸": true, "🏁": true, "🚩": true,
+    "🏴": true, "🏳️": true, "🏴‍☠️": true, "🇦🇪": true, "🇦🇷": true, "🇦🇹": true, "🇧🇪": true, "🇧🇫": true, "🇧🇬": true,
+    "🇧🇯": true, "🇧🇷": true, "🇧🇸": true, "🇨🇲": true, "🇨🇿": true, "🇩🇯": true, "🇪🇪": true, "🇪🇭": true, "🇪🇸": true,
+    "🇫🇷": true, "🇬🇧": true, "🇬🇭": true, "🇬🇼": true, "🇭🇷": true, "🇭🇺": true, "🇮🇳": true, "🇮🇹": true, "🇯🇴": true,
+    "🇯🇵": true, "🇰🇷": true, "🇲🇦": true, "🇲🇨": true, "🇲🇬": true, "🇲🇲": true, "🇵🇪": true, "🇵🇭": true, "🇵🇱": true,
+    "🇵🇸": true, "🇷🇴": true, "🇷🇺": true, "🇸🇦": true, "🇸🇩": true, "🇸🇸": true, "🇸🇹": true, "🇸🇽": true, "🇹🇩": true,
+    "🇺🇦": true, "🇺🇸": true, "🇺🇿": true, "🇻🇳": true, "🇾🇪": true, "🏁": true, "🚩": true
+};
+
+//Object: {[media_group_id] : time};
+global.LGHMedia = {}
+//clear old media group ids
+setInterval(()=>{
+    var now = getUnixTime();
+    var keys = Object.keys(global.LGHMedia);
+    keys.forEach((key)=>{
+        if( now > (global.LGHMedia[key].time+5) )
+            delete global.LGHMedia[key];
+    }
+)},1000)
 
 function main(args)
 {
@@ -11,7 +158,17 @@ function main(args)
     const GHbot = new LGHelpTemplate(args);
     const {TGbot, db, config} = GHbot;
 
-    var totalPages = 4;
+    var pages = [["photo", "📸"], ["video", "🎞"], ["album", "🖼"], ["gif", "🎥"], ["voice", "🎤"], ["audio", "🎧"],
+    ["sticker", "🃏"], ["sticker_video", "🎭"], ["dice", "🎲"], ["emoji_video", "😀"], ["emoji_premium", "👾"], ["video_note", "👁‍🗨"],
+    ["file", "💾"], ["game", "🎮"], ["contact", "🏷"], ["poll", "📊"], ["location", "📍"], ["capital", "🆎"],
+    ["payment", "💶"], ["via_bot", "🤖"], ["story", "📲"], ["spoiler", "🗯"], ["spoiler_media", "🌌"], ["giveaway", "🎁"],
+    ["mention", "🛎"], ["text_mention", "🆔"], ["hashtag", "#️⃣"], ["cashtag", "💰"], ["command", "💻"], ["url", "🖇"],
+    ["email", "✉️"], ["number", "📞"], ["bold", "✏️"], ["italic", "🖊"], ["underline", "➖"], ["striketrough", "🪡"],
+    ["quoteblock", "🔲"], ["closed_blockquote", "▪️"], ["code", "👨‍💻"], ["pre_code", "🔶"], ["textlink", "🔗"], ["scheduled", "🗓"],
+    ["effect", "✨"]
+    ]
+    pages = chunkArray(pages, 12);
+    var totalPages = pages.length;
 
     l = global.LGHLangs; //importing langs object
 
@@ -35,33 +192,17 @@ function main(args)
         if( !cb.data.startsWith("S_MEDIA_PAGE") ) //from here only things that keeps still on main menu
             return;
 
-        var page = [];
         var pageNum = -1;
         if (cb.data.startsWith("S_MEDIA_PAGE1")) {
-            page = [
-                ["photo", "📸"], ["video", "🎞"], ["album", "🖼"], ["gif", "🎥"], ["voice", "🎤"], ["audio", "🎧"],
-                ["sticker", "🃏"], ["sticker_video", "🎭"], ["dice", "🎲"], ["emoji_video", "😀"], ["emoji_premium", "👾"], ["video_note", "👁‍🗨"]
-            ];
             pageNum = 1;
         } else if (cb.data.startsWith("S_MEDIA_PAGE2")) {
-            page = [
-                ["file", "💾"], ["game", "🎮"], ["contact", "🏷"], ["poll", "📊"], ["location", "📍"], ["capital", "🆎"],
-                ["payment", "💶"], ["via_bot", "🤖"], ["story", "📲"], ["spoiler", "🗯"], ["spoiler_media", "🌌"], ["giveaway", "🎁"]
-            ];
             pageNum = 2;
         } else if (cb.data.startsWith("S_MEDIA_PAGE3")) {
-            page = [
-                ["mention", "🛎"], ["text_mention", "🆔"], ["hashtag", "#️⃣"], ["cashtag", "💰"], ["command", "💻"], ["url", "🖇"], ["email", "✉️"],
-                ["number", "📞"], ["bold", "✏️"], ["italic", "🖊"], ["underline", "➖"], ["striketrough", "🪡"]
-            ];
             pageNum = 3;
         } else if (cb.data.startsWith("S_MEDIA_PAGE4")) {
-            page = [
-                ["quoteblock", "🔲"], ["closed_blockquote", "▪️"], ["code", "👨‍💻"], ["pre_code", "🔶"], ["textlink", "🔗"],
-                ["scheduled", "🗓"], ["effect", "✨"]
-            ];
             pageNum = 4;
         }
+        var page = pages[pageNum-1];
         var pageCallback = "S_MEDIA_PAGE"+pageNum;
 
         var mediaType = false;
@@ -173,6 +314,89 @@ function main(args)
 
     GHbot.onMessage( async (msg, chat, user) => {
 
+        //identify unallowed media
+        if(msg.chat.type != "private"){(()=>{
+            if(user.perms.media == 1) return;
+
+            var mediaPunish = newPunishObj();
+            var textPunish = newPunishObj();
+            var totalPunish = newPunishObj();
+            var punishList = [];
+
+            mediaPunish = sumPunishMessageMedia(mediaPunish, punishList, chat.media, msg, mapping);
+            textPunish = sumPunishEntitiesMedia(chat, msg, textPunish, punishList);
+
+            //album handling //NOTE: a double punishment may be still applyed in case of album and unallowed text entity, this can be fixed only with some special handler to receive album to single object 
+            var isAlbum = msg.hasOwnProperty("media_group_id");
+            var toHandleAlbum = chat.media.hasOwnProperty("album") && isAlbum;
+            if( isAlbum && !global.LGHMedia.hasOwnProperty(msg.media_group_id) )
+            {
+                global.LGHMedia[msg.media_group_id] = getUnixTime();
+                if(toHandleAlbum)
+                {
+                    mediaPunish = sumPunishObj(mediaPunish, chat.media.album);
+                    punishList.push("album");
+                }
+            }
+            else if( isAlbum && global.LGHMedia.hasOwnProperty(msg.media_group_id) )
+            {
+                totalPunish.delete = mediaPunish.delete; //keep delete that should be fired anyway
+                if(toHandleAlbum) totalPunish.delete = totalPunish.delete || chat.media.album;
+                mediaPunish = newPunishObj(); //reset, because if media_group_id is already stored, punishment was already applyed
+                /*album always has same media type so a correct punishment is already applyed except for video and images,
+                too hard to implement a correct punishment for this single case and its anyawy a small detail*/
+            }
+            
+            totalPunish = sumPunishObj(mediaPunish, textPunish);
+
+            // emoji.length can me maximum 4
+            if( chat.media.hasOwnProperty("emoji_video") && msg.text && msg.text.length <= 4  && emojiTable.hasOwnProperty(msg.text) && !isAlbum)
+            {
+                totalPunish = sumPunishObj(totalPunish, chat.media.emoji_video);
+                punishList.push("emoji_video");
+            }
+
+            if( chat.media.hasOwnProperty("sticker") && msg.hasOwnProperty("sticker") && !msg.sticker.is_video && !msg.sticker.is_animated )
+            {
+                totalPunish = sumPunishObj(totalPunish, chat.media.sticker);
+                punishList.push("sticker");
+            }
+            if( chat.media.hasOwnProperty("sticker_video") && msg.hasOwnPropert("sticker") && (msg.sticker.is_video || msg.sticker.is_animated) )
+            {
+                totalPunish = sumPunishObj(totalPunish, chat.media.sticker_video);
+                punishList.push("sticker_video");
+            }
+
+            var text = msg.text || msg.caption;
+            if( chat.media.hasOwnProperty("capital") && isLatin(text) && text == text.toUpperCase() )
+            {
+                totalPunish = sumPunishObj(totalPunish, chat.media.capital);
+                punishList.push("capital");
+            }
+    
+
+            if( chat.media.hasOwnProperty("scheduled") && msg.is_from_offline )
+            {
+                totalPunish = sumPunishObj(totalPunish, chat.media.scheduled);
+                punishList.push("scheduled");
+            }
+
+
+            //punish
+            if(totalPunish.punishment != 0)
+            {
+                punishList.forEach((type, index) => {
+                    punishList[index] = l[msg.chat.lang]["MEDIA:"+type];
+                })
+                var types = punishList.join("+");
+                var reason = l[msg.chat.lang].UNALLOWED_MEDIA_PUNISHMENT.replace("{types}", types);
+                punishUser(GHbot, user.id,  msg.chat, RM.userToTarget(msg.chat, user), totalPunish.punishment, totalPunish.PTime, reason);
+            }
+
+            if(totalPunish.delete)
+                GHbot.TGbot.deleteMessages(chat.id, [msg.message_id]);
+
+        })()}
 
         //security guards
         if( !(user.waitingReply && user.waitingReplyType.startsWith("S_MEDIA")) ) return;

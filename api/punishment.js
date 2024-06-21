@@ -31,6 +31,34 @@ function newPunishObj()
     return {punishment:0, PTime:0, delete:false};
 }
 
+/**
+ * 
+ * @param {import("../GHbot").LGHPunish} a - operand 1
+ * @param {import("../GHbot").LGHPunish} b - operand 2
+ * @returns {import("../GHbot").LGHPunish}
+ */
+function sumPunishObj(a, b)
+{
+    var result = {punishment:0, PTime:0, delete:false};
+    result.punishment = (b.punishment > a.punishment) ? b.punishment : a.punishment;
+    result.PTime = (b.PTime > a.PTime) ? b.PTime : a.PTime;
+    result.delete = b.delete || a.delete;
+    return result;
+}
+
+/**
+ * @param {import("../GHbot").LGHPunish} a - the supposed greater punish
+ * @param {import("../GHbot").LGHPunish} b - the supposed smaller punish
+ * @returns {import("../GHbot").LGHPunish}
+ */
+function isPunishGreater(a, b)
+{
+    if(a.punishment > b.punishment) return true
+    if(a.punishment < b.punishment) return false
+    if(a.PTime > b.PTime) return true
+    if(a.PTime < b.PTime) return false
+}
+
 //punish related functions//
 function genRevokePunishButton(lang, targetId, punishment)
 {
@@ -348,7 +376,7 @@ function applyChatBasedPunish(GHbot, userId, chat, targetUser, punishments, type
 }
 
 module.exports = {
-    newPunishObj,
+    newPunishObj, sumPunishObj, isPunishGreater,
     genRevokePunishButton, genPunishText,
     silentPunish, punishUser,
     genUnpunishButtons, genUnpunishText,
