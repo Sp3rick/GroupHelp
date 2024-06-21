@@ -67,7 +67,7 @@ Useful links to contribute:
 ❌ Checks settings
 ❌ @Admin
 ❌ Blocks settings
-🟡 Media settings
+✅ Media blocks
 ❌ Anti-NSFW
 ✅ Warns settings
 ❌ Nigth mode
