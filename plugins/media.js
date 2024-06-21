@@ -185,7 +185,7 @@ function main(args)
         
         if( cb.data.startsWith("S_MEDIA_INFO") )
         {
-            var text = l[cb.chat.lang].MEDIA_INFO.replace("{type}", l[cb.chat.lang]["MEDIA:"+mediaType]);
+            var text = l[chat.lang].MEDIA_INFO.replace("{type}", l[chat.lang]["MEDIA:"+mediaType]);
             GHbot.answerCallbackQuery(user.id, cb.id, {show_alert:true,text})
         }
 
@@ -273,8 +273,8 @@ function main(args)
                 var isActive = chat.media.hasOwnProperty(element[0]);
 
                 var replace = isActive ?
-                    punishmentToFullText(cb.chat.lang, chat.media[element[0]].punishment, chat.media[element[0]].PTime, chat.media[element[0]].delete) :
-                    l[cb.chat.lang].OFF;
+                    punishmentToFullText(chat.lang, chat.media[element[0]].punishment, chat.media[element[0]].PTime, chat.media[element[0]].delete) :
+                    l[chat.lang].OFF;
                 text = text.replace("{"+element[0]+"}", replace);
 
                 buttons.push([
@@ -292,10 +292,10 @@ function main(args)
             })
             var navLine = [];
             if(pageNum > 1)
-                navLine.push({text: l[cb.chat.lang].PAGE_LEFT_BUTTON+" "+(pageNum-1), callback_data: "S_MEDIA_PAGE"+(pageNum-1)+":"+chat.id})
-            navLine.push({text: l[cb.chat.lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+chat.id})
+                navLine.push({text: l[chat.lang].PAGE_LEFT_BUTTON+" "+(pageNum-1), callback_data: "S_MEDIA_PAGE"+(pageNum-1)+":"+chat.id})
+            navLine.push({text: l[chat.lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+chat.id})
             if(pageNum < totalPages)
-                navLine.push({text: l[cb.chat.lang].PAGE_RIGHT_BUTTON+" "+(pageNum+1), callback_data: "S_MEDIA_PAGE"+(pageNum+1)+":"+chat.id})
+                navLine.push({text: l[chat.lang].PAGE_RIGHT_BUTTON+" "+(pageNum+1), callback_data: "S_MEDIA_PAGE"+(pageNum+1)+":"+chat.id})
             buttons.push(navLine);
 
             var options = {
@@ -386,10 +386,10 @@ function main(args)
             if(totalPunish.punishment != 0)
             {
                 punishList.forEach((type, index) => {
-                    punishList[index] = l[msg.chat.lang]["MEDIA:"+type];
+                    punishList[index] = l[chat.lang]["MEDIA:"+type];
                 })
                 var types = punishList.join("+");
-                var reason = l[msg.chat.lang].UNALLOWED_MEDIA_PUNISHMENT.replace("{types}", types);
+                var reason = l[chat.lang].UNALLOWED_MEDIA_PUNISHMENT.replace("{types}", types);
                 punishUser(GHbot, user.id,  msg.chat, RM.userToTarget(msg.chat, user), totalPunish.punishment, totalPunish.PTime, reason);
             }
 
@@ -412,9 +412,9 @@ function main(args)
         if (user.waitingReplyType.includes("STIME")) {
             if(!exhistObj) chat.media[mediaType] = newPunishObj();
             var pageCallback = user.waitingReplyType.split("_PTIME")[0];
-            var returnButtons = [[{ text: l[msg.chat.lang].BACK_BUTTON, callback_data: pageCallback+":"+chat.id }]]
+            var returnButtons = [[{ text: l[chat.lang].BACK_BUTTON, callback_data: pageCallback+":"+chat.id }]]
             var cb_prefix = user.waitingReplyType.split("#")[0];
-            var title = l[msg.chat.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(msg.chat.lang, chat.media[mediaType].punishment));
+            var title = l[chat.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(chat.lang, chat.media[mediaType].punishment));
             var time = ST.messageEvent(GHbot, chat.media[mediaType].PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
 
             if (time != -1 && time != chat.media[mediaType].PTime) {

@@ -145,6 +145,7 @@ async function main(config) {
                 console.log(msg);
                 return;
             }
+            if(chat.id == user.id) chat.lang = user.lang;
             GroupHelpBot.emit( "message", msg, chat, user );
             if ( chat.type == "private" ) GroupHelpBot.emit( "private", msg, chat, user );
         } catch (err) {
@@ -216,6 +217,7 @@ async function main(config) {
                 console.log(msg);
                 return;
             }
+            if(chat.id == user.id) chat.lang = user.lang;
             GroupHelpBot.emit( "callback_query", cb, chat, user );
         } catch (err) {
             console.log("Error after emitting a valid GroupHelpBot \"callback_query\", i will log error then \"cb\", \"chat\", \"user\" ")

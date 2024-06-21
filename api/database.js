@@ -154,7 +154,7 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
             var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
             chat.alphabets = newAlphabetsObj();
             chat.basePerms = update2d5Perms(chat.basePerms);
-            chat.adminPerms = update2d5Perms(chat.adminPerms);
+            if(chat.adminPerms) chat.adminPerms = update2d5Perms(chat.adminPerms);
             Object.keys(chat.users).forEach(userId=>{
                 chat.users[userId].perms = update2d5Perms(chat.users[userId].perms);
                 chat.users[userId].adminPerms = update2d5Perms(chat.users[userId].adminPerms);
