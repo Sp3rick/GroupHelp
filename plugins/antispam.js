@@ -176,13 +176,13 @@ function main(args) {
                 if(!user.perms.tgLink && tgLink)
                 {
                     var punish = true;
-                    if(!chat.spam.tgLinks.bots && tgLink.startsWith("@") && tgLink.endsWith("bot"))
+                    if(!chat.spam.tgLinks.bots && tgLink && tgLink.startsWith("@") && tgLink.endsWith("bot"))
                         punish = false;
-                    if(!chat.spam.tgLinks.usernames && tgLink.startsWith("@") && !tgLink.endsWith("bot"))
+                    if(!chat.spam.tgLinks.usernames && tgLink && tgLink.startsWith("@") && !tgLink.endsWith("bot"))
                         punish = false;
 
                     if(!punish) return;
-                    if(chat.spam.tgLinks.exceptions.includes(tgLink)) return;
+                    if(tgLink && chat.spam.tgLinks.exceptions.includes(tgLink)) return;
 
                     if(chat.spam.tgLinks.delete)
                         TGbot.deleteMessages(chat.id, [msg.message_id]);
