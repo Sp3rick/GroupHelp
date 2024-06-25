@@ -23,13 +23,14 @@ function main(args)
             });
         }
 
-        //security guards
         if(!chat.isGroup) return;
-        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_WELCOME")) ) return;
+
+        //security guards
+        if( !(msg.waitingReply && msg.waitingReply.startsWith("S_WELCOME")) ) return;
         if( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
 
-        var customMessage = await MSGMK.messageEvent(GHbot, db, chat.welcome.message, msg, msg.chat, user, "S_WELCOME");
+        var customMessage = await MSGMK.messageEvent(GHbot, db, chat.welcome.message, msg, chat, user, "S_WELCOME");
 
         if(customMessage)
         {
@@ -126,7 +127,7 @@ function main(args)
         if( cb.data.startsWith("S_WELCOME#MSGMK") )
         {
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_WELCOME_BUTTON:"+chat.id}]];
-            var customMessage = MSGMK.callbackEvent(GHbot, db, chat.welcome.message, cb, cb.chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME);
+            var customMessage = MSGMK.callbackEvent(GHbot, db, chat.welcome.message, cb, chat, user, "S_WELCOME", returnButtons, l[lang].WELCOME, l[lang].WELCOME2);
             if(customMessage)
             {
                 chat.welcome.message = customMessage;

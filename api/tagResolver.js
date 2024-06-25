@@ -138,7 +138,7 @@ function getMessageTargetUserId(msg) {
     return msg.from.id;
 }
 
-function LGHUserNameByTarget(msg, userId) {
+function LGHUserNameByMessage(msg, userId) {
     var LGHUserName = msg.hasOwnProperty("reply_to_message") ?
         usernameOrFullName(msg.reply_to_message.from) + " " : (getTag(userId) ? "@" + getTag(userId) + " " : "");
     LGHUserName += "[" + code(userId) + "] ";
@@ -159,7 +159,7 @@ async function getMessageTarget(msg, chat, TGbot, db)
 
     var target = {
         id:targetId,
-        name: LGHUserNameByTarget(msg, targetId),
+        name: LGHUserNameByMessage(msg, targetId),
     }
     if(chat && chat.isGroup) target.perms = RM.sumUserPerms(chat, targetId);
     target.user = msg.hasOwnProperty("reply_to_message") ? msg.reply_to_message.from : db.users.get(targetId);
@@ -213,5 +213,5 @@ module.exports = {
     load, save,
     log, logUsers, logEntities, logMsg, logCb, logMembers,
     getId, getTag, getMessageTargetUserId, getMessageTarget,
-    LGHUserNameByTarget, storeMembers, getAdmins,
+    LGHUserNameByMessage, storeMembers, getAdmins,
 };

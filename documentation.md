@@ -55,15 +55,15 @@ Usually GHBot events has 3 parameters: request (cb/msg), chat, user.
 
 On GHBot.onCallback() and GHBot.onMessage() if event comes from a group or callback data has a chat id, "chat" object will contain the full Custom Chat Object with chat.isGroup true, anyway the chat from where the request is coming is always avaiable in cb.chat or msg.chat
 
-user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 3 cases: if cb.chat.isGroup is true, if callback.data contains a groupId, or on message if user.waitingReply is true and user.waitingReplyType contains a groupId
+user.perms (result of api/rolesManager/sumUserPerms()) is avaiable in 2 cases: if callback.data or msg.waitingReply contains a groupId, if cb.chat.isGroup or msg.chat.isGroup
 
 NOTE: user.perms is a temporary item, it's not intended to be saved in the database (database does not save it)
 Any "msg" object contains msg.command (result of api/utils/parseCommand(msg.text))
 
 <b>Targets</b>
-Any message object may contain an msg.target object if a command or message target user is found
+Any message object may contain an msg.target object if a message reply target user is found
 Also cb.target may exhist, builded up from user id after "?" in cb.data
-user.waitingReplyTarget is set if a target if found in user.waitingReplyType (after "?")
+msg.waitingReplyTarget is set if a target if found on msg.waitingReplyType (after "?")
 
 NOTE FOR CALLBACK EVENT: callback event gives you the full chat object only if chat.isGroup is true, if is private chat you should require it yourself from the database (var settingsChatId = cb.data.split(":")[1]; var settingsChat = db.chats.get(settingsChatId))
 
@@ -78,29 +78,32 @@ when LibreGroupHelp is added to a group (and add it to the database) the default
 
 ## Expect user messages
 
-You can expect for user messages by set user.waitingReply to the chatId where you are expecting a reply, true for every chat
-Set user.waitingReplyType with callback data you will able to retrieve after (hirarchy in the section below)
-Then you need to update user object on database with db.users.update(user)
+You can expect for user messages in a chat or in private for a chat by using waitReplyForChat(db, callback, user, chat, onGroup) (from utils.js)
+The text on callback variable should follow the Callbacks LGH Hirarchy (hirarchy in the section below)
 
-When you receive a new message event user.waitingReply will be set true or false by main.js depending if it's the right chat
-Remember that if you make a new user.waitingReply in a certain point you will need also to disable that, otherwise other bot functions that want that bot is not waiting for any user reply will continue to not work
+When you receive a new message event msg.waitingReply will be set to string or false by main.js depending if it's the right chat
+Remember that if you waitReplyForChat in a certain point you will need also to disable that, otherwise other bot functions that wants msg.waitingReply false is not going to work (like commands), disable with unsetWaitReply(db, user, chat, onGroup)
 
 
 ## Callbacks and user callbacks data management (Hirarchy)
 
 Here is described the hirarchy of callbacks data.
 Giving right callaback data is essential to allow main.js to pre-set wanted values
-They are both avaiable on cb.data for buttons or on user.waitingReplyType for messages that bot is expecting (if user.waitingReply is true)
+They are both avaiable on cb.data for buttons or on msg.waitingReplye for messages that bot is expecting
 
 <b>Hirarchy</b>
 
-cb.data OR user.waitingReplyType = CALLBACK_NAME!data#editor_things|editorData:groupId?targetUserId
+cb.data OR msg.waitingReply = CALLBACK_NAME!data#editor_things|editorData:groupId?targetUserId
 
-Works with less items, same order only matters: CALLBACK_NAME:groupId OR CALLBACK_NAME#editor?targetUserId OR CALLBACK_NAME:groupId?targetUserId are all valid
+To work with less items, same order only matters: CALLBACK_NAME:groupId OR CALLBACK_NAME#editor?targetUserId OR CALLBACK_NAME:groupId?targetUserId. They are all valid
 
 -CALLBACK_NAME: name of callback that you can use, be sure that not conflicts with other names, often plugins check if it's their match with string.startsWith()
 
+-data: some additional data that you can attach to CALLBACK_NAME
+
 -editor: also that is often identified with string.startsWith(), it's usually used to open re-usable menus like MessageMaker.js, setNum.js, setTime.js
+
+-editorData that editor may attach
 
 -groupId: that allow main.js to set a full object of chat (note: msg.chat or cb.message.chat may be not affected, GHbot ever gives you a dedicated chat parameter), it also allow to set the user.perms object in private chat (in group it's done directly from chat.id)
 
@@ -163,8 +166,6 @@ Additional data of custom <i>user</i> object:
 
 >waitingReply : set to true if the bot is expecting a message from the user
 
->waitingReplyType : additional data related to waitingReply
-
 -When you modify any of this data don't forget to update it with db.users.update(user)
 
 
@@ -200,12 +201,12 @@ Complete list of implemented commands:
 
 -General
 * /settings - open group settings (COMMAND_SETTINGS)
-* /rules - show group rules (COMMAND_RULES) (@ avaiable)
-* /perms - show permissions summary of a user (COMMAND_PERMS) (@ avaiable)
-* /staff - show group staff with default and custom roles (COMMAND_STAFF) (@ avaiable)
-* /info - show info about a group user and edit it (COMMAND_INFO) (@ avaiable)
-* /me - show info about yourself (COMMAND_ME) (@ avaiable)
-* /pin - pin a chat message with or without notification (COMMAND_PIN) (@ avaiable)
+* /rules - show group rules (COMMAND_RULES) (force private avaiable)
+* /perms - show bot permissions of an user (COMMAND_PERMS) (force private avaiable)
+* /staff - show group staff with default and custom roles (COMMAND_STAFF) (force private avaiable)
+* /info - show info about a group user and edit it (COMMAND_INFO) (force private avaiable)
+* /me - show info about yourself (COMMAND_ME) (force private avaiable)
+* /pin - pin a chat message with or without notification (COMMAND_PIN) (force private avaiable)
 
 -Punishments
 * /del - delete a message (COMMAND_DELETE)

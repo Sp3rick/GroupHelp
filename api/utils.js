@@ -634,6 +634,8 @@ function tradCommand(lang, commandKey)
         translated = l[lang][commandKey];
     if(commandKey.startsWith("@COMMAND_"))
         translated = l[lang][commandKey.replace("@","")];
+    if(commandKey.startsWith("*COMMAND_"))
+        translated = l[lang][commandKey.replace("*","")];
 
     return translated;
 }
@@ -654,12 +656,15 @@ function genPermsReport(lang, perms)
         var command = tradCommand(lang, commandName);
 
         text+="/"+command;
-        if(commandName.startsWith("@"))
+        if(commandName.startsWith("*"))
             text+="(🔏) ";
+        else if(commandName.startsWith("@"))
+            text+="(👥) ";
         else
             text+=" ";
 
-        if(command == undefined)console.log("LGH: Undefined command key " + commandName)
+        if(command == undefined || command.length == 0)
+            console.log("LGH: Undefined command key " + commandName);
     });
 
     text+="\n\n"+
@@ -1221,51 +1226,20 @@ function anonymizeAdmins(adminList)
 
 /**
  * 
- * @param {Command} command 
- * @param {string} commandKey - name of the command as translation key
- * @param {GH.LGHPerms} perms - permissions to check in
- * @param {Array<string>} literalNames - other names for the command that's not depending from the lang
- * @returns {Boolean|1} Returns 1 if should be sent on private chat, true for public chat, false for missing permissions
- */
-function checkCommandPerms(command, commandKey, perms, literalNames)
-{
-    literalNames = literalNames || [];
-
-    if(!command || !command.name || !perms) return false;
-
-    var privateCommand = command.name.startsWith("*") &&
-    ( IsEqualInsideAnyLanguage(command.name.replace("*",""), commandKey) || literalNames.some(ln=>{return command.name.replace("*","") == (ln)}) ) &&
-    perms.commands.includes("@"+commandKey) || literalNames.some(ln=>{return perms.commands.includes("@"+ln)});
-
-    var publicCommand = command.name &&
-    ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == (ln)}) ) &&
-    perms.commands.includes(commandKey) || literalNames.some(ln=>{return perms.commands.includes(ln)});
-
-    var privateButAskedAsPublic = command.name &&
-    ( IsEqualInsideAnyLanguage(command.name, commandKey) || literalNames.some(ln=>{return command.name == (ln)}) ) &&
-    perms.commands.includes("@"+commandKey) || literalNames.some(ln=>{return perms.commands.includes("@"+ln)});
-
-    if(publicCommand) return true;
-    if(privateCommand || privateButAskedAsPublic) return 1;
-    return false;
-}
-
-/**
- * 
- * @param {Boolean|1} where - 1 if should be sent on private chat, true for public chat
+ * @param {Boolean} private - true if reply should be sent on private chat, false for group chat
  * @param {string} lang 
  * @param {GH} GHbot 
- * @param {TelegramBot.ChatId} userId - private chat case
- * @param {TelegramBot.ChatId} chatId - group chat case
+ * @param {TelegramBot.ChatId} userId - user chatId and private chat
+ * @param {TelegramBot.ChatId} chatId - group chatId
  * @param {Function} func - runs your function giving as parameter the wanted chat id, intentend to be here the sendMessage
- * @returns {Promise<TelegramBot.Message>|false} - sent message or false if where is invalid or false
+ * @returns {Promise<TelegramBot.Message>|false} - result of your passed function if was not an error
  */
-async function sendCommandReply(where, lang, GHbot, userId, chatId, func)
-{if(!where) return false; return new Promise(async (resolve, reject)=>{
+async function sendCommandReply(private, lang, GHbot, userId, chatId, func)
+{return new Promise(async (resolve, reject)=>{
 
     var l = global.LGHLangs;
 
-    var sendId = (where === 1) ? userId : chatId;
+    var sendId = private ? userId : chatId;
     var privateLink = "https://t.me/"+GHbot.TGbot.me.username;
     if(sendId == chatId)
         try{resolve(func(sendId))}catch(error){reject(error)}
@@ -1629,6 +1603,51 @@ async function welcomeNewUser(GHbot, db, MSGMK, chat, newUser, options)
     db.chats.update(chat);
 }
 
+/**
+ * 
+ * @param {GH.LGHDatabase} db 
+ * @param {string} callback 
+ * @param {GH.LGHUser} user 
+ * @param {GH.LGHChat} chat 
+ * @param {boolean} onGroup 
+ */
+function waitReplyForChat(db, callback, user, chat, onGroup)
+{
+    onGroup = onGroup || false;
+
+    if(onGroup)
+    {
+        callback = callback.split("?")[0].split(":")[0]+
+        (callback.split("?").length>1 ? ("?"+callback.split("?")[1]) : "");
+        chat.users[user.id].waitingReply = callback;
+        db.chats.update(chat);
+    }
+    else
+    {
+        callback = callback.split("?")[0].split(":")[0]+":"+chat.id+
+        (callback.split("?").length>1 ? ("?"+callback.split("?")[1]) : "");
+        user.waitingReply = callback;
+        db.users.update(user);
+    }
+
+}
+
+function unsetWaitReply(db, user, chat, onGroup)
+{
+    onGroup = onGroup || false;
+
+    if(onGroup)
+    {
+        chat.users[user.id].waitingReply = false;
+        db.chats.update(chat);
+    }
+    else
+    {
+        user.waitingReply = false;
+        db.users.update(user);
+    }
+}
+
 module.exports = 
 {
     bold : bold,
@@ -1684,7 +1703,6 @@ module.exports =
     usernameOrFullName : usernameOrFullName,
     LGHUserName : LGHUserName,
     anonymizeAdmins : anonymizeAdmins,
-    checkCommandPerms : checkCommandPerms,
     sendCommandReply : sendCommandReply,
     telegramErrorToText : telegramErrorToText,
     handleTelegramGroupError : handleTelegramGroupError,
@@ -1700,4 +1718,6 @@ module.exports =
     originIsSpam : originIsSpam,
     entitiesLinks : entitiesLinks,
     welcomeNewUser : welcomeNewUser,
+    waitReplyForChat : waitReplyForChat,
+    unsetWaitReply : unsetWaitReply,
 }

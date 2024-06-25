@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML} = require("../utils.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML, waitReplyForChat, unsetWaitReply} = require("../utils.js");
 const { pushUserRequest } = require("../SafeTelegram.js");
 const { substitute } = require("../substitutor.js");
 const GH = require("../../GHbot.js");
@@ -25,9 +25,9 @@ const GH = require("../../GHbot.js");
  * @param  {GH} GHbot
  * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} customMessage - MessageMaker object
- * @param  {TelegramBot.CallbackQuery} cb
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHCallback} cb
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable editing the message
@@ -49,8 +49,6 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
     var msg = cb.message;
     var lang = user.lang;
-
-    var settingsChatId = cb.data.split(":")[1];
 
     /// Deletions
     if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_DEL:") &&  customMessage.hasOwnProperty("text") )
@@ -82,11 +80,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     cb.data.startsWith(cb_prefix+"#MSGMK_TEXT_DEL:") || cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS_DEL:") || cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA_DEL:") )
     {
 
-        if( user.waitingReply )
-        {
-            user.waitingReply = false;
-            db.users.update(user);
-        }
+        if( msg.waitingReply ) unsetWaitReply(db, user, chat, msg.chat.isGroup);
 
         var hasText = customMessage.hasOwnProperty("text");
         var hasMedia = customMessage.hasOwnProperty("media");
@@ -100,22 +94,22 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
         var options = {
             message_id : msg.message_id,
-            chat_id : chat.id,
+            chat_id : msg.chat.id,
             parse_mode : "HTML",
             reply_markup : 
             {
                 inline_keyboard :
                 [
-                    [{text: l[lang].TEXT_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT:"+settingsChatId},
-                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT_SEE:"+settingsChatId}],
+                    [{text: l[lang].TEXT_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT:"+chat.id},
+                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT_SEE:"+chat.id}],
 
-                    [{text: l[lang].S_MEDIA_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA:"+settingsChatId},
-                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA_SEE:"+settingsChatId}],
+                    [{text: l[lang].S_MEDIA_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA:"+chat.id},
+                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA_SEE:"+chat.id}],
 
-                    [{text: l[lang].URLBUTTONS_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS:"+settingsChatId},
-                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS_SEE:"+settingsChatId}],
+                    [{text: l[lang].URLBUTTONS_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS:"+chat.id},
+                    {text: l[lang].SEE_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS_SEE:"+chat.id}],
 
-                    [{text: l[lang].SEE_WHOLE_MESSAGE, callback_data: cb_prefix+"#MSGMK_SEE:"+settingsChatId}]
+                    [{text: l[lang].SEE_WHOLE_MESSAGE, callback_data: cb_prefix+"#MSGMK_SEE:"+chat.id}]
                 ] 
             } 
         }
@@ -127,8 +121,8 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
         //this is to move from media -> text only panel
         if( cb.data.startsWith(cb_prefix+"#MSGMK_RESET-RETURN:") )
         {
-            GHbot.sendMessage(user.id, chat.id, text, options);
-            TGbot.deleteMessages(chat.id, [cb.message.message_id]);
+            GHbot.sendMessage(user.id, msg.chat.id, text, options);
+            TGbot.deleteMessages(msg.chat.id, [cb.message.message_id]);
 
             return false;
         }
@@ -142,21 +136,21 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_TEXT:") )
     {
 
-        user.waitingReply = chat.id;
-        user.waitingReplyType = cb_prefix+"#MSGMK_TEXT:"+settingsChatId;
-        db.users.update(user);
+
+        var callback = cb_prefix+"#MSGMK_TEXT:"+chat.id;
+        waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
 
         GHbot.editMessageText(user.id, l[lang].SET_MESSAGE_ADV, 
             {
                 message_id : msg.message_id,
-                chat_id : chat.id,
+                chat_id : msg.chat.id,
                 parse_mode : "HTML",
                 reply_markup : 
                 {
                     inline_keyboard :
                     [
-                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT_DEL:"+settingsChatId}],
-                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
+                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"#MSGMK_TEXT_DEL:"+chat.id}],
+                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}],
                     ] 
                 } 
             }
@@ -181,12 +175,12 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
         var options = {
             message_id : msg.message_id,
-            chat_id : chat.id,
+            chat_id : msg.chat.id,
             reply_markup : 
             {
                 inline_keyboard :
                 [
-                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
+                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}],
                 ] 
             } 
         }
@@ -196,12 +190,12 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
             if(customMessage.hasOwnProperty("entities"))
                 options.entities = customMessage.entities;
 
-            options.reply_markup.inline_keyboard.unshift([{text: l[lang].ENTITIES_FORMAT, callback_data: cb_prefix+"#MSGMK_TEXT_SWITCH:"+settingsChatId}])
+            options.reply_markup.inline_keyboard.unshift([{text: l[lang].ENTITIES_FORMAT, callback_data: cb_prefix+"#MSGMK_TEXT_SWITCH:"+chat.id}])
         }
         else
         {
             options.parse_mode = "HTML"; 
-            options.reply_markup.inline_keyboard.unshift([{text: l[lang].HTML_FORMAT, callback_data: cb_prefix+"#MSGMK_TEXT_SWITCH:"+settingsChatId}])
+            options.reply_markup.inline_keyboard.unshift([{text: l[lang].HTML_FORMAT, callback_data: cb_prefix+"#MSGMK_TEXT_SWITCH:"+chat.id}])
         }               
 
     
@@ -216,21 +210,20 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_MEDIA:") )
     {
 
-        user.waitingReply = chat.id;
-        user.waitingReplyType = cb_prefix+"#MSGMK_MEDIA:"+settingsChatId;
-        db.users.update(user);
+        var callback = cb_prefix+"#MSGMK_MEDIA:"+chat.id;
+        waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
 
         GHbot.editMessageText(user.id, l[lang].SET_MEDIA_ADV, 
             {
                 message_id : msg.message_id,
-                chat_id : chat.id,
+                chat_id : msg.chat.id,
                 parse_mode : "HTML",
                 reply_markup : 
                 {
                     inline_keyboard :
                     [
-                        [{text: l[lang].REMOVE_MEDIA_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA_DEL:"+settingsChatId}],
-                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
+                        [{text: l[lang].REMOVE_MEDIA_BUTTON, callback_data: cb_prefix+"#MSGMK_MEDIA_DEL:"+chat.id}],
+                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}],
                     ] 
                 } 
             }
@@ -251,12 +244,12 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
         var options = {
             message_id : msg.message_id,
-            chat_id : chat.id,
+            chat_id : msg.chat.id,
             reply_markup : 
             {
                 inline_keyboard :
                 [
-                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK_RESET-RETURN:"+settingsChatId}],
+                    [{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK_RESET-RETURN:"+chat.id}],
                 ] 
             } 
         }
@@ -264,8 +257,8 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
         var method = mediaTypeToMethod(customMessage.media.type)
 
-        pushUserRequest(TGbot, method, user.id, chat.id, customMessage.media.fileId, options);
-        TGbot.deleteMessages(chat.id, [msg.message_id]);
+        pushUserRequest(TGbot, method, user.id, msg.chat.id, customMessage.media.fileId, options);
+        TGbot.deleteMessages(msg.chat.id, [msg.message_id]);
 
         GHbot.answerCallbackQuery(user.id, cb.id);
 
@@ -276,21 +269,20 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_BUTTONS:") )
     {
 
-        user.waitingReply = chat.id;
-        user.waitingReplyType = cb_prefix+"#MSGMK_BUTTONS:"+settingsChatId;
-        db.users.update(user);
+        var callback = cb_prefix+"#MSGMK_BUTTONS:"+chat.id;
+        waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
 
         GHbot.editMessageText(user.id, l[lang].SET_BUTTONS_ADV, 
             {
                 message_id : msg.message_id,
-                chat_id : chat.id,
+                chat_id : msg.chat.id,
                 parse_mode : "HTML",
                 reply_markup : 
                 {
                     inline_keyboard :
                     [
-                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS_DEL:"+settingsChatId}],
-                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
+                        [{text: l[lang].REMOVE_MESSAGE_BUTTON, callback_data: cb_prefix+"#MSGMK_BUTTONS_DEL:"+chat.id}],
+                        [{text: l[lang].CANCEL_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}],
                     ] 
                 } 
             }
@@ -311,7 +303,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
         var options = {
             message_id : msg.message_id,
-            chat_id : chat.id,
+            chat_id : msg.chat.id,
             parse_mode : "HTML",
             reply_markup : 
             {
@@ -321,7 +313,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
 
         options.reply_markup.inline_keyboard = JSON.parse(JSON.stringify(customMessage.buttonsParsed)); 
 
-        options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}])
+        options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}])
 
         GHbot.editMessageText(user.id, code(customMessage.buttons), options)
         GHbot.answerCallbackQuery(user.id, cb.id);
@@ -333,11 +325,11 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
     if( cb.data.startsWith(cb_prefix+"#MSGMK_SEE:") )
     {
 
-        TGbot.deleteMessages(chat.id, [msg.message_id]);
-        sendMessage(GHbot, user, chat, customMessage, messageTitle).then( () => {
+        TGbot.deleteMessages(msg.chat.id, [msg.message_id]);
+        sendMessage(GHbot, user, chat, customMessage, messageTitle, {}, msg.chat.id).then( () => {
 
-            GHbot.sendMessage(user.id, chat.id, "➖➖➖➖➖➖➖➖➖➖", {
-                reply_markup: {inline_keyboard: [[{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}]]}
+            GHbot.sendMessage(user.id, msg.chat.id, "➖➖➖➖➖➖➖➖➖➖", {
+                reply_markup: {inline_keyboard: [[{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}]]}
             })
 
         } )
@@ -354,9 +346,9 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
  * @param  {GH} GHbot
  * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} customMessage - MessageMaker object
- * @param  {TelegramBot.Message} msg
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHMessage} msg
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * 
  * @return {customMessage|false}
@@ -369,25 +361,23 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
 
     var updateMSGMK=false;
 
-    var settingsChatId = user.waitingReplyType.split(":")[1];
-
     var options = {
         parse_mode : "HTML",
         reply_markup : 
         {
             inline_keyboard :
             [
-                [{text: l[user.lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+settingsChatId}],
+                [{text: l[user.lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}],
             ] 
         } 
     }
 
-    if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_TEXT:") )
+    if( msg.waitingReply.startsWith(cb_prefix+"#MSGMK_TEXT") )
     {
 
-        if( !msg.hasOwnProperty("text") || !(await validateTelegramHTML(GHbot, user.id, chat.id, msg.text)))
+        if( !msg.hasOwnProperty("text") || !(await validateTelegramHTML(GHbot, user.id, msg.chat.id, msg.text)))
         {
-            GHbot.sendMessage(user.id, chat.id, l[user.lang].PARSING_ERROR_TEXT, options)
+            GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].PARSING_ERROR_TEXT, options)
             return false;
         }
 
@@ -397,25 +387,23 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
         if(msg.hasOwnProperty("entities")) customMessage.entities = msg.entities;
         updateMSGMK=true
 
-        user.waitingReply = false;
-        db.users.update(user);
-
-        GHbot.sendMessage(user.id, chat.id, l[user.lang].MESSAGE_SET_BUTTON, options )
+        unsetWaitReply(db, user, chat, msg.chat.isGroup);
+        GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].MESSAGE_SET_BUTTON, options )
 
 
     }
 
-    if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_MEDIA:") )
+    if( msg.waitingReply.startsWith(cb_prefix+"#MSGMK_MEDIA") )
     {
 
         var media = extractMedia(msg);
         if(!media.type)
         {
-            GHbot.sendMessage(user.id, chat.id, l[user.lang].MEDIA_INCORRECT, options )
+            GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].MEDIA_INCORRECT, options )
             return false;
         }
         
-        if( msg.hasOwnProperty("caption") && await validateTelegramHTML(GHbot, user.id, chat.id, msg.caption))
+        if( msg.hasOwnProperty("caption") && await validateTelegramHTML(GHbot, user.id, msg.chat.id, msg.caption))
         {
             if(customMessage.hasOwnProperty("entities")) delete customMessage.entities; //delete old entities
             customMessage.text = msg.caption;
@@ -429,20 +417,19 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
         customMessage.media = media;
         updateMSGMK=true
 
-        user.waitingReply = false;
-        db.users.update(user);
+        unsetWaitReply(db, user, chat, msg.chat.isGroup);
 
-        GHbot.sendMessage(user.id, chat.id, l[user.lang].MEDIA_SET_BUTTON, options )
+        GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].MEDIA_SET_BUTTON, options )
 
     }
 
-    if( user.waitingReplyType.startsWith(cb_prefix+"#MSGMK_BUTTONS:") )
+    if( msg.waitingReply.startsWith(cb_prefix+"#MSGMK_BUTTONS") )
     {
 
         if( !msg.hasOwnProperty("text") )
         {
 
-            GHbot.sendMessage(user.id, chat.id, l[user.lang].PARSING_ERROR_TEXT, options )
+            GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].PARSING_ERROR_TEXT, options )
             return false;
 
         }
@@ -472,7 +459,7 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
             text = text +"\n\n"+l[user.lang].ADV_REPORT_ISSUE+"\n\n<b>Row: "+keyboard.row+"\nCulumn: "+keyboard.culumn+"</b>";
 
             options.disable_web_page_preview = true;
-            GHbot.sendMessage(user.id, chat.id, text, options);
+            GHbot.sendMessage(user.id, msg.chat.id, text, options);
             return false;
 
         }
@@ -481,10 +468,9 @@ async function messageEvent(GHbot, db, customMessage, msg, chat, user, cb_prefix
         customMessage.buttons = msg.text;
         updateMSGMK=true;
 
-        user.waitingReply = false;
-        db.users.update(user);
+        unsetWaitReply(db, user, chat, msg.chat.isGroup);
 
-        GHbot.sendMessage(user.id, chat.id, l[user.lang].BUTTONS_SET_BUTTON, options)
+        GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].BUTTONS_SET_BUTTON, options)
 
     }
 

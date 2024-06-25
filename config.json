@@ -1,10 +1,10 @@
 {
 
-    "botToken" : "token-here",
+    "botToken" : "7110997293:AAHlA0CF76GOOw-eaROal7F3-YT-6eDujYc",
     "botStaff" : [ "361908469" ],
     "deleteChatDataAfterBotRemove" : false,
     "overwriteChatDataIfReAddedToGroup" : false,
-    "allowExternalApi" : false,
+    "allowExternalApi" : true,
     "reserveLang" : "en_en",
     "saveDatabaseSeconds" : 3600,
     "saveTagResolverSeconds" : 3600,

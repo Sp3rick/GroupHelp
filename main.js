@@ -5,7 +5,8 @@ const getDatabase = require( "./api/database.js" );
 const RM = require("./api/rolesManager.js");
 const TR = require("./api/tagResolver.js");
 const TelegramBot = require('node-telegram-bot-api');
-const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime } = require("./api/utils.js");
+const GHCommand = require("./api/LGHCommand.js");
+const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime, unsetWaitReply } = require("./api/utils.js");
   
 
 async function main(config) {
@@ -102,6 +103,7 @@ async function main(config) {
             db.chats.update(chat);
         }
 
+
         //configuring msg.command
         var command = parseCommand(msg.text || "");
         msg.command = command;
@@ -111,30 +113,39 @@ async function main(config) {
         msg.target = await TR.getMessageTarget(msg, chat, TGbot, db);
 
         
-        //configuring waitingReply
-        if(user.waitingReply)
+        //configuring msg.waitingReply and selected chat (the incoming msg request chat object is kept on msg.chat)
+        msg.waitingReply = false;
+        var groupPrivateWR = msg.chat.type == "private" && user.waitingReply && user.waitingReply.includes(":");
+        if(isGroup)
         {
-            if(user.waitingReply !== true && user.waitingReply != chat.id)
-                    user.waitingReply = false;
-            else
+            msg.waitingReply = RM.getUser(chat, user.id).waitingReply;
+            if(msg.waitingReply.hasOwnProperty(":"))
             {
-                console.log("message from waitingReply user: ["+user.waitingReply+"] "+user.waitingReplyType);
-                user.waitingReply = true;
+                var selectedChatId = msg.waitingReply.split(":")[1].split("?")[0];
+                chat = db.chats.get(selectedChatId);
             }
+            if(msg.waitingReply)
+                console.log("user "+user.id+" sent to group "+msg.chat.id+" a WR: ["+chat.id+"] "+msg.waitingReply);
         }
-
-        //configure user.perms and the selected chat if avaiable (the incoming msg request chat object is kept on msg.chat)
-        if( chat.isGroup || (user.waitingReply && user.waitingReplyType.includes(":")) )
+        else if( groupPrivateWR )
         {
-            chat = chat.isGroup ? chat : db.chats.get(user.waitingReplyType.split(":")[1].split("?")[0]);
-            user.perms = RM.sumUserPerms(chat, user.id);
+            var selectedChatId = user.waitingReply.split(":")[1].split("?")[0];
+            var selectedChat = db.chats.get(selectedChatId);
+            chat = selectedChat;
+            msg.waitingReply = user.waitingReply;
+            console.log("user "+user.id+" sent a private message for a group WR: ["+selectedChatId+"] "+ msg.waitingReply);
+            
         }
+        
+        //configure user.perms and the selected chat if avaiable 
+        if( chat.isGroup ) user.perms = RM.sumUserPerms(chat, user.id);
 
-        //configuring user.waitingReplyTarget 
-        if( user.waitingReply && user.waitingReplyType.includes("?") )
+        //configuring msg.waitingReplyTarget
+        msg.waitingReplyTarget = false;
+        if( msg.waitingReply && msg.waitingReply.includes("?") )
         {
-            var wrTargetId = user.waitingReplyType.split("?")[1];
-            user.waitingReplyTarget = RM.userIdToTarget(TGbot, chat, wrTargetId, db);
+            var WRTargetId = msg.waitingReply.split("?")[1];
+            msg.waitingReplyTarget = RM.userIdToTarget(TGbot, chat, WRTargetId, db);
         }
 
 
@@ -147,6 +158,7 @@ async function main(config) {
             }
             if(chat.id == user.id) chat.lang = user.lang;
             GroupHelpBot.emit( "message", msg, chat, user );
+            GHCommand.messageEvent(msg, chat, user);
             if ( chat.type == "private" ) GroupHelpBot.emit( "private", msg, chat, user );
         } catch (err) {
             console.log("Error after emitting a valid GroupHelpBot \"message\", i will log error then \"msg\", \"chat\", \"user\" ")
@@ -189,12 +201,11 @@ async function main(config) {
             return;
         }
 
-        //take it for granted that if user clicks a button he's not going to send another message as input
-        if( user.waitingReply == chat.id || user.waitingReply === true )
-        {
-            user.waitingReply = false;
-            db.users.update(user);
-        }
+        //disable waitingReply on a chat if user clicks a button there
+        var groupPrivateWR = msg.chat.type == "private" && user.waitingReply && user.waitingReply.includes(":");
+        var isActiveGroupPrivateWR = groupPrivateWR && user.waitingReply.split(":")[1].split("?")[0] == chat.id
+        if( isActiveGroupPrivateWR || (chat.isGroup && RM.getUserWR(chat, user.id)) )
+            unsetWaitReply(db, user, chat, msg.chat.isGroup);
 
         //configure user.perms and the selected chat if avaiable (the incoming cb request chat object is kept on cb.chat)
         if(chat.isGroup || cb.data.includes(":"))

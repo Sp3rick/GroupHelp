@@ -7,9 +7,9 @@ const GH = require("../../GHbot.js");
  * @param  {GH} GHbot
  * @param  {GH.LGHDatabase} db - database
  * @param  {GH.LGHAlphabetBasedPunish} ABP - 
- * @param  {TelegramBot.CallbackQuery} cb
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHCallback} cb
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable editing the message
@@ -20,7 +20,6 @@ function callbackEvent(GHbot, db, ABP, cb, chat, user, cb_prefix, returnButtons,
 
     title = title || "Set chat based punish"
 
-    var settingsChatId = cb.data.split(":")[1].split("?")[0];
     var lang = user.lang;
     var msg = cb.message;
 
@@ -53,7 +52,7 @@ function callbackEvent(GHbot, db, ABP, cb, chat, user, cb_prefix, returnButtons,
     if( toEdit && cb.data.startsWith(prefix+"_"+toEdit+"_PTIME#STIME") )
     {
         var currentTime = pData.PTime;
-        var STReturnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: prefix+"_"+toEdit+":"+settingsChatId}]]
+        var STReturnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: prefix+"_"+toEdit+":"+chat.id}]]
         var STCbPrefix = prefix+"_"+toEdit+"_PTIME";
         var STTitle = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, pData.punishment));
         var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, STCbPrefix, STReturnButtons, STTitle)
@@ -83,10 +82,10 @@ function callbackEvent(GHbot, db, ABP, cb, chat, user, cb_prefix, returnButtons,
         var chineseB = (toEdit == "CHINESE" )? "» "+l[lang].ALPHABETS_CHINESE_BUTTON+" «" : l[lang].ALPHABETS_CHINESE_BUTTON;
         var latinB = (toEdit == "LATIN") ? "» "+l[lang].ALPHABETS_LATIN_BUTTON+" «" : l[lang].ALPHABETS_LATIN_BUTTON;
 
-        var arabicCB = (toEdit == "ARABIC") ? prefix+":"+settingsChatId : prefix+"_ARABIC:"+settingsChatId
-        var cyrillicCB = (toEdit == "CYRILLIC") ? prefix+":"+settingsChatId : prefix+"_CYRILLIC:"+settingsChatId
-        var chineseCB = (toEdit == "CHINESE" )? prefix+":"+settingsChatId : prefix+"_CHINESE:"+settingsChatId
-        var latinCB = (toEdit == "LATIN") ? prefix+":"+settingsChatId : prefix+"_LATIN:"+settingsChatId
+        var arabicCB = (toEdit == "ARABIC") ? prefix+":"+chat.id : prefix+"_ARABIC:"+chat.id
+        var cyrillicCB = (toEdit == "CYRILLIC") ? prefix+":"+chat.id : prefix+"_CYRILLIC:"+chat.id
+        var chineseCB = (toEdit == "CHINESE" )? prefix+":"+chat.id : prefix+"_CHINESE:"+chat.id
+        var latinCB = (toEdit == "LATIN") ? prefix+":"+chat.id : prefix+"_LATIN:"+chat.id
 
         var buttons = [
             [{text: arabicB, callback_data: arabicCB},
@@ -99,7 +98,7 @@ function callbackEvent(GHbot, db, ABP, cb, chat, user, cb_prefix, returnButtons,
         if(toEdit)
         {
             buttons.push([{text: "➖➖➖➖➖➖➖➖➖➖", callback_data: "EMPTY"}]);
-            genPunishButtons(lang, punishment, prefix+"_"+toEdit, settingsChatId, true, pData.delete).forEach((line)=>{buttons.push(line)});
+            genPunishButtons(lang, punishment, prefix+"_"+toEdit, chat.id, true, pData.delete).forEach((line)=>{buttons.push(line)});
         }
 
         returnButtons.forEach((line)=>{buttons.push(line)});
@@ -111,7 +110,7 @@ function callbackEvent(GHbot, db, ABP, cb, chat, user, cb_prefix, returnButtons,
         .replace("{latin}", punishmentToFullText(lang, latin.punishment, latin.PTime, latin.delete));
         GHbot.editMessageText( user.id, text, {
             message_id : msg.message_id,
-            chat_id : chat.id,
+            chat_id : msg.chat.id,
             parse_mode : "HTML",
             reply_markup : {inline_keyboard: buttons},
             disable_web_page_preview: true,
@@ -125,9 +124,9 @@ function callbackEvent(GHbot, db, ABP, cb, chat, user, cb_prefix, returnButtons,
 /** 
  * @param  {GH} GHbot
  * @param  {GH.LGHAlphabetBasedPunish} ABP
- * @param  {TelegramBot.Message} msg
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHMessage} msg
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * 
  * @return {GH.LGHAlphabetBasedPunish|false} returns a modified version of passed ABP, false if shouldn't be updated
@@ -137,7 +136,6 @@ function messageEvent(GHbot, ABP, msg, chat, user, cb_prefix)
 
     var l = global.LGHLangs;
 
-    var settingsChatId = user.waitingReplyType.split(":")[1].split("?")[0];
     var lang = user.lang;
 
     var update = false;
@@ -147,20 +145,20 @@ function messageEvent(GHbot, ABP, msg, chat, user, cb_prefix)
     var toEdit = false; //set what we are going to edit
     var pData = false; //punishment data about what we are editing
     var PObjName = false;
-    if (user.waitingReplyType.startsWith(prefix+"_ARABIC"))
+    if (msg.waitingReply.startsWith(prefix+"_ARABIC"))
         toEdit = "ARABIC";
-    if (user.waitingReplyType.startsWith(prefix+"_CYRILLIC"))
+    if (msg.waitingReply.startsWith(prefix+"_CYRILLIC"))
         toEdit = "CYRILLIC";
-    if (user.waitingReplyType.startsWith(prefix+"_CHINESE"))
+    if (msg.waitingReply.startsWith(prefix+"_CHINESE"))
         toEdit = "CHINESE";
-    if (user.waitingReplyType.startsWith(prefix+"_LATIN"))
+    if (msg.waitingReply.startsWith(prefix+"_LATIN"))
         toEdit = "LATIN";
     if (toEdit) {
         var PObjName = toEdit.toLowerCase();
         pData = ABP[PObjName];
     }
-    if (user.waitingReplyType.startsWith(prefix+"_"+toEdit+"_PTIME#STIME")) {
-        var STReturnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: prefix+"_"+toEdit+":"+settingsChatId }]];
+    if (msg.waitingReply.startsWith(prefix+"_"+toEdit+"_PTIME#STIME")) {
+        var STReturnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: prefix+"_"+toEdit+":"+chat.id }]];
         var STCbPrefix = prefix+"_"+toEdit+"_PTIME";
         var STTitle = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, pData.punishment));
         var time = ST.messageEvent(GHbot, pData.PTime, msg, chat, user, STCbPrefix, STReturnButtons, STTitle);

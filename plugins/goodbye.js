@@ -30,17 +30,15 @@ function main(args)
         }
 
         //security guards
-        if (!(user.waitingReply)) return;
-        var myCallback = user.waitingReplyType.startsWith("S_GOODBYE");
-        if (!myCallback) return;
-        if (msg.chat.isGroup && chat.id != msg.chat.id) return;//additional security guard
-        if (!(user.perms && user.perms.settings)) return;
+        if ( !(msg.waitingReply && msg.waitingReply.startsWith("S_GOODBYE")) ) return;
+        if ( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
+        if ( !(user.perms && user.perms.settings) ) return;
 
         var customMessage = false;
-        if(user.waitingReplyType.startsWith("S_GOODBYE_GROUP#MSGMK"))
-            customMessage = await MSGMK.messageEvent(GHbot, db, chat.goodbye.gMsg, msg, msg.chat, user, "S_GOODBYE_GROUP");
-        if(user.waitingReplyType.startsWith("S_GOODBYE_PRIVATE#MSGMK"))
-            customMessage = await MSGMK.messageEvent(GHbot, db, chat.goodbye.pMsg, msg, msg.chat, user, "S_GOODBYE_PRIVATE");
+        if(msg.waitingReply.startsWith("S_GOODBYE_GROUP#MSGMK"))
+            customMessage = await MSGMK.messageEvent(GHbot, db, chat.goodbye.gMsg, msg, chat, user, "S_GOODBYE_GROUP");
+        if(msg.waitingReply.startsWith("S_GOODBYE_PRIVATE#MSGMK"))
+            customMessage = await MSGMK.messageEvent(GHbot, db, chat.goodbye.pMsg, msg, chat, user, "S_GOODBYE_PRIVATE");
         if(customMessage)
         {
             chat.rules = customMessage;
@@ -84,7 +82,7 @@ function main(args)
         {
             var title = l[lang].GOODBYE_GROUP_EDIT;
             var msgTitle = l[lang].EMPTY_GOODBYE;
-            var customMessage = MSGMK.callbackEvent(GHbot, db, chat.goodbye.gMsg, cb, cb.chat, user, "S_GOODBYE_GROUP", returnButtons, title, msgTitle)
+            var customMessage = MSGMK.callbackEvent(GHbot, db, chat.goodbye.gMsg, cb, chat, user, "S_GOODBYE_GROUP", returnButtons, title, msgTitle)
             if(customMessage)
             {
                 chat.goodbye.gMsg = customMessage;
@@ -95,7 +93,7 @@ function main(args)
         {
             var title = l[lang].GOODBYE_PRIVATE_EDIT;
             var msgTitle = l[lang].EMPTY_GOODBYE;
-            var customMessage = MSGMK.callbackEvent(GHbot, db, chat.goodbye.pMsg, cb, cb.chat, user, "S_GOODBYE_PRIVATE", returnButtons, title, msgTitle)
+            var customMessage = MSGMK.callbackEvent(GHbot, db, chat.goodbye.pMsg, cb, chat, user, "S_GOODBYE_PRIVATE", returnButtons, title, msgTitle)
             if(customMessage)
             {
                 chat.goodbye.pMsg = customMessage;

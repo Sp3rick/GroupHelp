@@ -13,16 +13,17 @@ function main(args)
 
     GHbot.onMessage( (msg, chat, user) => {
 
-        //security guards
         if(!chat.isGroup) return;
-        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_WARN_")) ) return;
+
+        //security guards
+        if( !(msg.waitingReply && msg.waitingReply.startsWith("S_WARN_")) ) return;
         if( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
 
         //punishment time setting
         var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_WARN_BUTTON:"+chat.id}]]
-        var cb_prefix = user.waitingReplyType.split("#")[0];
-        if( user.waitingReplyType.startsWith("S_WARN_PTIME#STIME") )
+        var cb_prefix = msg.waitingReply.split("#")[0];
+        if( msg.waitingReply.startsWith("S_WARN_PTIME#STIME") )
         {
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.warns.punishment));
             var time = ST.messageEvent(GHbot, chat.warns.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
@@ -34,11 +35,11 @@ function main(args)
             } 
         }
 
-        if( user.waitingReplyType.startsWith("S_WARN_LIMIT#SNUM")  )
+        if( msg.waitingReply.startsWith("S_WARN_LIMIT#SNUM")  )
         {
             var punishmentText = punishmentToFullText(user.lang, chat.warns.punishment, chat.warns.PTime);
             var title = l[user.lang].WARNS_DESCRIPTION.replaceAll("{punishmentText}",punishmentText).replaceAll("{limit}",bold("{number}"));
-            var num = SN.messageEvent(GHbot, chat.flood.messages, msg, msg.chat, user, "S_WARN_LIMIT", returnButtons, title, config.minWarns, config.maxWarns);
+            var num = SN.messageEvent(GHbot, chat.flood.messages, msg, chat, user, "S_WARN_LIMIT", returnButtons, title, config.minWarns, config.maxWarns);
             if(num != -1 && num != chat.flood.messages)
             {
                 chat.warns.limit = num;
@@ -160,7 +161,7 @@ function main(args)
         if(cb.data.startsWith("S_WARN_LIMIT#SNUM_MENU"))
         {
             var title = l[user.lang].WARNS_DESCRIPTION.replaceAll("{punishmentText}",punishmentText).replaceAll("{limit}",bold("{number}"))
-            var num = SN.callbackEvent(GHbot, db, chat.warns.limit, cb, cb.chat, user, cb_prefix, returnButtons, title, config.minWarns, config.maxWarns);
+            var num = SN.callbackEvent(GHbot, db, chat.warns.limit, cb, chat, user, cb_prefix, returnButtons, title, config.minWarns, config.maxWarns);
             if(num != -1 && num != chat.warns.limit)
             {
                 chat.warns.limit = num;

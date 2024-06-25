@@ -117,7 +117,7 @@ function main(args)
         if( cb.data.startsWith("S_FLOOD_MESSAGES#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",chat.flood.time);
-            var num = SN.callbackEvent(GHbot, db, chat.flood.messages, cb, cb.chat, user, cb_prefix, returnButtons, title, msgMin, msgMax);
+            var num = SN.callbackEvent(GHbot, db, chat.flood.messages, cb, chat, user, cb_prefix, returnButtons, title, msgMin, msgMax);
 
             if(num != -1 && num != chat.flood.messages)
             {
@@ -128,7 +128,7 @@ function main(args)
         if( cb.data.startsWith("S_FLOOD_TIME#SNUM_MENU") )
         {
             var title = l[lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",chat.flood.messages);
-            var num = SN.callbackEvent(GHbot, db, chat.flood.time, cb, cb.chat, user, cb_prefix, returnButtons, title, timeMin, timeMax);
+            var num = SN.callbackEvent(GHbot, db, chat.flood.time, cb, chat, user, cb_prefix, returnButtons, title, timeMin, timeMax);
 
             if(num != -1 && num != chat.flood.time)
             {
@@ -210,17 +210,17 @@ function main(args)
             }
             if(fire) global.LGHFlood[key].lastPunishment = now;
 
-        })()}
+        })()};
 
         //security guards
-        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_FLOOD")) ) return;
+        if( !(msg.waitingReply && msg.waitingReply.startsWith("S_FLOOD")) ) return;
         if( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
         
         //punishment time setting
         var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+chat.id}]]
-        var cb_prefix = user.waitingReplyType.split("#")[0];
-        if( user.waitingReplyType.startsWith("S_FLOOD_M_PTIME#STIME") )
+        var cb_prefix = msg.waitingReply.split("#")[0];
+        if( msg.waitingReply.startsWith("S_FLOOD_M_PTIME#STIME") )
         {
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.flood.punishment));
             var time = ST.messageEvent(GHbot, chat.flood.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
@@ -235,26 +235,26 @@ function main(args)
         var newValue = -1;
         var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_FLOOD_M_:"+chat.id}]]
         var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.flood.punishment));
-        if( user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM")  )
+        if( msg.waitingReply.startsWith("S_FLOOD_MESSAGES#SNUM")  )
         {
             var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{messages}",bold("{number}")).replaceAll("{seconds}",chat.flood.time);
-            newValue = SN.messageEvent(GHbot, chat.flood.messages, msg, msg.chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
+            newValue = SN.messageEvent(GHbot, chat.flood.messages, msg, chat, user, "S_FLOOD_MESSAGES", returnButtons, title, msgMin, msgMax);
         }
     
-        if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM")  )
+        if( msg.waitingReply.startsWith("S_FLOOD_TIME#SNUM")  )
         {
             var title = l[user.lang].ANTIFLOOD_DESCRIPTION.replaceAll("{seconds}",bold("{number}")).replaceAll("{messages}",chat.flood.messages);
-            newValue = SN.messageEvent(GHbot, chat.flood.time, msg, msg.chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
+            newValue = SN.messageEvent(GHbot, chat.flood.time, msg, chat, user, "S_FLOOD_TIME", returnButtons, title, timeMin, timeMax);
         }
         if(newValue != -1)
         {
-            if(user.waitingReplyType.startsWith("S_FLOOD_MESSAGES#SNUM") && newValue != chat.flood.messages)
+            if(msg.waitingReply.startsWith("S_FLOOD_MESSAGES#SNUM") && newValue != chat.flood.messages)
             {
                 chat.flood.messages = newValue;
                 db.chats.update(chat);
             }
 
-            if( user.waitingReplyType.startsWith("S_FLOOD_TIME#SNUM") && newValue != chat.flood.time )
+            if( msg.waitingReply.startsWith("S_FLOOD_TIME#SNUM") && newValue != chat.flood.time )
             {
                 chat.flood.time = newValue;
                 db.chats.update(chat);

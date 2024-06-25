@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js");
 const GH = require("../GHbot.js");
-const { genPunishButtons, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, tag, usernameOrFullName, welcomeNewUser } = require("../api/utils.js");
+const { genPunishButtons, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, tag, usernameOrFullName, welcomeNewUser, unsetWaitReply, waitReplyForChat } = require("../api/utils.js");
 const ST = require("../api/editors/setTime.js");
 const MSGMK = require( "../api/editors/MessageMaker.js" )
 const { punishUser, silentPunish } = require("../api/punishment.js");
@@ -107,8 +107,7 @@ function captchaFailed(GHbot, db, chat, user)
         return;
     }
 
-    user.waitingReply = false;
-    db.users.update(user);
+    unsetWaitReply(db, user, chat, true);
 
     var id = chat.id+"_"+user.id;
     GHbot.TGbot.deleteMessages(chat.id, [global.LGHCaptcha[id].messageId]);
@@ -129,8 +128,7 @@ function captchaSuccess(GHbot, db, chat, user)
     if(chat.welcome.state)
         welcomeNewUser(GHbot, db, MSGMK, chat, user);
 
-    user.waitingReply = false;
-    db.users.update(user);
+    unsetWaitReply(db, user, chat, true);
 
     var id = chat.id+"_"+user.id;
     if(global.LGHCaptcha[id]){
@@ -193,19 +191,17 @@ function main(args)
                 var solution = captcha.text;
                 global.LGHCaptcha[id] = {messageId: sentMsg.message_id, within, solution};
                 
-                newUser.waitingReply = chat.id;
-                newUser.waitingReplyType = "CAPTCHA_IMAGE_GUESS:"+chat.id;
-                db.users.update(newUser);
+                waitReplyForChat(db, "CAPTCHA_IMAGE_GUESS", newUser, chat, msg.chat.isGroup);
             }
 
         })}
 
         //prevent messages from users under captcha
-        if(user.waitingReply && user.waitingReplyType.startsWith("CAPTCHA_"))
+        if(msg.waitingReply && msg.waitingReply.startsWith("CAPTCHA_"))
             GHbot.TGbot.deleteMessages(chat.id, [msg.message_id]);
 
         //captcha image guess
-        if (user.waitingReply && user.waitingReplyType.startsWith("CAPTCHA_IMAGE_GUESS"))
+        if (msg.waitingReply && msg.waitingReply.startsWith("CAPTCHA_IMAGE_GUESS"))
         {
             var id = chat.id+"_"+user.id;
             if(!global.LGHCaptcha[id]) return;
@@ -218,16 +214,16 @@ function main(args)
         }
 
         //security guards
-        if (!(user.waitingReply)) return;
-        var myCallback = user.waitingReplyType.startsWith("S_CAPTCHA") || user.waitingReplyType.startsWith("S_CAPTCHA");
+        if (!msg.waitingReply) return;
+        var myCallback = msg.waitingReply.startsWith("S_CAPTCHA") || msg.waitingReply.startsWith("S_CAPTCHA");
         if (!myCallback) return;
         if (msg.chat.isGroup && chat.id != msg.chat.id) return;//additional security guard
         if (!(user.perms && user.perms.settings)) return;
 
         //time limit
-        if (user.waitingReplyType.startsWith("S_CAPTCHA_TIME#STIME")) {
+        if (msg.waitingReply.startsWith("S_CAPTCHA_TIME#STIME")) {
             var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_CAPTCHA_BUTTON:" + chat.id }]]
-            var cb_prefix = user.waitingReplyType.split("#")[0];
+            var cb_prefix = msg.waitingReply.split("#")[0];
             var title = l[user.lang].CAPTCHA_TIME_TITLE.replace("{punishment}", punishmentToText(user.lang, chat.captcha.punishment));
             var time = ST.messageEvent(GHbot, chat.captcha.time, msg, msg.chat, user, cb_prefix, returnButtons, title, minimumTimeLimit, maxTimeLimit);
 
@@ -237,9 +233,9 @@ function main(args)
             }
         }
         //punishment time
-        if (user.waitingReplyType.startsWith("S_CAPTCHA_BUTTON_PTIME#STIME")) {
+        if (msg.waitingReply.startsWith("S_CAPTCHA_BUTTON_PTIME#STIME")) {
             var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_CAPTCHA_BUTTON:" + chat.id }]]
-            var cb_prefix = user.waitingReplyType.split("#")[0];
+            var cb_prefix = msg.waitingReply.split("#")[0];
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, chat.captcha.punishment));
             var time = ST.messageEvent(GHbot, chat.captcha.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
 

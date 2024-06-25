@@ -72,6 +72,13 @@ function update2d5Perms(perms)
     perms.length = 0;
     return perms;
 }
+function update2d7d3Perms(perms)
+{
+    perms.commands.forEach((command, index)=>{
+        perms.commands[index] = command.replace("@","*");
+    })
+    return perms;
+}
 
 function updateDatabase(version, versionFile, chatsDir, usersDir)
 {
@@ -180,6 +187,41 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
         })
     }
 
+    if(version == "0.2.7")
+    {
+        version = "0.2.7.3";
+        console.log("\tupdating from 0.2.7 to 0.2.7.3 ...");
+
+        var chatFiles = fs.readdirSync(chatsDir);
+        chatFiles.forEach((fileName)=>{
+            var file = chatsDir+"/"+fileName;
+            var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+            chat.alphabets = newAlphabetsObj();
+            chat.basePerms = update2d7d3Perms(chat.basePerms);
+            chat.basePerms.commands.push("COMMAND_RELOAD");
+            if(chat.adminPerms) chat.adminPerms = update2d7d3Perms(chat.adminPerms);
+            Object.keys(chat.users).forEach(userId=>{
+                chat.users[userId].perms = update2d7d3Perms(chat.users[userId].perms);
+                chat.users[userId].adminPerms = update2d7d3Perms(chat.users[userId].adminPerms);
+                chat.users[userId].waitingReply = false;
+            })
+            Object.keys(chat.roles).forEach(role=>{
+                if(chat.roles[role].perms) chat.roles[role].perms = update2d7d3Perms(chat.roles[role].perms);
+            })
+            fs.writeFileSync(file, JSON.stringify(chat));
+        })
+        
+        var userFiles = fs.readdirSync(usersDir);
+        userFiles.forEach((fileName)=>{
+            var file = usersDir+"/"+fileName;
+            var user = JSON.parse(fs.readFileSync(file, "utf-8"));
+            if(user.hasOwnProperty("waitingReplyType"))
+                delete user.waitingReplyType;
+            user.waitingReply = false;
+            fs.writeFileSync(file, JSON.stringify(chat));
+        });
+            
+    }
 
     //add new if here to update from latest dbVersion to new
 
@@ -425,7 +467,6 @@ function getDatabase(config) {
                 //prepare object with all bot needed info// TODO: add to documentation all additional infos of users
 
                 user.waitingReply = false;
-                user.waitingReplyType = "";
                 user.lang = "en_en";
                 if( user.language_code == "en" ){
 
@@ -460,7 +501,6 @@ function getDatabase(config) {
                 if( user.hasOwnProperty("lang") ) newUser.lang = user.lang;
                 if( user.hasOwnProperty("premium") ) newUser.premium = user.premium;
                 if( user.hasOwnProperty("waitingReply") ) newUser.waitingReply = user.waitingReply;
-                if( user.hasOwnProperty("waitingReplyType") ) newUser.waitingReplyType = user.waitingReplyType;
 
 
                 var userFile = database.usersDir + "/" + newUser.id + ".json";

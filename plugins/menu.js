@@ -1,4 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
+const { unsetWaitReply, waitReplyForChat } = require("../api/utils.js");
 
 function main(args)
 {
@@ -15,7 +16,7 @@ function main(args)
         if(chat.type != "private") return;
 
         //if is a message directed to support
-        var isSupportDirected = (user.waitingReply == true && user.waitingReplyType == "SUPPORT") || (msg.hasOwnProperty("reply_to_message") && String(msg.reply_to_message.text).startsWith("#Support"));
+        var isSupportDirected = (msg.waitingReply == "SUPPORT") || (msg.hasOwnProperty("reply_to_message") && String(msg.reply_to_message.text).startsWith("#Support"));
         var isBotStaffer = config.botStaff.includes(String(user.id));
         var isReplyToUserSupport = msg.hasOwnProperty("reply_to_message") && String(msg.reply_to_message.text).startsWith("#id");
         if(isSupportDirected)
@@ -41,8 +42,7 @@ function main(args)
                     reply_markup :{inline_keyboard :[[{text: l[user.lang].BACK_BUTTON, callback_data: "MENU"}]]}
             })
 
-            user.waitingReply = false;
-            db.users.update(user);
+            unsetWaitReply(db, user, chat, false);
         }
         //if a bot staffer reply to a support message (that starts with #id)
         else if( isBotStaffer && isReplyToUserSupport )
@@ -78,7 +78,7 @@ function main(args)
         }
 
         //if no-one is expecting a message from user
-        if( user.waitingReply == false && !isSupportDirected && !isReplyToUserSupport)
+        if( msg.waitingReply == false && !isSupportDirected && !isReplyToUserSupport)
             GHbot.sendMessage(user.id, user.id, l[user.lang].PRESENTATION.replace("{name}",user.first_name+" "+(user.last_name||"")),{
                 parse_mode : "HTML",
                 link_preview_options : JSON.stringify({is_disabled : true}),
@@ -118,9 +118,8 @@ function main(args)
         if( cb.data == "SUPPORT_BUTTON" )
         {
 
-            user.waitingReply = chat.id;
-            user.waitingReplyType = "SUPPORT";
-            db.users.update(user);
+            var callback = "SUPPORT";
+            waitReplyForChat(db, callback, user, chat, false);
 
             GHbot.editMessageText( user.id, l[lang].SUPPORT_MESSAGE, 
             {

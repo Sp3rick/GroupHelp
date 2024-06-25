@@ -148,9 +148,18 @@ function newUser(user, perms, adminPerms, roles, title)
         adminPerms: adminPerms,
         roles: roles,
         title: title,
+        waitingReply : false,
     }
 
     return userData
+}
+
+/**
+ * @returns {GH.userStatus}
+ */
+function getUser(chat, userId)
+{
+    return chat.users[userId];
 }
 
 function getUserRoles(chat, userId)
@@ -192,6 +201,12 @@ function getUserLevel(chat, userId)
     })
 
     return level;
+}
+
+function getUserWR(chat, userId)
+{
+    if(!chat.users.hasOwnProperty(userId)) return false;
+    return chat.users[userId].waitingReply;
 }
 
 /**
@@ -611,7 +626,8 @@ function userIdToTarget(TGbot, chat, userId, db)
 
 module.exports = {
     newPerms, newRole, newUser, newPremadeRolesObject,
-    getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
+    getUser, getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getUserWR,
+    getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
     deleteRole, deleteUser, forgotUser, renameRole, changeRoleEmoji,
     setRole, unsetRole, addUser,
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,

@@ -102,15 +102,13 @@ function main(args)
         })()}
 
         //security guards
-        if (!(user.waitingReply)) return;
-        var myCallback = user.waitingReplyType.startsWith("S_ALPHABETS");
-        if (!myCallback) return;
-        if (msg.chat.isGroup && chat.id != msg.chat.id) return;//additional security guard
-        if (!(user.perms && user.perms.settings)) return;
+        if ( !(msg.waitingReply && msg.waitingReply.startsWith("S_ALPHABETS")) ) return;
+        if ( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
+        if ( !(user.perms && user.perms.settings) ) return;
 
-        if (user.waitingReplyType.startsWith("S_ALPHABETS#ABP"))
+        if (msg.waitingReply.startsWith("S_ALPHABETS#ABP"))
         {
-            var newAbp = ABP.messageEvent(GHbot, chat.alphabets, msg, msg.chat, user, "S_ALPHABETS");
+            var newAbp = ABP.messageEvent(GHbot, chat.alphabets, msg, chat, user, "S_ALPHABETS");
             if(newAbp)
             {
                 chat.alphabets = newAbp;
@@ -135,7 +133,7 @@ function main(args)
         if (cb.data.startsWith("S_ALPHABETS#ABP")) {
             var returnButtons = [[{ text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:" + chat.id }]];
             var title = l[lang].ALPHABETS_DESCRIPTION+"\n";
-            var newAbp = ABP.callbackEvent(GHbot, db, chat.alphabets, cb, cb.chat, user, "S_ALPHABETS", returnButtons, title);
+            var newAbp = ABP.callbackEvent(GHbot, db, chat.alphabets, cb, chat, user, "S_ALPHABETS", returnButtons, title);
             if (newAbp) {
                 chat.alphabets = newAbp;
                 db.chats.update(chat);

@@ -8,9 +8,9 @@ const GH = require("../../GHbot.js");
 function genCommandButtonsLine(chat, commandKey, prefix, settingsChatId)
 {
     var all = !chat.basePerms.commands.includes(commandKey) ? "👥" : "👥 ☑️";
-    var pAll = !chat.basePerms.commands.includes("@"+commandKey) ? "🤖" : "🤖 ☑️";
+    var pAll = !chat.basePerms.commands.includes("*"+commandKey) ? "🤖" : "🤖 ☑️";
     var adm = !chat.adminPerms.commands.includes(commandKey) ? "👮🏻" : "👮🏻 ☑️";
-    var pAdm = !chat.adminPerms.commands.includes("@"+commandKey) ? "🥷" : "🥷 ☑️";
+    var pAdm = !chat.adminPerms.commands.includes("*"+commandKey) ? "🥷" : "🥷 ☑️";
     var line = [
         {text: "/"+tradCommand(chat.lang, commandKey), callback_data: prefix+"_MENU_INFO|"+commandKey+":"+settingsChatId},
         {text: all, callback_data: prefix+"_MENU_ALL|"+commandKey+":"+settingsChatId},
@@ -73,11 +73,11 @@ function callbackEvent(GHbot, db, settingsChat, cb, chat, user, cb_prefix, retur
         }
         if(who == "PALL")
         {
-            var commandIndex = commandsB.indexOf("@"+commandKey);
+            var commandIndex = commandsB.indexOf("*"+commandKey);
             if(commandIndex != -1)
                 settingsChat.basePerms.commands.splice(commandIndex,1);
             else
-                settingsChat.basePerms.commands.push("@"+commandKey);
+                settingsChat.basePerms.commands.push("*"+commandKey);
         }
         if(who == "ADM")
         {
@@ -89,11 +89,11 @@ function callbackEvent(GHbot, db, settingsChat, cb, chat, user, cb_prefix, retur
         }
         if(who == "PADM")
         {
-            var commandIndex = commandsA.indexOf("@"+commandKey);
+            var commandIndex = commandsA.indexOf("*"+commandKey);
             if(commandIndex != -1)
                 settingsChat.adminPerms.commands.splice(commandIndex,1);
             else
-                settingsChat.adminPerms.commands.push("@"+commandKey);
+                settingsChat.adminPerms.commands.push("*"+commandKey);
         }
         updateChat = true;
     }

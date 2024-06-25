@@ -1,6 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js");
-const {genSettingsKeyboard, bold, checkCommandPerms, code, genSettingsText, genSettings2Keyboard, link} = require( "../api/utils.js" );
+const {genSettingsKeyboard, bold, code, genSettingsText, genSettings2Keyboard, link} = require( "../api/utils.js" );
 const CMDPerms = require("../api/editors/CommandsPerms.js")
+const GHCommand = require("../api/LGHCommand.js");
+
 
 function main(args)
 {
@@ -12,28 +14,24 @@ function main(args)
     langKeys = Object.keys(l);
     loadedLangs = Object.keys(l).length;
 
-    GHbot.onMessage((msg, chat, user) => {
-
-        var lang = user.lang
-
+    GHCommand.registerCommands(["COMMAND_SETTINGS"], async (msg, chat, user, private, lang, key, keyLang) => {
         if(!msg.chat.isGroup) return;
-        if(user.waitingReply) return;
         if(user.perms.settings != 1) return;
 
-        if( msg.chat.isGroup && checkCommandPerms(msg.command, "COMMAND_SETTINGS", user.perms ) )
-        {
+        GHbot.sendMessage( user.id, msg.chat.id, l[lang].SETTINGS_WHERE_OPEN, {
+            message_id : msg.message_id,
+            chat_id : msg.chat.id,
+            parse_mode : "HTML",
+            reply_markup : {inline_keyboard :[
+                    [{text: l[lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+msg.chat.id}],
+                    [{text: l[lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+msg.chat.id}],
+            ]}
+        })
+    })
 
-            GHbot.sendMessage( user.id, msg.chat.id, l[lang].SETTINGS_WHERE_OPEN, {
-                    message_id : msg.message_id,
-                    chat_id : msg.chat.id,
-                    parse_mode : "HTML",
-                    reply_markup : {inline_keyboard :[
-                            [{text: l[lang].SETTINGS_HERE, callback_data: "SETTINGS_HERE:"+msg.chat.id}],
-                            [{text: l[lang].SETTINGS_PRIVATE, callback_data: "SETTINGS_PRIVATE:"+msg.chat.id}],
-                    ]}
-            })
+    GHbot.onMessage((msg, chat, user) => {
 
-        }
+        
 
     })
     
@@ -52,7 +50,6 @@ function main(args)
             GHbot.answerCallbackQuery(user.id, cb.id, {text: l[lang].MISSING_PERMISSION, show_alert:true});
             return;
         }
-        if(!chat.isGroup) return;
 
         if( cb.data.startsWith("SETTINGS") )
             lang = chat.lang;

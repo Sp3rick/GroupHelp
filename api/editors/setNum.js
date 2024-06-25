@@ -1,14 +1,14 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {isNumber, genSetNumKeyboard} = require("../utils.js");
+const {isNumber, genSetNumKeyboard, waitReplyForChat} = require("../utils.js");
 const GH = require("../../GHbot.js");
 
 /** 
  * @param  {GH} GHbot
  * @param {GH.LGHDatabase} db - database
  * @param  {customMessage} currentNumber
- * @param  {TelegramBot.CallbackQuery} cb
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHCallback} cb
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable editing the message
@@ -32,11 +32,10 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 
     var settingsChatId = cb.data.split(":")[1];
 
-    if(!user.waitingReplyType.startsWith(cb_prefix+"#SNUM") || user.waitingReply != true)
+    if(!msg.waitingReply.startsWith(cb_prefix+"#SNUM") || msg.waitingReply == false)
     {
-        user.waitingReply = chat.id;
-        user.waitingReplyType = cb_prefix+"#SNUM:"+settingsChatId;
-        db.users.update(user);
+        var callback = cb_prefix+"#SNUM";
+        waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
     }
 
     if( cb.data.startsWith(cb_prefix+"#SNUM_MENU_N_") )
@@ -67,7 +66,7 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 
         var options = {
             message_id : msg.message_id,
-            chat_id : chat.id,
+            chat_id : msg.chat.id,
             parse_mode : "HTML",
             reply_markup : {} 
         }
@@ -107,9 +106,9 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 /** 
  * @param  {GH} GHbot
  * @param  {customMessage} customMessage
- * @param  {TelegramBot.Message} msg
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHMessage} msg
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable editing the message
@@ -123,7 +122,6 @@ function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnBu
 
     var l = global.LGHLangs;
 
-    var settingsChatId = user.waitingReplyType.split(":")[1];
     var text = msg.text;
     var number = currentNumber
     min = min || 1;
@@ -149,13 +147,13 @@ function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnBu
         options.reply_markup.inline_keyboard.push( button );
     })
 
-    if( user.waitingReplyType.startsWith(cb_prefix+"#SNUM:") )
+    if( msg.waitingReply.startsWith(cb_prefix+"#SNUM") )
     {
         if(isNumber(text))
             number = Math.trunc(Number(text));
         else
         {
-            GHbot.sendMessage(user.id, chat.id, l[user.lang].SNUM_INVALID_NUMBER, errorOpts);
+            GHbot.sendMessage(user.id, msg.chat.id, l[user.lang].SNUM_INVALID_NUMBER, errorOpts);
             return -1;
         }
 
@@ -164,18 +162,18 @@ function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnBu
         {
             number = currentNumber;
             var errorText = l[user.lang].SNUM_TOOBIG.replace("{number}",max)
-            GHbot.sendMessage(user.id, chat.id, errorText, errorOpts);
+            GHbot.sendMessage(user.id, msg.chat.id, errorText, errorOpts);
         }
         else if(number < min && number != currentNumber)
         {
             number = currentNumber;
             var errorText = l[user.lang].SNUM_TOOSMALL.replace("{number}",min)
-            GHbot.sendMessage(user.id, chat.id, errorText, errorOpts);
+            GHbot.sendMessage(user.id, msg.chat.id, errorText, errorOpts);
         }
         else
         {
             title = title.replaceAll("{number}", number);
-            GHbot.sendMessage(user.id, chat.id, title, options);
+            GHbot.sendMessage(user.id, msg.chat.id, title, options);
         }
 
         

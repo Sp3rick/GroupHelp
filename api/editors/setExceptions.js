@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName } = require("../utils.js");
+const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName, waitReplyForChat } = require("../utils.js");
 const GH = require("../../GHbot.js");
 
 /**
@@ -13,9 +13,9 @@ const GH = require("../../GHbot.js");
  * @param  {GH} GHbot
  * @param {GH.LGHDatabase} db - database
  * @param  {Array<String>} exceptions
- * @param  {TelegramBot.CallbackQuery} cb
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHCallback} cb
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable on menu to set the exceptions
@@ -36,23 +36,20 @@ function callbackEvent(GHbot, db, exceptions, cb, chat, user, cb_prefix, returnB
     var update = false;
     var prefix = cb_prefix + "#EXC";
     var lang = user.lang;
-
-    var settingsChatId = cb.data.split(":")[1];
-
     if (cb.data.startsWith(prefix+"_MENU")) {
 
         buttons = [
-            [{ text: l[lang].SHOW_WHITELIST_BUTTON, callback_data: prefix + "_SHOW:" + settingsChatId }],
+            [{ text: l[lang].SHOW_WHITELIST_BUTTON, callback_data: prefix + "_SHOW:" + chat.id }],
 
-            [{ text: l[lang].ADD_BUTTON, callback_data: prefix + "_ADD:" + settingsChatId },
-            { text: l[lang].REMOVE_BUTTON, callback_data: prefix + "_REMOVE:" + settingsChatId }],
+            [{ text: l[lang].ADD_BUTTON, callback_data: prefix + "_ADD:" + chat.id },
+            { text: l[lang].REMOVE_BUTTON, callback_data: prefix + "_REMOVE:" + chat.id }],
         ]
 
         returnButtons.forEach((line)=>{buttons.push(line)});
 
         GHbot.editMessageText(user.id, title, {
             message_id: msg.message_id,
-            chat_id: chat.id,
+            chat_id: msg.chat.id,
             parse_mode: "HTML",
             reply_markup: { inline_keyboard: buttons }
         });
@@ -64,37 +61,35 @@ function callbackEvent(GHbot, db, exceptions, cb, chat, user, cb_prefix, returnB
         exceptions.forEach((exc)=>{text+="\n"+exc});
         if(exceptions.length == 0) text+="\n"+l[lang].EMPTY
 
-        buttons = [[{ text: l[lang].BACK_BUTTON, callback_data: prefix + "_MENU:" + settingsChatId }]]
+        buttons = [[{ text: l[lang].BACK_BUTTON, callback_data: prefix + "_MENU:" + chat.id }]]
 
         GHbot.editMessageText(user.id, text, {
             message_id: msg.message_id,
-            chat_id: chat.id,
+            chat_id: msg.chat.id,
             parse_mode: "HTML",
             link_preview_options : JSON.stringify({is_disabled : true}),
             reply_markup: { inline_keyboard: buttons }
         });
     }
     if (cb.data.startsWith(prefix+"_ADD")) {
-        user.waitingReply = chat.id;
-        user.waitingReplyType = prefix+"_ADD:"+settingsChatId;
-        db.users.update(user);
-        buttons = [[{ text: l[lang].BACK_BUTTON, callback_data: prefix + "_MENU:" + settingsChatId }]]
+        var callback = prefix+"_ADD"
+        waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
+        buttons = [[{ text: l[lang].BACK_BUTTON, callback_data: prefix + "_MENU:" + chat.id }]]
         GHbot.editMessageText(user.id, addTitle, {
             message_id: msg.message_id,
-            chat_id: chat.id,
+            chat_id: msg.chat.id,
             parse_mode: "HTML",
             link_preview_options : JSON.stringify({is_disabled : true}),
             reply_markup: { inline_keyboard: buttons }
         });
     }
     if (cb.data.startsWith(prefix+"_REMOVE")) {
-        user.waitingReply = chat.id;
-        user.waitingReplyType = prefix+"_REMOVE:"+settingsChatId;
-        db.users.update(user);
-        buttons = [[{ text: l[lang].BACK_BUTTON, callback_data: prefix + "_MENU:" + settingsChatId }]]
+        var callback = prefix+"_REMOVE";
+        waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
+        buttons = [[{ text: l[lang].BACK_BUTTON, callback_data: prefix + "_MENU:" + chat.id }]]
         GHbot.editMessageText(user.id, delTitle, {
             message_id: msg.message_id,
-            chat_id: chat.id,
+            chat_id: msg.chat.id,
             parse_mode: "HTML",
             link_preview_options : JSON.stringify({is_disabled : true}),
             reply_markup: { inline_keyboard: buttons }
@@ -111,9 +106,9 @@ function callbackEvent(GHbot, db, exceptions, cb, chat, user, cb_prefix, returnB
  * @param {GH.LGHDatabase} db - database
  * @param  {Array<String>} exceptions
  * @param  {ValidatorFunction} validator
- * @param  {TelegramBot.Message} msg
- * @param  {TelegramBot.Chat} chat
- * @param  {TelegramBot.User} user
+ * @param  {GH.LGHMessage} msg
+ * @param  {GH.LGHChat} chat - selectedChat
+ * @param  {GH.LGHUser} user
  * @param  {String} cb_prefix
  * @param  {TelegramBot.KeyboardButton} returnButtons
  * @param  {String} title - custom title avaiable editing the message
@@ -125,7 +120,6 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
 
     var l = global.LGHLangs;
 
-    var settingsChatId = user.waitingReplyType.split(":")[1].split("?")[0];
     var prefix = cb_prefix+"#EXC";
     var lang = user.lang;
     max = max || 100;
@@ -149,16 +143,16 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
            if(chatIdExcList.length > 0)excIndex = exceptions.indexOf(chatIdExcList[0]);
         }
 
-        if(user.waitingReplyType.startsWith(prefix+"_ADD") && excIndex == -1)
+        if(msg.waitingReply.startsWith(prefix+"_ADD") && excIndex == -1)
             foundStrings = originChat.username ? [originChat.username] : [originChat.title+":"+originChat.id];
 
-        if(user.waitingReplyType.startsWith(prefix+"_REMOVE") && excIndex == -1)
+        if(msg.waitingReply.startsWith(prefix+"_REMOVE") && excIndex == -1)
         {
             GHbot.sendMessage(user.id, chat.id, l[lang].MISSING_EXCEPTION, {reply_markup:{inline_keyboard:returnButtons}});
             return false;
         }
         
-        if(user.waitingReplyType.startsWith(prefix+"_REMOVE"))
+        if(msg.waitingReply.startsWith(prefix+"_REMOVE"))
             foundStrings = [exceptions[excIndex]];
         */ //currently disabled, i think that if user forward want to store exactly the chatId, and never the username
 
@@ -176,7 +170,7 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
 
     if(foundStrings === false)
     {
-        GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_EXCEPTIONS, {reply_markup:{inline_keyboard:returnButtons}});
+        GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_EXCEPTIONS, {reply_markup:{inline_keyboard:returnButtons}});
         return false;
     }
 
@@ -191,29 +185,29 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
         if(!exceptions.includes(validString)) alreadyExhistAll = false;
     })
 
-    if(user.waitingReplyType.startsWith(prefix+"_ADD") && isAnyStringValid && !alreadyExhistAll)
+    if(msg.waitingReply.startsWith(prefix+"_ADD") && isAnyStringValid && !alreadyExhistAll)
     {
         var toPushExc = [];
         stringList.forEach((string)=>{if(!exceptions.includes(string)) toPushExc.push(string)});
 
         if(toPushExc.length+exceptions.length > max)
         {
-            GHbot.sendMessage(user.id, chat.id, l[lang].TOO_MANY_EXCEPTIONS, {reply_markup:{inline_keyboard:returnButtons}});
+            GHbot.sendMessage(user.id, msg.chat.id, l[lang].TOO_MANY_EXCEPTIONS, {reply_markup:{inline_keyboard:returnButtons}});
             return false;
         }
         else
             toPushExc.forEach((exc)=>{exceptions.push(exc)});
 
-        GHbot.sendMessage(user.id, chat.id, l[lang].EXCEPTIONS_ADDED, {reply_markup:{inline_keyboard:returnButtons}});
+        GHbot.sendMessage(user.id, msg.chat.id, l[lang].EXCEPTIONS_ADDED, {reply_markup:{inline_keyboard:returnButtons}});
         return exceptions;
     }
-    else if(user.waitingReplyType.startsWith(prefix+"_ADD") && alreadyExhistAll)
+    else if(msg.waitingReply.startsWith(prefix+"_ADD") && alreadyExhistAll)
     {
-        GHbot.sendMessage(user.id, chat.id, l[lang].EXCEPTIONS_EXHIST, {reply_markup:{inline_keyboard:returnButtons}});
+        GHbot.sendMessage(user.id, msg.chat.id, l[lang].EXCEPTIONS_EXHIST, {reply_markup:{inline_keyboard:returnButtons}});
         return false;
     }
     
-    if(user.waitingReplyType.startsWith(prefix+"_REMOVE"))
+    if(msg.waitingReply.startsWith(prefix+"_REMOVE"))
     {
         foundStrings.forEach((string) => {
             var excIndex = exceptions.indexOf(string);
@@ -222,11 +216,11 @@ function messageEvent(GHbot, db, exceptions, validator, msg, chat, user, cb_pref
             
             if(excIndex != -1) exceptions.splice(excIndex, 1);
         })
-        GHbot.sendMessage(user.id, chat.id, l[lang].EXCEPTIONS_REMOVED, {reply_markup:{inline_keyboard:returnButtons}});
+        GHbot.sendMessage(user.id, msg.chat.id, l[lang].EXCEPTIONS_REMOVED, {reply_markup:{inline_keyboard:returnButtons}});
         return exceptions;
     }
 
-    GHbot.sendMessage(user.id, chat.id, l[lang].INVALID_EXCEPTIONS, {reply_markup:{inline_keyboard:returnButtons}});
+    GHbot.sendMessage(user.id, msg.chat.id, l[lang].INVALID_EXCEPTIONS, {reply_markup:{inline_keyboard:returnButtons}});
     return false;
 }
 

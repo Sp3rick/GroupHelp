@@ -52,10 +52,12 @@ Useful links to contribute:
 ✅ Roles and permissions hirarchy
 ❌ Custom roles
 ✅ Moderation commands
+❌ Support moderation for channels users
 ❌ Support for anonymous admins
 🟡 Bot support
 ❌ Bot help (how to use)
 ❌ Bot clones support
+❌ UTC Time settings
 ✅ Langs and lang settings
 ✅ Rules
 ✅ Welcome
@@ -130,7 +132,7 @@ To update the bot you need to backup ./database folder and ./config.json only, t
 
     implement direct private settings with /*settings
     add a /commands command to help user to know bot commands, admin commands, and custom-group commands if avaiable
-    a check system to drop wrong formatted cb.data and user.waitingReplyType
+    a check system to drop wrong formatted cb.data and waitingReply
     allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)
     add something to allow a group admin to identify all users with additional bot perms
     ?add an automatic leveling system for admins? (maybe?)

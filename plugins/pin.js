@@ -1,5 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js")
-const { telegramErrorToText, checkCommandPerms, sendCommandReply } = require( "../api/utils.js" );
+const { telegramErrorToText, sendCommandReply } = require( "../api/utils.js" );
+const GHCommand = require("../api/LGHCommand.js");
 
 function main(args)
 {
@@ -8,39 +9,30 @@ function main(args)
     const {TGbot, db, config} = GHbot;
 
     l = global.LGHLangs; //importing langs object
-
-    GHbot.onMessage( (msg, chat, user) => {
-
+    
+    GHCommand.registerCommands(["COMMAND_PIN"], async (msg, chat, user, private, lang, key, keyLang) => {
         if(!msg.chat.isGroup) return;
-        if(user.waitingReply) return;
-
-        var command = msg.command;
-        var lang = chat.lang;
-        var where;
-
-        where = checkCommandPerms(command, "COMMAND_PIN", user.perms, ["pin"]);
-        if(where)
+        if(msg.reply_to_message)
         {
-
-            if(!msg.reply_to_message) return;
-
-            var data = chat.id+","+msg.reply_to_message.message_id;
-            var buttons = [
-                [{text:l[lang].NOT_NOTIFY,callback_data:"PIN_SILENT_"+data+":"+chat.id}, {text:l[lang].YES_NOTIFY,callback_data:"PIN_NOTIFY_"+data+":"+chat.id}],
-                [{text:l[lang].CANCEL_BUTTON,callback_data:"PIN_CANCEL:"+chat.id}]
-            ]
-
-            var options = {
-                parse_mode : "HTML",
-                reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
-                reply_markup: {inline_keyboard:buttons}
-            }
-            var text = l[lang].ASK_PIN_NOTIFY
-            var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
-            sendCommandReply(where, lang, GHbot, user.id, msg.chat.id, func);
+            //TODO: let know the user how to use pin command
+            return;
         }
 
-    } )
+        var data = chat.id+","+msg.reply_to_message.message_id;
+        var buttons = [
+            [{text:l[lang].NOT_NOTIFY,callback_data:"PIN_SILENT_"+data+":"+chat.id}, {text:l[lang].YES_NOTIFY,callback_data:"PIN_NOTIFY_"+data+":"+chat.id}],
+            [{text:l[lang].CANCEL_BUTTON,callback_data:"PIN_CANCEL:"+chat.id}]
+        ]
+
+        var options = {
+            parse_mode : "HTML",
+            reply_parameters: {chat_id:chat.id, message_id: msg.message_id, allow_sending_without_reply:true},
+            reply_markup: {inline_keyboard:buttons}
+        }
+        var text = l[lang].ASK_PIN_NOTIFY
+        var func = (id) => {return GHbot.sendMessage(user.id, id, text, options)};
+        sendCommandReply(private, lang, GHbot, user.id, msg.chat.id, func);
+    })
 
     GHbot.onCallback( async (cb, chat, user) => {
 

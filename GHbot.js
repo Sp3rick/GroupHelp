@@ -106,6 +106,7 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHPerms} adminPerms - LGHPerms object for user permissions if admin
  * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
  * @property {String|undefined} title - user administrator title
+ * @property {String|false} waitingReply - string with callback data hirarchy if bot is expecting a message from user on group
  */
 
 /**
@@ -292,9 +293,7 @@ testObject()
  * @typedef {Object} CustomUser
  * @property {LGHPerms|null} perms - temporary object with summary of user permissions
  * @property {String} lang - current user lang
- * @property {Boolean} waitingReply - set to true if the bot is expecting a message from the user
- * @property {any} waitingReplyType - additional data related to waitingReply
- * @property {TargetUser} waitingReplyTarget - Optional temporary object with data about a target LGH user, false if no target found
+ * @property {String} waitingReply - set to true if the bot is expecting a message from the user
 
 /**
  * @typedef {TelegramBot.User & CustomUser} LGHUser - Custom chat object given by LGHBot events, custom items avaiable if working about a group
@@ -322,6 +321,9 @@ testObject()
  * @typedef {Object} CustomMessage
  * @property {LGHChat} chat - Always original chat object where the message is coming from
  * @property {ParsedCommand & CustomCommand} command - result of message text parsed with parseCommand()
+ * @property {TargetUser|false} target - Optional temporary object with data about a command target
+ * @property {string|false} waitingReply - Optional temporary object with waitingReply data for the selected chat
+ * @property {TargetUser|false} waitingReplyTarget - Optional temporary object with data about a target LGH user, false if no target found
  */
 
 /**

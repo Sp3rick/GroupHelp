@@ -399,21 +399,21 @@ function main(args)
         })()}
 
         //security guards
-        if( !(user.waitingReply && user.waitingReplyType.startsWith("S_MEDIA")) ) return;
+        if( !(msg.waitingReply && msg.waitingReply.startsWith("S_MEDIA")) ) return;
         if( msg.chat.isGroup && chat.id != msg.chat.id ) return;//additional security guard
         if( !(user.perms && user.perms.settings) ) return;
 
         var mediaType = false;
-        if( user.waitingReplyType.includes("!") )
-            mediaType = user.waitingReplyType.split("!")[1].split("#")[0].split(":")[0];
+        if( msg.waitingReply.includes("!") )
+            mediaType = msg.waitingReply.split("!")[1].split("#")[0].split(":")[0];
         
         var exhistObj = chat.media.hasOwnProperty(mediaType);
 
-        if (user.waitingReplyType.includes("STIME")) {
+        if (msg.waitingReply.includes("STIME")) {
             if(!exhistObj) chat.media[mediaType] = newPunishObj();
-            var pageCallback = user.waitingReplyType.split("_PTIME")[0];
+            var pageCallback = msg.waitingReply.split("_PTIME")[0];
             var returnButtons = [[{ text: l[chat.lang].BACK_BUTTON, callback_data: pageCallback+":"+chat.id }]]
-            var cb_prefix = user.waitingReplyType.split("#")[0];
+            var cb_prefix = msg.waitingReply.split("#")[0];
             var title = l[chat.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(chat.lang, chat.media[mediaType].punishment));
             var time = ST.messageEvent(GHbot, chat.media[mediaType].PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
 

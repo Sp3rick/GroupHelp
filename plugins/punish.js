@@ -1,7 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js");
+const GHCommand = require("../api/LGHCommand.js");
 const { punishUser, unpunishUser, silentPunish, silentUnpunish, genPunishText, genUnpunishButtons, genUnpunishText, genRevokePunishButton } = require("../api/punishment.js");
-const { LGHUserNameByTarget } = require("../api/tagResolver.js");
-const { checkCommandPerms, parseHumanTime, telegramErrorToText, unwarnUser, clearWarns, LGHUserName, bold, getUnixTime } = require("../api/utils.js");
+const { LGHUserNameByMessage } = require("../api/tagResolver.js");
+const { parseHumanTime, telegramErrorToText, unwarnUser, clearWarns, LGHUserName, bold, getUnixTime } = require("../api/utils.js");
 
 function main(args)
 {
@@ -11,10 +12,11 @@ function main(args)
 
     l = global.LGHLangs; //importing langs object
 
-    GHbot.onMessage( (msg, chat, user) => {
-
+    var commandsList = ["COMMAND_DELETE", "COMMAND_DELWARN", "COMMAND_DELKICK", "COMMAND_DELMUTE", "COMMAND_DELBAN", "COMMAND_WARN",
+    "COMMAND_UNWARN", "COMMAND_KICK", "COMMAND_MUTE", "COMMAND_UNMUTE", "COMMAND_BAN", "COMMAND_UNBAN"];
+    GHCommand.registerCommands(commandsList, async (msg, chat, user, private, lang, key, keyLang) => {
         if(!msg.chat.isGroup) return;
-        if(user.waitingReply) return;
+        if(msg.waitingReply) return;
 
         var command = msg.command;
         var lang = msg.chat.lang;
@@ -22,27 +24,13 @@ function main(args)
 
         var punishment = false;
         var removePunishment = false;
-        var commandDelete = msg.chat.isGroup && checkCommandPerms(command, "COMMAND_DELETE", user.perms, ["del"]);
+        var commandDelete = key == "COMMAND_DELETE";
         var silentDelete = false;
-        if(checkCommandPerms(command, "COMMAND_DELWARN", user.perms))
-        {
-            silentDelete = true;
-            punishment = 1;
-        }
-        if(checkCommandPerms(command, "COMMAND_DELKICK", user.perms))
-        {
-            silentDelete = true;
-            punishment = 2;
-        }
-        if(checkCommandPerms(command, "COMMAND_DELMUTE", user.perms))
-        {
-            silentDelete = true;
-            punishment = 3;
-        }
-        if(checkCommandPerms(command, "COMMAND_DELBAN", user.perms))
-        {
-            silentDelete = true;
-            punishment = 4;
+        switch (key) {
+            case "COMMAND_DELWARN":silentDelete=true;punishment=1;break;
+            case "COMMAND_DELKICK":silentDelete=true;punishment=2;break;
+            case "COMMAND_DELMUTE":silentDelete=true;punishment=3;break;
+            case "COMMAND_DELBAN":silentDelete=true;punishment=4;break;
         }
 
         if( commandDelete || silentDelete)
@@ -53,30 +41,22 @@ function main(args)
                 return;
             }
             TGbot.deleteMessages(msg.chat.id, [msg.message_id, msg.reply_to_message.message_id]);
-            var fullUsername = LGHUserNameByTarget(msg, target.id);
+            var fullUsername = LGHUserNameByMessage(msg, target.id);
             if(!silentDelete && command.args && command.args.length > 0 && (getUnixTime() - msg.reply_to_message.date < 172800))
                 GHbot.sendMessage(user.id, msg.chat.id, l[lang].MESSAGE_BEEN_DELETED_REASON
                 .replace("{name}",fullUsername).replace("{reason}",bold(command.args)),
                 {parse_mode: "HTML"});
         }
 
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_WARN", user.perms))
-            punishment = 1;
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNWARN", user.perms))
-            removePunishment = 1;
-
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_KICK", user.perms))
-            punishment = 2;
-
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_MUTE", user.perms))
-            punishment = 3;
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNMUTE", user.perms))
-            removePunishment = 3;
-
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_BAN", user.perms))
-            punishment = 4;
-        if( msg.chat.isGroup && checkCommandPerms(command, "COMMAND_UNBAN", user.perms))
-            removePunishment = 4;
+        switch (key) {
+            case "COMMAND_WARN":punishment=1;break;
+            case "COMMAND_UNWARN":removePunishment=1;break;
+            case "COMMAND_KICK":punishment=2;break;
+            case "COMMAND_MUTE":punishment=3;break;
+            case "COMMAND_UNMUTE":removePunishment=3;break;
+            case "COMMAND_BAN":punishment=4;break;
+            case "COMMAND_UNBAN":punishment=4;break;
+        }
 
         if((punishment || removePunishment) && !target)
         {
@@ -104,8 +84,7 @@ function main(args)
         }
         if(removePunishment)
             unpunishUser(GHbot, user.id, msg.chat, target, removePunishment, command.args)
-
-    } )
+    })
 
     GHbot.onCallback( async (cb, chat, user) => {
 
