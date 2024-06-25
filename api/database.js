@@ -210,7 +210,7 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
             })
             fs.writeFileSync(file, JSON.stringify(chat));
         })
-        
+
         var userFiles = fs.readdirSync(usersDir);
         userFiles.forEach((fileName)=>{
             var file = usersDir+"/"+fileName;
@@ -218,7 +218,7 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
             if(user.hasOwnProperty("waitingReplyType"))
                 delete user.waitingReplyType;
             user.waitingReply = false;
-            fs.writeFileSync(file, JSON.stringify(chat));
+            fs.writeFileSync(file, JSON.stringify(user));
         });
             
     }
