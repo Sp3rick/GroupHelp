@@ -1,6 +1,6 @@
 const TelegramBot = require("node-telegram-bot-api");
 const ST = require("./setTime.js");
-const {handlePunishmentCallback, genPunishButtons, punishmentToFullText, punishmentToText} = require("../utils.js");
+const {handlePunishmentCallback, genPunishButtons, punishmentToFullText, punishmentToText} = require("../utils/utils.js");
 const GH = require("../../GHbot.js");
 
 /** 

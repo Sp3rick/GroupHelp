@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {isNumber, genSetNumKeyboard, waitReplyForChat} = require("../utils.js");
+const {isNumber, genSetNumKeyboard, waitReplyForChat, isUserWaitingReply} = require("../utils/utils.js");
 const GH = require("../../GHbot.js");
 
 /** 
@@ -30,9 +30,7 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 
     var msg = cb.message;
 
-    var settingsChatId = cb.data.split(":")[1];
-
-    if(!msg.waitingReply.startsWith(cb_prefix+"#SNUM") || msg.waitingReply == false)
+    if(isUserWaitingReply(user, chat, cb.chat.isGroup))
     {
         var callback = cb_prefix+"#SNUM";
         waitReplyForChat(db, callback, user, chat, msg.chat.isGroup);
@@ -73,7 +71,7 @@ function callbackEvent(GHbot, db, currentNumber, cb, chat, user, cb_prefix, retu
 
         var errorCb = {show_alert:true}
 
-        options.reply_markup.inline_keyboard = genSetNumKeyboard(cb_prefix, settingsChatId);
+        options.reply_markup.inline_keyboard = genSetNumKeyboard(cb_prefix, chat.id);
 
         returnButtons.forEach(button => {
             options.reply_markup.inline_keyboard.push( button );
@@ -138,11 +136,11 @@ function messageEvent(GHbot, currentNumber, msg, chat, user, cb_prefix, returnBu
         parse_mode : "HTML",
         reply_markup : 
         {
-            inline_keyboard : [[{text: l[user.lang].BACK_BUTTON, callback_data: cb_prefix+"#SNUM_MENU:"+settingsChatId}]] 
+            inline_keyboard : [[{text: l[user.lang].BACK_BUTTON, callback_data: cb_prefix+"#SNUM_MENU:"+chat.id}]] 
         } 
     }
 
-    options.reply_markup.inline_keyboard = genSetNumKeyboard(cb_prefix, settingsChatId);
+    options.reply_markup.inline_keyboard = genSetNumKeyboard(cb_prefix, chat.id);
     returnButtons.forEach(button => {
         options.reply_markup.inline_keyboard.push( button );
     })

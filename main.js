@@ -1,12 +1,12 @@
 var LGHelpTemplate = require("./GHbot.js");
-const {parseCommand} = require( __dirname + "/api/utils.js" );
+const {parseCommand} = require( __dirname + "/api/utils/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( "./api/database.js" );
-const RM = require("./api/rolesManager.js");
-const TR = require("./api/tagResolver.js");
+const RM = require("./api/utils/rolesManager.js");
+const TR = require("./api/tg/tagResolver.js");
 const TelegramBot = require('node-telegram-bot-api');
-const GHCommand = require("./api/LGHCommand.js");
-const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime, unsetWaitReply } = require("./api/utils.js");
+const GHCommand = require("./api/tg/LGHCommand.js");
+const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime, unsetWaitReply } = require("./api/utils/utils.js");
   
 
 async function main(config) {

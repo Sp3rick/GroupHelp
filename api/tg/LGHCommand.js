@@ -1,4 +1,4 @@
-const GH = require("../GHbot.js");
+const GH = require("../../GHbot.js");
 l = global.LGHLangs;
 /**
  * @typedef {Object} resolveCommandKeyReturn

@@ -1,5 +1,5 @@
 const LGHelpTemplate = require("../GHbot.js")
-const { getUnixTime, welcomeNewUser } = require( "../api/utils.js" );
+const { getUnixTime, welcomeNewUser } = require( "../api/utils/utils.js" );
 const MSGMK = require( "../api/editors/MessageMaker.js" )
 
 function main(args)

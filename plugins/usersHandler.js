@@ -1,9 +1,9 @@
 var LGHelpTemplate = require("../GHbot.js");
-var RM = require("../api/rolesManager.js");
-var {genPermsReport, genMemberInfoText, getUnixTime, handleTelegramGroupError, isAdminOfChat, isChatAllowed, sendCommandReply, telegramErrorToText} = require ("../api/utils.js");
-var { silentPunish } = require("../api/punishment.js");
-const { getAdmins } = require("../api/tagResolver.js");
-const GHCommand = require("../api/LGHCommand.js");
+var RM = require("../api/utils/rolesManager.js");
+var {genPermsReport, genMemberInfoText, getUnixTime, handleTelegramGroupError, isAdminOfChat, isChatAllowed, sendCommandReply, telegramErrorToText} = require ("../api/utils/utils.js");
+var { silentPunish } = require("../api/utils/punishment.js");
+const { getAdmins } = require("../api/tg/tagResolver.js");
+const GHCommand = require("../api/tg/LGHCommand.js");
 
 function main(args)
 {

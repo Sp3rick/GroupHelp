@@ -1,8 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {sendCommandReply} = require( "../api/utils.js" );
+const {sendCommandReply} = require( "../api/utils/utils.js" );
 const MSGMK = require( "../api/editors/MessageMaker.js" )
 const CMDPerms = require("../api/editors/CommandsPerms.js")
-const GHCommand = require("../api/LGHCommand.js");
+const GHCommand = require("../api/tg/LGHCommand.js");
 
 function main(args)
 {
@@ -94,7 +94,7 @@ function main(args)
         if( cb.data.startsWith("S_RULES#CMDPERMS") )
         {
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+chat.id}]];
-            var newChat = CMDPerms.callbackEvent(GHbot, db, chat, cb, cb.chat, user, "S_RULES", returnButtons)
+            var newChat = CMDPerms.callbackEvent(GHbot, db, chat, cb, chat, user, "S_RULES", returnButtons)
             if(newChat) db.chats.update(newChat);
         }
 

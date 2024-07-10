@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName, waitReplyForChat } = require("../utils.js");
+const { isNumber, genSetNumKeyboard, bold, usernameOrFullName, fullName, waitReplyForChat } = require("../utils/utils.js");
 const GH = require("../../GHbot.js");
 
 /**

@@ -33,9 +33,9 @@ function newPunishObj()
 
 /**
  * 
- * @param {import("../GHbot").LGHPunish} a - operand 1
- * @param {import("../GHbot").LGHPunish} b - operand 2
- * @returns {import("../GHbot").LGHPunish}
+ * @param {import("../../GHbot").LGHPunish} a - operand 1
+ * @param {import("../../GHbot").LGHPunish} b - operand 2
+ * @returns {import("../../GHbot").LGHPunish}
  */
 function sumPunishObj(a, b)
 {
@@ -47,9 +47,9 @@ function sumPunishObj(a, b)
 }
 
 /**
- * @param {import("../GHbot").LGHPunish} a - the supposed greater punish
- * @param {import("../GHbot").LGHPunish} b - the supposed smaller punish
- * @returns {import("../GHbot").LGHPunish}
+ * @param {import("../../GHbot").LGHPunish} a - the supposed greater punish
+ * @param {import("../../GHbot").LGHPunish} b - the supposed smaller punish
+ * @returns {import("../../GHbot").LGHPunish}
  */
 function isPunishGreater(a, b)
 {

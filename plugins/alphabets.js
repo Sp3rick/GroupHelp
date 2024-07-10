@@ -1,8 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js");
 const ABP = require("../api/editors/setAlphabetPunish.js");
-const { punishUser } = require("../api/punishment.js");
-const { isString } = require("../api/utils.js");
-const RM = require("../api/rolesManager.js");
+const { punishUser } = require("../api/utils/punishment.js");
+const { isString } = require("../api/utils/utils.js");
+const RM = require("../api/utils/rolesManager.js");
 
 l = global.LGHLangs; //importing langs object
 

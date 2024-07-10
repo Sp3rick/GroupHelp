@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { pushUserRequest } = require("./api/SafeTelegram");
+const { pushUserRequest } = require("./api/tg/SafeTelegram");
 /**
  * @typedef {import("node-telegram-bot-api")} TelegramBot
  */
@@ -259,7 +259,8 @@ const { pushUserRequest } = require("./api/SafeTelegram");
  * @property {LGHAdminList|null} admins - array with known admins objects (user data anonymized)
  * @property {String|null} lang - current chat lang
  * @property {String|null} currency - currency of chat, default to USD
- * @property {Boolean} isGroup - result of (chat.type == "supergroup" || chat.type == "group")
+ * @property {string|false} link - group access link
+ * @property {Boolean} isGroup - temporary item, result of (chat.type == "supergroup" || chat.type == "group")
  * @property {Object.<string, userStatus>|null} users - Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
  * @property {Object.<string, LGHRole>|null} roles - data about a specific role, full role Object if it's a custom role (key with a number)
  * @property {LGHPerms} basePerms - base permissions applyed to every user

@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseHumanTime, secondsToHumanTime, waitReplyForChat} = require("../utils.js");
+const {parseHumanTime, secondsToHumanTime, waitReplyForChat} = require("../utils/utils.js");
 const GH = require("../../GHbot.js");
 
 /** 

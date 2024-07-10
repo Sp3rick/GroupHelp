@@ -1,9 +1,9 @@
 var LGHelpTemplate = require("../GHbot.js");
 const GH = require("../GHbot.js");
-const { genPunishButtons, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, tag, usernameOrFullName, welcomeNewUser, unsetWaitReply, waitReplyForChat } = require("../api/utils.js");
+const { genPunishButtons, secondsToHumanTime, punishmentToFullText, handlePunishmentCallback, punishmentToText, getUnixTime, tag, usernameOrFullName, welcomeNewUser, unsetWaitReply, waitReplyForChat } = require("../api/utils/utils.js");
 const ST = require("../api/editors/setTime.js");
 const MSGMK = require( "../api/editors/MessageMaker.js" )
-const { punishUser, silentPunish } = require("../api/punishment.js");
+const { punishUser, silentPunish } = require("../api/utils/punishment.js");
 
 const svg = require("svg-captcha");
 const canvas = require("canvas");
@@ -11,7 +11,7 @@ const {Canvg, presets} = require("canvg");
 const color = require("randomcolor");
 const {DOMParser} = require("@xmldom/xmldom");
 const fetch = require("node-fetch");
-const { userToTarget } = require("../api/rolesManager.js");
+const { userToTarget } = require("../api/utils/rolesManager.js");
 
 l = global.LGHLangs; //importing langs object
 
@@ -225,7 +225,7 @@ function main(args)
             var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_CAPTCHA_BUTTON:" + chat.id }]]
             var cb_prefix = msg.waitingReply.split("#")[0];
             var title = l[user.lang].CAPTCHA_TIME_TITLE.replace("{punishment}", punishmentToText(user.lang, chat.captcha.punishment));
-            var time = ST.messageEvent(GHbot, chat.captcha.time, msg, msg.chat, user, cb_prefix, returnButtons, title, minimumTimeLimit, maxTimeLimit);
+            var time = ST.messageEvent(GHbot, chat.captcha.time, msg, chat, user, cb_prefix, returnButtons, title, minimumTimeLimit, maxTimeLimit);
 
             if (time != -1 && time != chat.captcha.time) {
                 chat.captcha.time = time;
@@ -237,7 +237,7 @@ function main(args)
             var returnButtons = [[{ text: l[user.lang].BACK_BUTTON, callback_data: "S_CAPTCHA_BUTTON:" + chat.id }]]
             var cb_prefix = msg.waitingReply.split("#")[0];
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(user.lang, chat.captcha.punishment));
-            var time = ST.messageEvent(GHbot, chat.captcha.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
+            var time = ST.messageEvent(GHbot, chat.captcha.PTime, msg, chat, user, cb_prefix, returnButtons, title);
 
             if (time != -1 && time != chat.captcha.PTime) {
                 chat.captcha.PTime = time;
@@ -301,7 +301,7 @@ function main(args)
             var cb_prefix = cb.data.split("#")[0];
             var currentTime = chat.captcha.PTime;
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(lang, chat.captcha.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, returnButtons, title)
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
 
             if (time != -1 && time != currentTime) {
                 chat.captcha.PTime = time;
@@ -375,7 +375,7 @@ function main(args)
             var cb_prefix = cb.data.split("#")[0];
             var currentTime = chat.captcha.time;
             var title = l[lang].CAPTCHA_TIME_TITLE.replace("{punishment}", punishmentToText(lang, chat.captcha.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, returnButtons, title, minimumTimeLimit, maxTimeLimit)
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title, minimumTimeLimit, maxTimeLimit)
 
             if (time != -1 && time != currentTime) {
                 chat.captcha.time = time;

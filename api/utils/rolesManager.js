@@ -1,5 +1,5 @@
 const {genUserList, bold, isString, anonymizeAdmins, LGHUserName, loadChatUserId, isAdminOfChat} = require("./utils.js");
-const GH = require("../GHbot.js");
+const GH = require("../../GHbot.js");
 const TelegramBot = require("node-telegram-bot-api");
 l = global.LGHLangs;
 

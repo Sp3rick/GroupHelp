@@ -1,7 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
-const {genSettingsKeyboard, bold, code, genSettingsText, genSettings2Keyboard, link} = require( "../api/utils.js" );
+const {genSettingsKeyboard, bold, code, genSettingsText, genSettings2Keyboard, link} = require( "../api/utils/utils.js" );
 const CMDPerms = require("../api/editors/CommandsPerms.js")
-const GHCommand = require("../api/LGHCommand.js");
+const GHCommand = require("../api/tg/LGHCommand.js");
 
 
 function main(args)
@@ -145,7 +145,7 @@ function main(args)
         if(cb.data.startsWith("S_#CMDPERMS"))
         {
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_PERMS_BUTTON:"+chat.id}]];
-            var newChat = CMDPerms.callbackEvent(GHbot, db, chat, cb, cb.chat, user, "S_", returnButtons)
+            var newChat = CMDPerms.callbackEvent(GHbot, db, chat, cb, chat, user, "S_", returnButtons)
             if(newChat) db.chats.update(newChat);
         }
 
@@ -227,9 +227,6 @@ function main(args)
             GHbot.answerCallbackQuery(user.id, cb.id);
 
         }
-
-        if( cb.data.startsWith("S_CLOSE_BUTTON") )
-            TGbot.deleteMessages(cb.chat.id, [msg.message_id]);
 
         if( cb.data.startsWith( "LANGSET=" ) ) //expected "LANGSET=en_en:chat.id" or "LANGSET=en_en" 
         {

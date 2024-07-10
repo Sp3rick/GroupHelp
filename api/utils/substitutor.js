@@ -1,7 +1,7 @@
-const { LGHUserName, tag, isNumber, replaceLast } = require("./utils");
-const cp = require("./cryptoPrices");
+const { LGHUserName, tag, isNumber, replaceLast } = require("./utils.js");
+const cp = require("../external/cryptoPrices");
 const TelegramBot = require("node-telegram-bot-api");
-const GH = require("../GHbot.js");
+const GH = require("../../GHbot.js");
 
 l = global.LGHLangs;
 

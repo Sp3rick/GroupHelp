@@ -1,9 +1,9 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, textToPunishment, genPunishButtons, handlePunishmentCallback } = require("../api/utils.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, textToPunishment, genPunishButtons, handlePunishmentCallback } = require("../api/utils/utils.js");
 const SN = require("../api/editors/setNum.js");
 const ST = require("../api/editors/setTime.js");
-const RM = require("../api/rolesManager.js");
-const { punishUser } = require("../api/punishment.js");
+const RM = require("../api/utils/rolesManager.js");
+const { punishUser } = require("../api/utils/punishment.js");
 
 //object structure: global.LGHFlood[chatId+userId] = { lastPunishment, grouped: { [groupId] : {ids: [messageIds], time} }, single: { [messageId] : time } }
 global.LGHFlood = {};
@@ -75,7 +75,7 @@ function main(args)
         {
             var currentTime = chat.flood.PTime;
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, chat.flood.punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, returnButtons, title)
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
 
             if(time != -1 && time != currentTime)
             {
@@ -222,8 +222,8 @@ function main(args)
         var cb_prefix = msg.waitingReply.split("#")[0];
         if( msg.waitingReply.startsWith("S_FLOOD_M_PTIME#STIME") )
         {
-            var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.flood.punishment));
-            var time = ST.messageEvent(GHbot, chat.flood.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
+            var title = l[user.lang].SEND_LINK_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.flood.punishment));
+            var time = ST.messageEvent(GHbot, chat.flood.PTime, msg, chat, user, cb_prefix, returnButtons, title);
 
             if(time != -1 && time != chat.flood.PTime)
             {

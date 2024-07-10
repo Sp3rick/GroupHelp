@@ -1,8 +1,8 @@
 var LGHelpTemplate = require("../GHbot.js");
-const GHCommand = require("../api/LGHCommand.js");
-const { punishUser, unpunishUser, silentPunish, silentUnpunish, genPunishText, genUnpunishButtons, genUnpunishText, genRevokePunishButton } = require("../api/punishment.js");
-const { LGHUserNameByMessage } = require("../api/tagResolver.js");
-const { parseHumanTime, telegramErrorToText, unwarnUser, clearWarns, LGHUserName, bold, getUnixTime } = require("../api/utils.js");
+const GHCommand = require("../api/tg/LGHCommand.js");
+const { punishUser, unpunishUser, silentPunish, silentUnpunish, genPunishText, genUnpunishButtons, genUnpunishText, genRevokePunishButton } = require("../api/utils/punishment.js");
+const { LGHUserNameByMessage } = require("../api/tg/tagResolver.js");
+const { parseHumanTime, telegramErrorToText, unwarnUser, clearWarns, LGHUserName, bold, getUnixTime } = require("../api/utils/utils.js");
 
 function main(args)
 {

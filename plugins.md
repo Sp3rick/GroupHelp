@@ -6,7 +6,7 @@ If you need documentation look at here [documentation.md](https://github.com/Sp3
 ## Roles Manager
 (api/rolesManager.js)
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 This plugin manages users data and roles in the group
 
@@ -90,7 +90,7 @@ chat.users[id].perms > chat.users[id].adminPerms > chat.roles[role].perms (highe
 ## Message Maker
 (api/MessageMaker.js)
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 <b>simpleMedia Object:</b>
 
@@ -185,7 +185,7 @@ Syntax: FIAT{SYMBOL:OPTION}
 
 ## setChatBasedPunish.js
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 >Depends on api/setTime.js
 
 A settings panel to edit LGHChatBasedPunish object (avaiable on GHbot.js)
@@ -197,7 +197,7 @@ A settings panel to edit LGHChatBasedPunish object (avaiable on GHbot.js)
 ## usersHandler.js
 
 >Depends on api/rolesManager.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Adds on global.roles[roleName] data about pre-made roles: founder, moderator, muter, cleaner, helper, free.
 
@@ -212,7 +212,7 @@ Added commands: /reload, /staff, /info, /perms, /forgot
 ## promote.js
 
 >Depends on api/rolesManager.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Handle promotions and unpromotions commands, allow also to edit single admin perms
 
@@ -225,7 +225,7 @@ Added commands: /free, /unfree, /helper, /unhelper, /cleaner, /uncleaner, /muter
 ## punish.js
 
 >Depends on api/punishments.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Handle punish and unpunish commands
 
@@ -237,7 +237,7 @@ Added commands: /delete, /warn, /unwarn, /kick, /mute, /unmute, /ban, /unban
 
 ## Settings Plugin
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Manage settings for single users and settings panel for chats, lang setting is included
 
@@ -248,7 +248,7 @@ Added commands: /settings
 
 ## CommandsPerms.js
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 A menu to change basic commands permissions for every on group or admins, in future will allow to change perms for roles 
 
@@ -259,7 +259,7 @@ A menu to change basic commands permissions for every on group or admins, in fut
 ## Rules Plugin
 
 >Depends on api/MessageMaker.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Module to add rules of the group and allow to edit these trough settings
 
@@ -276,7 +276,7 @@ Note: if format is false or entities unavaiable set message parse_mode to HTML (
 ## Welcome Plugin
 
 >Depends on api/MessageMaker.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Module to allow set up a welcome message for new users in the group
 
@@ -303,7 +303,7 @@ LGHWelcome Object:
 ## Anti-Flood Plugin
 
 >Depends on api/rolesManager.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 >Depends on api/setNum.js
 >Depends on api/setTime.js
 
@@ -328,7 +328,7 @@ LGHFlood Object:
 ## Anti-Spam Plugin
 
 >Depends on api/punishment.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 >Depends on api/setNum.js
 >Depends on api/setExceptions.js
 >Depends on api/setChatBasedPunishment.js
@@ -353,7 +353,7 @@ LGHSpam Object:
 ## Captcha Plugin
 
 >Depends on api/punishment.js
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 >Depends on api/setTime.js
 >Depends on api/MessageMaker.js
 >Depends on svg-captcha
@@ -410,7 +410,7 @@ LGHSpam Object:
 
 ## warns.js
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 >Depends on api/setNum.js
 >Depends on api/setTime.js
 
@@ -434,6 +434,6 @@ chat.warns Warns Object:
 
 ## pin.js
 
->Depends on api/utils.js
+>Depends on api/utils/utils.js
 
 Adds /pin command and handle all related things

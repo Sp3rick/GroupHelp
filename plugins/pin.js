@@ -1,6 +1,6 @@
 var LGHelpTemplate = require("../GHbot.js")
-const { telegramErrorToText, sendCommandReply } = require( "../api/utils.js" );
-const GHCommand = require("../api/LGHCommand.js");
+const { telegramErrorToText, sendCommandReply } = require( "../api/utils/utils.js" );
+const GHCommand = require("../api/tg/LGHCommand.js");
 
 function main(args)
 {

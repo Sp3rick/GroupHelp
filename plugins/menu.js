@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { unsetWaitReply, waitReplyForChat } = require("../api/utils.js");
+const { unsetWaitReply, waitReplyForChat } = require("../api/utils/utils.js");
 
 function main(args)
 {

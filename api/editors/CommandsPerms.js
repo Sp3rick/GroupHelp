@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const { tradCommand } = require("../utils.js");
+const { tradCommand } = require("../utils/utils.js");
 const GH = require("../../GHbot.js");
 
 /** 
@@ -101,7 +101,7 @@ function callbackEvent(GHbot, db, settingsChat, cb, chat, user, cb_prefix, retur
     //this menu has already commands intended for every user, admin commands should be in separate panel still in CommandsPerms
     if(cb.data.startsWith(prefix+"_MENU"))
     {
-        var opts = {parse_mode:"HTML", chat_id:chat.id, message_id:msg.message_id};
+        var opts = {parse_mode:"HTML", chat_id:cb.chat.id, message_id:msg.message_id};
 
         text = l[lang].COMMAND_PERMS_DESCRIPTION;
         
@@ -110,7 +110,8 @@ function callbackEvent(GHbot, db, settingsChat, cb, chat, user, cb_prefix, retur
         var meL = genCommandButtonsLine(settingsChat, "COMMAND_ME", prefix, settingsChatId);
         var infoL = genCommandButtonsLine(settingsChat, "COMMAND_INFO", prefix, settingsChatId);
         var permsL = genCommandButtonsLine(settingsChat, "COMMAND_PERMS", prefix, settingsChatId);
-        buttons = [staffL, rulesL, meL, infoL, permsL];
+        var linkL = genCommandButtonsLine(settingsChat, "COMMAND_LINK", prefix, settingsChatId);
+        buttons = [staffL, rulesL, meL, infoL, permsL, linkL];
         //TODO: this below is going to include all commands, it's going to be added with custom roles, the return button will be avaiable also there
         //buttons.push([{text:l[lang].COMMAND_PERMS_ADMINS, callback_data:prefix+"_ROLES:"+settingsChatId}])
         returnButtons.forEach((line) => {buttons.push(line)});

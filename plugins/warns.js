@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { genPunishmentTimeSetButton, punishmentToText, punishmentToFullText, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns, textToPunishment } = require("../api/utils.js");
+const { genPunishmentTimeSetButton, punishmentToText, punishmentToFullText, bold, secondsToHumanTime, LGHUserName, getUserWarns, clearWarns, textToPunishment } = require("../api/utils/utils.js");
 const SN = require("../api/editors/setNum.js");
 const ST = require("../api/editors/setTime.js");
 
@@ -26,7 +26,7 @@ function main(args)
         if( msg.waitingReply.startsWith("S_WARN_PTIME#STIME") )
         {
             var title = l[user.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(user.lang, chat.warns.punishment));
-            var time = ST.messageEvent(GHbot, chat.warns.PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
+            var time = ST.messageEvent(GHbot, chat.warns.PTime, msg, chat, user, cb_prefix, returnButtons, title);
 
             if(time != -1 && time != chat.warns.PTime)
             {
@@ -148,7 +148,7 @@ function main(args)
         if(cb.data.startsWith("S_WARN_PTIME#STIME"))
         {
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}",punishmentToText(lang, chat.warns.punishment));
-            var time = ST.callbackEvent(GHbot, db, chat.warns.PTime, cb, cb.chat, user, cb_prefix, returnButtons, title);
+            var time = ST.callbackEvent(GHbot, db, chat.warns.PTime, cb, chat, user, cb_prefix, returnButtons, title);
 
             if(time != -1 && time != chat.warns.PTime)
             {

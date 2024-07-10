@@ -1,8 +1,8 @@
 const fs = require( "fs" );
-const { usernameOrFullName, isNumber, code, loadChatUserId } = require("./utils");
-const RM = require("./rolesManager");
+const { usernameOrFullName, isNumber, code, loadChatUserId } = require("../utils/utils.js");
+const RM = require("../utils/rolesManager.js");
 const TelegramBot = require("node-telegram-bot-api");
-const GH = require("../GHbot.js");
+const GH = require("../../GHbot.js");
 
 if(!global.LGHTagToId) global.LGHTagToId = {};
 if(!global.LGHIdToTag) global.LGHIdToTag = {};

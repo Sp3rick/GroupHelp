@@ -1,7 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML, waitReplyForChat, unsetWaitReply} = require("../utils.js");
-const { pushUserRequest } = require("../SafeTelegram.js");
-const { substitute } = require("../substitutor.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML, waitReplyForChat, unsetWaitReply} = require("../utils/utils.js");
+const { pushUserRequest } = require("../tg/SafeTelegram.js");
+const { substitute } = require("../utils/substitutor.js");
 const GH = require("../../GHbot.js");
 
 /** 

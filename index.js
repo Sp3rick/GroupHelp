@@ -1,10 +1,10 @@
 process.env.NTBA_FIX_319 = 1;
 process.env.NTBA_FIX_350 = 0;
-global.LGHVersion = "0.2.7.3";
+global.LGHVersion = "0.2.8";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
-const TR = require("./api/tagResolver.js");
-const cp = require("./api/cryptoPrices.js");
+const TR = require("./api/tg/tagResolver.js");
+const cp = require("./api/external/cryptoPrices.js");
 const config = JSON.parse( fs.readFileSync( __dirname + "/config.json" ) );
 
 console.log("Starting...")
@@ -25,7 +25,7 @@ async function main()
     console.log( "-loaded principal language: \"" + l[rLang].LANG_NAME + "\" " + rLang )
 
     var langs = fs.readdirSync( __dirname + "/langs" );
-    langs = langs.slice( langs.indexOf(rLang + ".json")+1 );
+    langs.splice( langs.indexOf(rLang + ".json"), 1 );
 
     var defaultLangObjects = Object.keys(l[rLang])
     langs.forEach( (langFile) => {

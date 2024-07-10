@@ -1,7 +1,7 @@
 const fs = require( "fs" );
 const TelegramBot = require('node-telegram-bot-api');
-const {isValidChat, isValidUser, getUnixTime} = require( global.directory + "/api/utils.js" )
-var RM = require("../api/rolesManager.js");
+const {isValidChat, isValidUser, getUnixTime} = require( global.directory + "/api/utils/utils.js" )
+var RM = require("./utils/rolesManager.js");
 
 function newSpamObj()
 {
@@ -223,6 +223,24 @@ function updateDatabase(version, versionFile, chatsDir, usersDir)
             
     }
 
+    if(version == "0.2.7.3")
+        {
+            version = "0.2.8";
+            console.log("\tupdating from 0.2.7.3 to 0.2.8 ...");
+    
+            var chatFiles = fs.readdirSync(chatsDir);
+            chatFiles.forEach((fileName)=>{
+                var file = chatsDir+"/"+fileName;
+                var chat = JSON.parse(fs.readFileSync(file, "utf-8"));
+                if(!chat.basePerms.commands.includes("COMMAND_RELOAD"))
+                    chat.basePerms.commands.push("COMMAND_RELOAD");
+                chat.basePerms.commands.push("COMMAND_LINK");
+                chat.link = false;
+                fs.writeFileSync(file, JSON.stringify(chat));
+            })
+                
+        }
+
     //add new if here to update from latest dbVersion to new
 
 
@@ -305,8 +323,9 @@ function getDatabase(config) {
                 chat.admins = [];
                 chat.lang = config.reserveLang;
                 chat.currency = "USD";
+                chat.link = chat.username ? "https://t.me/"+chat.username : false;
                 chat.users = {};
-                chat.basePerms = RM.newPerms(["@COMMAND_RULES", "@COMMAND_ME", "@COMMAND_STAFF"]);
+                chat.basePerms = RM.newPerms(["COMMAND_RULES", "COMMAND_ME", "COMMAND_STAFF", "COMMAND_RELOAD", "COMMAND_LINK"]);
                 chat.adminPerms = RM.newPerms(["COMMAND_RULES", "@COMMAND_ME", "COMMAND_STAFF", "COMMAND_PERMS"]);
                 chat.roles = RM.newPremadeRolesObject();
                 chat.warns = { timed:{}, count:{}, limit:3, punishment:3, PTime: 0 };
@@ -423,6 +442,7 @@ function getDatabase(config) {
                 if(chat.hasOwnProperty("goodbye")) global.DBCHATS[chat.id].goodbye = chat.goodbye;
                 if(chat.hasOwnProperty("alphabets")) global.DBCHATS[chat.id].alphabets = chat.alphabets;
                 if(chat.hasOwnProperty("media")) global.DBCHATS[chat.id].media = chat.media;
+                if(chat.hasOwnProperty("link")) global.DBCHATS[chat.id].link = chat.link;
 
                 global.DBCHATS[chat.id].lastUse = now;
 

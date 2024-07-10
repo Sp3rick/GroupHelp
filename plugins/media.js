@@ -1,7 +1,7 @@
 var LGHelpTemplate = require("../GHbot.js");
-const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, genPunishButtons, handlePunishmentCallback, textToPunishment, isArray, isString } = require("../api/utils.js");
-const RM = require("../api/rolesManager.js");
-const { punishUser, newPunishObj, sumPunishObj, isPunishGreater } = require("../api/punishment.js");
+const { bold, punishmentToText, getUnixTime, genPunishmentTimeSetButton, punishmentToFullText, chunkArray, genPunishButtons, handlePunishmentCallback, textToPunishment, isArray, isString } = require("../api/utils/utils.js");
+const RM = require("../api/utils/rolesManager.js");
+const { punishUser, newPunishObj, sumPunishObj, isPunishGreater } = require("../api/utils/punishment.js");
 const ST = require("../api/editors/setTime.js");
 
 const LATIN_REGEX = /[a-zA-Z]/;
@@ -249,7 +249,7 @@ function main(args)
             var cb_prefix = cb.data.split("#")[0];
             var currentTime = chat.media[mediaType].PTime;
             var title = l[lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(lang, chat.media[mediaType].punishment));
-            var time = ST.callbackEvent(GHbot, db, currentTime, cb, cb.chat, user, cb_prefix, returnButtons, title)
+            var time = ST.callbackEvent(GHbot, db, currentTime, cb, chat, user, cb_prefix, returnButtons, title)
 
             if (time != -1 && time != currentTime)
                 chat.media[mediaType].PTime = time;
@@ -415,7 +415,7 @@ function main(args)
             var returnButtons = [[{ text: l[chat.lang].BACK_BUTTON, callback_data: pageCallback+":"+chat.id }]]
             var cb_prefix = msg.waitingReply.split("#")[0];
             var title = l[chat.lang].SEND_PUNISHMENT_DURATION.replace("{punishment}", punishmentToText(chat.lang, chat.media[mediaType].punishment));
-            var time = ST.messageEvent(GHbot, chat.media[mediaType].PTime, msg, msg.chat, user, cb_prefix, returnButtons, title);
+            var time = ST.messageEvent(GHbot, chat.media[mediaType].PTime, msg, chat, user, cb_prefix, returnButtons, title);
 
             if (time != -1 && time != chat.media[mediaType].PTime) {
                 chat.media[mediaType].PTime = time;

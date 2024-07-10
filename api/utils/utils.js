@@ -1,6 +1,6 @@
 const chrono = require('chrono-node');
 const TelegramBot = require('node-telegram-bot-api');
-const GH = require("../GHbot.js");
+const GH = require("../../GHbot.js");
 l = global.LGHLangs;
 
 function cleanHTML(text)
@@ -11,6 +11,10 @@ function cleanHTML(text)
 function bold(text)
 {
     return "<b>"+cleanHTML(text)+"</b>";
+}
+function italic(text)
+{
+    return "<i>"+cleanHTML(text)+"</i>";
 }
 function code(text)
 {
@@ -306,24 +310,24 @@ function genSettingsKeyboard(lang, chatId)
         [{text: l[lang].S_GOODBYE_BUTTON, callback_data: "S_GOODBYE_BUTTON:"+chatId},
         {text: l[lang].S_ALPHABETS_BUTTON, callback_data: "S_ALPHABETS#ABP:"+chatId}],
 
-        [{text: l[lang].S_CAPTCHA_BUTTON, callback_data: "S_CAPTCHA_BUTTON:"+chatId},
-        {text: l[lang].S_CHECKS_BUTTON, callback_data: "S_CHECKS_BUTTON:"+chatId}],
+        [{text: l[lang].S_CAPTCHA_BUTTON, callback_data: "S_CAPTCHA_BUTTON:"+chatId}/*,
+        {text: l[lang].S_CHECKS_BUTTON, callback_data: "S_CHECKS_BUTTON:"+chatId}*/],
 
-        [{text: l[lang].S_ADMIN_BUTTON, callback_data: "S_ADMIN_BUTTON:"+chatId},
-        {text: l[lang].S_BLOCKS_BUTTON, callback_data: "S_BLOCKS_BUTTON:"+chatId}],
+        //[{text: l[lang].S_ADMIN_BUTTON, callback_data: "S_ADMIN_BUTTON:"+chatId},
+        //{text: l[lang].S_BLOCKS_BUTTON, callback_data: "S_BLOCKS_BUTTON:"+chatId}],
 
-        [{text: l[lang].S_MEDIA_BUTTON, callback_data: "S_MEDIA_PAGE1:"+chatId},
-        {text: l[lang].S_PORN_BUTTON, callback_data: "S_PORN_BUTTON:"+chatId}],
+        [{text: l[lang].S_MEDIA_BUTTON, callback_data: "S_MEDIA_PAGE1:"+chatId}/*,
+        {text: l[lang].S_PORN_BUTTON, callback_data: "S_PORN_BUTTON:"+chatId}*/],
 
-        [{text: l[lang].S_WARN_BUTTON, callback_data: "S_WARN_BUTTON:"+chatId},
-        {text: l[lang].S_NIGHT_BUTTON, callback_data: "S_NIGHT_BUTTON:"+chatId}],
+        [{text: l[lang].S_WARN_BUTTON, callback_data: "S_WARN_BUTTON:"+chatId}/*,
+        {text: l[lang].S_NIGHT_BUTTON, callback_data: "S_NIGHT_BUTTON:"+chatId}*/],
 
-        [{text: l[lang].S_TAG_BUTTON, callback_data: "S_TAG_BUTTON:"+chatId},
+        [/*{text: l[lang].S_TAG_BUTTON, callback_data: "S_TAG_BUTTON:"+chatId},*/
         {text: l[lang].S_LINK_BUTTON, callback_data: "S_LINK_BUTTON:"+chatId}],
 
-        [{text: l[lang].S_APPROVEMODE_BUTTON, callback_data: "S_APPROVEMODE_BUTTON:"+chatId}],
+        //[{text: l[lang].S_APPROVEMODE_BUTTON, callback_data: "S_APPROVEMODE_BUTTON:"+chatId}],
 
-        [{text: l[lang].S_MESSAGESDELETION_BUTTON, callback_data: "S_MESSAGESDELETION_BUTTON:"+chatId}],
+        //[{text: l[lang].S_MESSAGESDELETION_BUTTON, callback_data: "S_MESSAGESDELETION_BUTTON:"+chatId}],
 
         [{text: l[lang].FLAG + "Lang", callback_data: "LANGS_BUTTON:"+chatId},
         {text: l[lang].S_CLOSE_BUTTON, callback_data: "S_CLOSE_BUTTON:"+chatId},
@@ -358,18 +362,18 @@ function genSettings2Keyboard(lang, chatId)
 
     var keyboard =
     [
-        [{text: l[lang].S_TOPIC_BUTTON, callback_data: "S_TOPIC_BUTTON:"+chatId}],
-        [{text: l[lang].S_WORDSBAN_BUTTON, callback_data: "S_WORDSBAN_BUTTON:"+chatId}],
-        [{text: l[lang].S_RECURRING_BUTTON, callback_data: "S_RECURRING_BUTTON:"+chatId}],
-        [{text: l[lang].S_MEMBERS_BUTTON, callback_data: "S_MEMBERS_BUTTON:"+chatId}],
-        [{text: l[lang].S_MASKED_BUTTON, callback_data: "S_MASKED_BUTTON:"+chatId}],
-        [{text: l[lang].S_CHANNEL_BUTTON, callback_data: "S_CHANNEL_BUTTON:"+chatId}],
-        [{text: l[lang].S_CUSTOMCMD_BUTTON, callback_data: "S_CUSTOMCMD_BUTTON:"+chatId}],
-        [{text: l[lang].S_MAGICCMD_BUTTON, callback_data: "S_MAGICCMD_BUTTON:"+chatId}],
-        [{text: l[lang].S_LENGTH_BUTTON, callback_data: "S_LENGTH_BUTTON:"+chatId}],
+        //[{text: l[lang].S_TOPIC_BUTTON, callback_data: "S_TOPIC_BUTTON:"+chatId}],
+        //[{text: l[lang].S_WORDSBAN_BUTTON, callback_data: "S_WORDSBAN_BUTTON:"+chatId}],
+        //[{text: l[lang].S_RECURRING_BUTTON, callback_data: "S_RECURRING_BUTTON:"+chatId}],
+        //[{text: l[lang].S_MEMBERS_BUTTON, callback_data: "S_MEMBERS_BUTTON:"+chatId}],
+        //[{text: l[lang].S_MASKED_BUTTON, callback_data: "S_MASKED_BUTTON:"+chatId}],
+        //[{text: l[lang].S_CHANNEL_BUTTON, callback_data: "S_CHANNEL_BUTTON:"+chatId}],
+        //[{text: l[lang].S_CUSTOMCMD_BUTTON, callback_data: "S_CUSTOMCMD_BUTTON:"+chatId}],
+        //[{text: l[lang].S_MAGICCMD_BUTTON, callback_data: "S_MAGICCMD_BUTTON:"+chatId}],
+        //[{text: l[lang].S_LENGTH_BUTTON, callback_data: "S_LENGTH_BUTTON:"+chatId}],
 
-        [{text: l[lang].S_PERMS_BUTTON, callback_data: "S_PERMS_BUTTON:"+chatId},
-        {text: l[lang].S_LOGC_BUTTON, callback_data: "S_LOGC_BUTTON:"+chatId}],
+        [{text: l[lang].S_PERMS_BUTTON, callback_data: "S_PERMS_BUTTON:"+chatId}/*,
+        {text: l[lang].S_LOGC_BUTTON, callback_data: "S_LOGC_BUTTON:"+chatId}*/],
 
         [{text: l[lang].BACK2_BUTTON, callback_data: "SETTINGS_HERE:"+chatId},
         {text: l[lang].S_CLOSE_BUTTON, callback_data: "S_CLOSE_BUTTON:"+chatId},
@@ -1648,9 +1652,29 @@ function unsetWaitReply(db, user, chat, onGroup)
     }
 }
 
+function isUserWaitingReply(user, chat, onGroup)
+{
+    onGroup = onGroup || false;
+
+    if(onGroup)
+        return chat.users[user.id].waitingReply ? true : false;
+    else
+        return user.waitingReply ? true : false;
+}
+
+function makeLinkText(callback)
+{
+    
+}
+function makeLinkButtons(callback)
+{
+
+}
+
 module.exports = 
 {
     bold : bold,
+    italic: italic,
     code : code,
     tag : tag,
     link : link,
@@ -1720,4 +1744,7 @@ module.exports =
     welcomeNewUser : welcomeNewUser,
     waitReplyForChat : waitReplyForChat,
     unsetWaitReply : unsetWaitReply,
+    isUserWaitingReply : isUserWaitingReply,
+    makeLinkText : makeLinkText,
+    makeLinkButtons : makeLinkButtons,
 }

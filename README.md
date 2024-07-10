@@ -74,7 +74,7 @@ Useful links to contribute:
 ✅ Warns settings
 ❌ Nigth mode
 ❌ Tag settings
-❌ Link settings
+🟡 Link settings
 ❌ Approve mode
 ❌ Message Deletion settings
 ❌ Topics settings
@@ -123,6 +123,7 @@ To update the bot you need to backup ./database folder and ./config.json only, t
 -long  term:
 
     add log channel
+    chatIds anonymization on database
     compress chats data stored on database
     support all group help functions and more (+anti-sheduled messages[msg.is_from_offline], )
     allow bot clone bot when user give a token
