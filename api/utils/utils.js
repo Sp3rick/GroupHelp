@@ -59,6 +59,11 @@ const isValidUrl = urlString=> {
 return !!urlPattern.test(urlString);
 }
 
+function deepCopy(obj)
+{
+    return JSON.parse(JSON.stringify(obj));
+}
+
 function isNumber(str) {
     if (typeof str != "string") return false
     return !isNaN(str) && !isNaN(parseFloat(str)) 
@@ -1683,6 +1688,7 @@ module.exports =
     isArray : isArray,
     isString :isString,
     replaceLast : replaceLast,
+    deepCopy : deepCopy,
     isNumber : isNumber,
     randomInt : randomInt,
     keysArrayToObj : keysArrayToObj,

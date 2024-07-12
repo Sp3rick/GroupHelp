@@ -374,7 +374,7 @@ function main(args)
                 }
 
                 admin[perm] = !oldPermState;
-                var promoteOpts = JSON.parse(JSON.stringify(admin));
+                var promoteOpts = deepCopy(admin);
                 delete promoteOpts.status;
                 delete promoteOpts.user;
                 try {
@@ -392,7 +392,7 @@ function main(args)
             }
 
             //for accurancy we set true all permissions that's already on for every user in group, telegram is dumb and do not that by default
-            var displayAdmin = JSON.parse(JSON.stringify(admin));
+            var displayAdmin = deepCopy(admin);
             Object.keys(chatPerms).forEach((gPerm)=>{if(chatPerms[gPerm])displayAdmin[gPerm]=true;});
 
             var options = {

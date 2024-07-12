@@ -74,7 +74,7 @@ Useful links to contribute:
 ✅ Warns settings
 ❌ Nigth mode
 ❌ Tag settings
-🟡 Link settings
+✅ Link settings
 ❌ Approve mode
 ❌ Message Deletion settings
 ❌ Topics settings

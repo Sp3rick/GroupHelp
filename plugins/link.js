@@ -1,5 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js")
-const {sendCommandReply, bold, waitReplyForChat, unsetWaitReply, link, isNumber, getUnixTime, italic, replaceLast, secondsToHumanTime} = require( "../api/utils/utils.js" );
+const {sendCommandReply, bold, waitReplyForChat, unsetWaitReply, link, isNumber, getUnixTime, italic, replaceLast, secondsToHumanTime, deepCopy} = require( "../api/utils/utils.js" );
 const CMDPerms = require("../api/editors/CommandsPerms.js")
 const GHCommand = require("../api/tg/LGHCommand.js");
 const SN = require("../api/editors/setNum.js");
@@ -35,6 +35,9 @@ function main(args)
         }  
         else if(user.perms.settings)
         {
+            options.reply_markup = {inline_keyboard:[[{text:l[lang].SET_A_LINK_BUTTON, callback_data:"S_LINK_BUTTON:"+chat.id}]]}
+            var func = (id) => {return GHbot.sendMessage(user.id, id, bold(l[lang].LINK_NOT_SET_ADMIN), options)};
+            sendCommandReply(private, msg.chat.lang, GHbot, user.id, msg.chat.id, func);
             
         }
     })
@@ -106,6 +109,7 @@ function main(args)
     } )
 
 
+    //TODO: something to allow to list all links created from bot and allow to revoke them
     GHbot.onCallback( async (cb, chat, user) => {
 
         var msg = cb.message;
@@ -123,10 +127,17 @@ function main(args)
             db.chats.update(chat);
         }
 
-        //TO FINISH
-        var mainMenuCallback = false/*cb.data.startsWith("S_LINK_BUTTON:") ||
+        if( cb.data.startsWith("S_LINK_SETMAIN") )
+        {
+            var setLink = "https://t.me/"+cb.data.split("!")[1].split(":")[0];
+            chat.link = setLink;
+            db.chats.update(chat);
+        }
+
+        var mainMenuCallback = cb.data.startsWith("S_LINK_BUTTON:") ||
             (cb.data.startsWith("S_LINK_SEE:") && !chat.link) ||
-            cb.data.startsWith("S_LINK_DELETE:");*/
+            cb.data.startsWith("S_LINK_DELETE:") ||
+            cb.data.startsWith("S_LINK_SETMAIN");
         if( mainMenuCallback )
         {
             var line1 = [{text: l[lang].SET_BUTTON, callback_data: "S_LINK_SET:"+chat.id}];
@@ -154,7 +165,7 @@ function main(args)
         if( cb.data.startsWith("S_LINK_SET:") )
         {
             var buttons = [];
-            if(chat.link) buttons.push([{text: l[lang].DELETE_LINK_BUTTON2, callback_data: "S_LINK_DELETE:"+chat.id}])
+            //if(chat.link) buttons.push([{text: l[lang].DELETE_LINK_BUTTON2, callback_data: "S_LINK_DELETE:"+chat.id}])
             buttons.push([{text: l[lang].CANCEL_BUTTON, callback_data: "S_LINK_BUTTON:"+chat.id}])
 
             waitReplyForChat(db, "S_LINK_SET", user, chat, msg.chat.isGroup);
@@ -248,21 +259,21 @@ function main(args)
             var text = bold(l[lang].S_LINK_BUTTON)+" » "+createdLink.invite_link;
             if(!linkMaker.approval && linkMaker.invites!=0) text+="\n ├"+bold(l[lang].INVITATIONS_BUTTON)+": "+linkMaker.invites;
             if(linkMaker.time!=0) text+="\n ├"+bold(l[lang].UNTIL_BUTTON)+": "+secondsToHumanTime(lang, linkMaker.time);
-            text+="\n  └ "+bold(l[lang].APPROVAL_MODE)+": "+(linkMaker.approval?l[lang].YES:l[lang].NO);
+            text+="\n └ "+bold(l[lang].APPROVAL_MODE)+": "+(linkMaker.approval?l[lang].YES:l[lang].NO);
             var linkCode = createdLink.invite_link.split("/").at(-1);
             var buttons = [[{text: l[lang].REVOKE_LINK_BUTTON, callback_data: "S_LINK_REVOKE!"+linkCode+":"+chat.id}]]
-            var opts = {chat_id:msg.chat.id,message_id:msg.message_id,parse_mode:"HTML",disable_web_page_preview:true,reply_markup:{inline_keyboard:buttons}}
+            if(!chat.link) buttons.push([{text: l[lang].SET_AS_MAIN_LINK_BUTTON, callback_data: "S_LINK_SETMAIN!"+linkCode+":"+chat.id}])
+            var options = {chat_id:msg.chat.id,message_id:msg.message_id,parse_mode:"HTML",disable_web_page_preview:true,reply_markup:{inline_keyboard:buttons}}
             delete global.LGHLinkMaker[id];
+            //try to move the reply on private chat if not already (TODO: do that in a function)
             try {
-                await GHbot.sendMessage(user.id, user.id, text, opts);
-                opts.chat_id = msg.chat.id;
+                await GHbot.sendMessage(user.id, user.id, text, deepCopy(options));
                 var privateLink = "https://t.me/"+GHbot.TGbot.me.username;
                 var editText = link(l[lang].SENT_PRIVATE_CHAT, privateLink);
-                var options = {chat_id:msg.chat.id,message_id:msg.message_id,parse_mode:"HTML",disable_web_page_preview:true};
-                await GHbot.editMessageText(user.id, editText, options);
+                var opts = {chat_id:msg.chat.id,message_id:msg.message_id,parse_mode:"HTML",disable_web_page_preview:true};
+                await GHbot.editMessageText(user.id, editText, opts);
             } catch (error) {
-                opts.chat_id = msg.chat.id;
-                await GHbot.editMessageText(user.id, text, opts);
+                await GHbot.editMessageText(user.id, text, options);
             }
         } catch (error) {
             GHbot.sendMessage(user.id, msg.chat.id, l[lang].CANT_CREATE_LINK);

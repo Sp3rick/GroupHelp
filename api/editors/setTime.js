@@ -141,7 +141,7 @@ function messageEvent(GHbot, currentTime, msg, chat, user, cb_prefix, returnButt
         }
 
         text = (title+l[user.lang].STIME_DESCRIPTION).replaceAll("{time}", secondsToHumanTime(user.lang, time) + " ("+time+" seconds)")
-        .replaceAll("{minimum}",minTimeHuman).replaceAll("{maximum}",maxTimeHuman); //TODO : translate to human readable time
+        .replaceAll("{minimum}",minTimeHuman).replaceAll("{maximum}",maxTimeHuman);
 
         GHbot.sendMessage(user.id, msg.chat.id, text, options);
     }

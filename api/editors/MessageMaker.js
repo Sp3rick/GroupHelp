@@ -1,5 +1,5 @@
 const TelegramBot = require("node-telegram-bot-api");
-const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML, waitReplyForChat, unsetWaitReply} = require("../utils/utils.js");
+const {parseTextToInlineKeyboard, isObject, extractMedia, mediaTypeToMethod, code, bold, validateTelegramHTML, waitReplyForChat, unsetWaitReply, deepCopy} = require("../utils/utils.js");
 const { pushUserRequest } = require("../tg/SafeTelegram.js");
 const { substitute } = require("../utils/substitutor.js");
 const GH = require("../../GHbot.js");
@@ -311,7 +311,7 @@ function callbackEvent(GHbot, db, customMessage, cb, chat, user, cb_prefix, retu
             } 
         }
 
-        options.reply_markup.inline_keyboard = JSON.parse(JSON.stringify(customMessage.buttonsParsed)); 
+        options.reply_markup.inline_keyboard = deepCopy(customMessage.buttonsParsed); 
 
         options.reply_markup.inline_keyboard.push([{text: l[lang].BACK_BUTTON, callback_data: cb_prefix+"#MSGMK:"+chat.id}])
 
@@ -508,7 +508,7 @@ function sendMessage(GHbot, user, chat, customMessage, messageTitle, additionalO
 
     if(customMessage.format && customMessage.hasOwnProperty("entities"))
     {
-        options.entities = JSON.parse(JSON.stringify(customMessage.entities));
+        options.entities = deepCopy(customMessage.entities);
         for(var i=0; i < options.entities.length; i++)
             options.entities[i].offset += text.length;
         options.entities.unshift({offset: 0, length: text.length, type: "bold"})

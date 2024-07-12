@@ -201,18 +201,18 @@ async function main(config) {
             return;
         }
 
-        //disable waitingReply on a chat if user clicks a button there
-        var groupPrivateWR = msg.chat.type == "private" && user.waitingReply && user.waitingReply.includes(":");
-        var isActiveGroupPrivateWR = groupPrivateWR && user.waitingReply.split(":")[1].split("?")[0] == chat.id
-        if( isActiveGroupPrivateWR || (chat.isGroup && RM.getUserWR(chat, user.id)) )
-            unsetWaitReply(db, user, chat, msg.chat.isGroup);
-
         //configure user.perms and the selected chat if avaiable (the incoming cb request chat object is kept on cb.chat)
         if(chat.isGroup || cb.data.includes(":"))
         {
             chat = chat.isGroup ? chat : db.chats.get(cb.data.split(":")[1].split("?")[0]);
             user.perms = RM.sumUserPerms(chat, user.id);
         }
+
+        //disable waitingReply on a chat if user clicks a button there
+        var groupPrivateWR = msg.chat.type == "private" && user.waitingReply && user.waitingReply.includes(":");
+        var isActiveGroupPrivateWR = groupPrivateWR && user.waitingReply.split(":")[1].split("?")[0] == chat.id
+        if( isActiveGroupPrivateWR || (chat.isGroup && RM.getUserWR(chat, user.id)) )
+            unsetWaitReply(db, user, chat, msg.chat.isGroup);
 
         //configure cb.target
         if(cb.data.includes("?"))
