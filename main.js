@@ -115,11 +115,12 @@ async function main(config) {
         
         //configuring msg.waitingReply and selected chat (the incoming msg request chat object is kept on msg.chat)
         msg.waitingReply = false;
-        var groupPrivateWR = msg.chat.type == "private" && user.waitingReply && user.waitingReply.includes(":");
+        var privateWR = msg.chat.type == "private" && user.waitingReply;
+        var groupPrivateWR = privateWR && user.waitingReply.includes(":");
         if(isGroup)
         {
             msg.waitingReply = RM.getUser(chat, user.id).waitingReply;
-            if(msg.waitingReply.hasOwnProperty(":"))
+            if(msg.waitingReply.inlcudes(":"))
             {
                 var selectedChatId = msg.waitingReply.split(":")[1].split("?")[0];
                 chat = db.chats.get(selectedChatId);
@@ -134,7 +135,11 @@ async function main(config) {
             chat = selectedChat;
             msg.waitingReply = user.waitingReply;
             console.log("user "+user.id+" sent a private message for a group WR: ["+selectedChatId+"] "+ msg.waitingReply);
-            
+        }
+        else if(privateWR)
+        {
+            msg.waitingReply = user.waitingReply;
+            console.log("user "+user.id+" sent a private message for private waitingReply: "+ msg.waitingReply);
         }
         
         //configure user.perms and the selected chat if avaiable 
@@ -153,6 +158,12 @@ async function main(config) {
             if(!user.lang)
             {
                 console.log("somehow user.lang is not avaiable, logging message to futher debug");
+                console.log(msg);
+                return;
+            }
+            if(msg.waitingReply && msg.waitingReply.includes(":") && !chat.isGroup)
+            {
+                console.log("invalid message waitingReply group detected, logging message to futher debug");
                 console.log(msg);
                 return;
             }

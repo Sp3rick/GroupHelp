@@ -1641,9 +1641,16 @@ function waitReplyForChat(db, callback, user, chat, onGroup)
 
 }
 
+function waitReplyPrivate(db, callback, user)
+{
+    user.waitingReply = callback;
+    db.users.update(user);
+}
+
 function unsetWaitReply(db, user, chat, onGroup)
 {
     onGroup = onGroup || false;
+    chat = chat || false;
 
     if(onGroup)
     {
@@ -1749,6 +1756,7 @@ module.exports =
     entitiesLinks : entitiesLinks,
     welcomeNewUser : welcomeNewUser,
     waitReplyForChat : waitReplyForChat,
+    waitReplyPrivate : waitReplyPrivate,
     unsetWaitReply : unsetWaitReply,
     isUserWaitingReply : isUserWaitingReply,
     makeLinkText : makeLinkText,
