@@ -3,7 +3,7 @@
     "@xmldom/xmldom": "^0.8.10",
     "canvas": "^2.11.2",
     "canvg": "^4.0.2",
-    "chrono-node": "^2.7.5",
+    "chrono-node": "^2.7.6",
     "node-fetch": "^2.7.0",
     "node-telegram-bot-api": "github:yagop/node-telegram-bot-api",
     "randomcolor": "^0.6.2",

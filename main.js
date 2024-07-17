@@ -120,7 +120,7 @@ async function main(config) {
         if(isGroup)
         {
             msg.waitingReply = RM.getUser(chat, user.id).waitingReply;
-            if(msg.waitingReply.inlcudes(":"))
+            if(msg.waitingReply && msg.waitingReply.includes(":"))
             {
                 var selectedChatId = msg.waitingReply.split(":")[1].split("?")[0];
                 chat = db.chats.get(selectedChatId);
@@ -220,9 +220,10 @@ async function main(config) {
         }
 
         //disable waitingReply on a chat if user clicks a button there
-        var groupPrivateWR = msg.chat.type == "private" && user.waitingReply && user.waitingReply.includes(":");
+        var privateWR = msg.chat.type == "private" && user.waitingReply;
+        var groupPrivateWR = privateWR && user.waitingReply.includes(":");
         var isActiveGroupPrivateWR = groupPrivateWR && user.waitingReply.split(":")[1].split("?")[0] == chat.id
-        if( isActiveGroupPrivateWR || (chat.isGroup && RM.getUserWR(chat, user.id)) )
+        if( privateWR || (chat.isGroup && RM.getUserWR(chat, user.id)) )
             unsetWaitReply(db, user, chat, msg.chat.isGroup);
 
         //configure cb.target

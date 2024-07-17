@@ -78,7 +78,8 @@ function main(args)
         if( msg.waitingReply.startsWith("S_LINK_MAKE_INV#SNUM")  )
         {
             var id = chat.id+"_"+user.id;
-            if(!global.LGHLinkMaker.hasOwnProperty(id)) return;
+            if(!global.LGHLinkMaker.hasOwnProperty(id))
+                global.LGHLinkMaker[id] = {invites:0, time:0, approval:false};
             var linkMaker = global.LGHLinkMaker[id];
 
             var returnButtons = [[{ text: l[user.lang].SET_UNLIMITED_BUTTON, callback_data: "S_LINK_MAKE_MENU_ZEROINV:" + chat.id }],
@@ -93,7 +94,8 @@ function main(args)
         {   
             
             var id = chat.id+"_"+user.id;
-            if(!global.LGHLinkMaker.hasOwnProperty(id)) return;
+            if(!global.LGHLinkMaker.hasOwnProperty(id))
+                global.LGHLinkMaker[id] = {invites:0, time:0, approval:false};
             var linkMaker = global.LGHLinkMaker[id];
 
             var returnButtons = [[{text: l[user.lang].BACK_BUTTON, callback_data: "S_LINK_MAKE_MENU:"+chat.id}]]
@@ -225,7 +227,7 @@ function main(args)
             var approvalText = l[lang].APPROVAL_MODE+" "+(linkMaker.approval?"✔️":"✖️")
             var line2 = [{text: approvalText, callback_data: "S_LINK_MAKE_MENU_APPROVAL:"+chat.id}];
 
-            var line3 = [{text: l[lang].CANCEL_BUTTON, callback_data: "SETTINGS_HERE:"+chat.id}];
+            var line3 = [{text: l[lang].CANCEL_BUTTON, callback_data: "S_LINK_BUTTON:"+chat.id}];
             line3.push({text: l[lang].CREATE_LINK_BUTTON, callback_data: "S_LINK_MAKE_FINISH:"+chat.id});
 
             var buttons = [line1, line2, line3];

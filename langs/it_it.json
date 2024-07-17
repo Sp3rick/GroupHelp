@@ -20,7 +20,7 @@
     "COMMANDS_BUTTON" :  "📖 Comandi Bot",
     "BACK_BUTTON" : "🔙Indietro",
     "CHANNEL_BUTTON" : "Canale📢",
-    "SUPPORT_MESSAGE" : "👉🏻 Invia ora un messaggio con una richiesta allo staff.\n\n💡La richiesta vede essere inviata <b>in un solo messaggio</b>, altri messaggi non saranno ricevuti.",
+    "SUPPORT_MESSAGE" : "👉🏻 Invia ora un messaggio con una richiesta allo staff.\n\n💡La richiesta deve essere inviata <b>in un solo messaggio</b>, altri messaggi non saranno ricevuti.",
     "SUPPORT_SENT_CONFIRM" : "Messaggio inviato. Risponderemo il prima possibile.",
     "SUPPORT_RECEIVED" : "👤Hai ricevuto un messaggio dal supporto, per replicare rispondi a questo messaggio",
     "CANCEL_BUTTON" : "❌ Annulla",
