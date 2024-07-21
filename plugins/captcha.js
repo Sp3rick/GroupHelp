@@ -77,6 +77,7 @@ async function newCaptchaImage()
     return {text: captcha.text, png};
 }
 
+
 function isCaptchaExpired(id)
 {
     return global.LGHCaptcha[id].within < getUnixTime();
@@ -146,6 +147,35 @@ function main(args)
     const GHbot = new LGHelpTemplate(args);
     const {TGbot, db, config} = GHbot;
 
+    /**
+     * 
+     * @param {GH} GHbot 
+     * @param {GH.LGHChat} chat 
+     * @param {GH.LGHUser} user
+     * @param {Boolean} onGroup - true if captcha should be solved on group chat ||NOTE: currently only group mode (true) is supported
+     */
+    async function generateCaptcha(GHbot, chat, user, onGroup)
+    {
+        if(chat.captcha.mode == "image")
+        {            
+            var captcha = await newCaptchaImage();
+
+            var buttons = [[{text:l[chat.lang].CHANGE_IMAGE_BUTTON, callback_data:"CAPTCHA_CHANGEIMAGE:"+chat.id}]];
+            var text = l[chat.lang].CAPTCHA_IMAGE_QUESTION
+            .replace("{mention}", tag(usernameOrFullName(user), user.id))
+            .replace("{time}",secondsToHumanTime(chat.lang, chat.captcha.time));
+
+            var sentMsg = await GHbot.sendPhoto(user.id, chat.id, captcha.png, {caption:text, parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
+            
+            var id = chat.id+"_"+user.id;
+            var within = getUnixTime() + chat.captcha.time;
+            var solution = captcha.text;
+            global.LGHCaptcha[id] = {messageId: sentMsg.message_id, within, solution};
+            
+            waitReplyForChat(db, "CAPTCHA_IMAGE_GUESS", user, chat, onGroup);
+        }
+    }
+
     //clear and punish expired captchas
     setInterval(()=>{
         var keys = Object.keys(global.LGHCaptcha);
@@ -175,24 +205,7 @@ function main(args)
                 return;
             }
 
-            if(chat.captcha.mode == "image")
-            {            
-                var captcha = await newCaptchaImage();
-
-                var buttons = [[{text:l[chat.lang].CHANGE_IMAGE_BUTTON, callback_data:"CAPTCHA_CHANGEIMAGE:"+chat.id}]];
-                var text = l[chat.lang].CAPTCHA_IMAGE_QUESTION
-                .replace("{mention}", tag(usernameOrFullName(newUser), newUser.id))
-                .replace("{time}",secondsToHumanTime(chat.lang, chat.captcha.time));
-
-                var sentMsg = await GHbot.sendPhoto(newUser.id, chat.id, captcha.png, {caption:text, parse_mode:"HTML", reply_markup:{inline_keyboard:buttons}});
-                
-                var id = chat.id+"_"+newUser.id;
-                var within = getUnixTime() + chat.captcha.time;
-                var solution = captcha.text;
-                global.LGHCaptcha[id] = {messageId: sentMsg.message_id, within, solution};
-                
-                waitReplyForChat(db, "CAPTCHA_IMAGE_GUESS", newUser, chat, msg.chat.isGroup);
-            }
+            generateCaptcha(GHbot, chat, newUser, msg.chat.isGroup);
 
         })}
 
@@ -204,7 +217,12 @@ function main(args)
         if (msg.waitingReply && msg.waitingReply.startsWith("CAPTCHA_IMAGE_GUESS"))
         {
             var id = chat.id+"_"+user.id;
-            if(!global.LGHCaptcha[id]) return;
+            if(!global.LGHCaptcha[id])
+            {
+                //generate new captcha
+                generateCaptcha(GHbot, chat, user, msg.chat.isGroup);
+                return;
+            }
             var isCorrectSolution = msg.text && (global.LGHCaptcha[id].solution.toLowerCase() == msg.text.toLowerCase());
 
             if(isCorrectSolution && !isCaptchaExpired(id))

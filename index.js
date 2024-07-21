@@ -1,6 +1,6 @@
 process.env.NTBA_FIX_319 = 1;
 process.env.NTBA_FIX_350 = 0;
-global.LGHVersion = "0.2.8.3";
+global.LGHVersion = "0.2.8.4";
 global.directory = __dirname; //used from /api/database.js
 const fs = require("fs");
 const TR = require("./api/tg/tagResolver.js");
