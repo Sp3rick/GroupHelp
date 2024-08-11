@@ -871,7 +871,7 @@ function IsEqualInsideAnyLanguage(text, optionName, caseSensitive)
 function parseTextToInlineKeyboard(text)
 {
 
-    var culumnsLimit = 8;
+    var culumnsLimit = 8; //tg limit 8
     var rowsLimit = 14; //tg limit 16
     var totalButtonsLimit = 92; //tg limit 100
     var buttonNameLimit = 64;

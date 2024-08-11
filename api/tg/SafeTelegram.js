@@ -82,7 +82,19 @@ function pushUserRequest(bot, method, userId, ...args)
         var result = await PM[userId][key];
         resolve(result);
     } catch (error) {
-        reject(error);
+
+        //completly prevent some useless errors
+        if(error.code != "ETELEGRAM")
+        {
+            reject(error);
+            return;
+        }
+
+        var errDescription = error.response.body.description;
+        if(errDescription.includes("message is not modified"))
+            resolve(false);
+        else
+            reject(error);
     }
     delete PM[userId][key];
     return;

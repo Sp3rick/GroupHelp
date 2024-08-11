@@ -1,4 +1,12 @@
+/**NOTE:
+ * to be sure that api is going to give you valid values without errors check if isAvaiable() returns true
+ */
+
 const https = require('https');
+isLoaded = false;
+topCrypto = {}; //BTC : {object}
+topCryptoArray = [];
+fiatRates = {}; //EUR : rateUsd
 
 function bodyGet(url)
 {return new Promise((resolve, reject)=>{
@@ -23,7 +31,8 @@ function bodyGet(url)
 })}
 
 async function updatePrices()
-{
+{try {
+    
     var request = await bodyGet("https://api.coincap.io/v2/assets?limit=2000");
     if(!request) return;
     topCryptoArray = request.data;
@@ -45,7 +54,12 @@ async function updatePrices()
         if(rate.type == "crypto") return;
         fiatRates[rate.symbol] = Number(rate.rateUsd);
     })
-}
+
+    if(!isLoaded) isLoaded = true;
+
+} catch (error) {
+    
+}}
 
 function cutPrice(number)
 {
@@ -103,16 +117,9 @@ function supplyToBlock(currentSupply) {
     return currentBlock;
 }
 /////////////////
-//NOTE: to use that you have to check first for isAvaiable value
-
-topCrypto = {}; //BTC : {object}
-topCryptoArray = [];
-fiatRates = {}; //EUR : rateUsd
-isLoaded = false;
 
 async function load()
 {
-    isLoaded = true;
     await updatePrices();
     setInterval( ()=>{
     updatePrices();

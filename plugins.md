@@ -131,7 +131,7 @@ text avaiable substitutions:
 
 • {NAMESURNAME} = name and surname
 
-• {GHNAME} = name in LGH format
+• {GHNAME} = name in LGH format ( [userId] name/surname )
 
 • {USERNAME} = user @username
 
@@ -171,7 +171,7 @@ Syntax: FIAT{SYMBOL:OPTION}
 
 • {TOP1} {TOP2} ... {TOP2000} = get crypto symbol at specific classific height (max 2000) ({TOP1} will translate to "BTC", so {{TOP1}} is the same of {BTC} and will give you the crypto price)
 
-• Options: CAP(capitalization), VOL(24h volume), SUPPLY, RANK(cap classific), NAME, EXPLORER. (example: {CAPBITCOIN})
+• Options: CAP(capitalization), VOL(24h volume), SUPPLY, RANK(cap classific), NAME, EXPLORER. (example: {BTC:CAP})
 
 • Convert from default to specific currency: ${number}, €{number}, £{number}, CHF{number} or ₣{number}.
 

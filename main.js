@@ -233,14 +233,16 @@ async function main(config) {
             cb.target = RM.userIdToTarget(TGbot, chat, targetId, db);
         }
 
+        if(!user.lang)
+        {
+            console.log("somehow user.lang is not avaiable, logging message to futher debug");
+            console.log(msg);
+            return;
+        }
+        if(chat.id == user.id) chat.lang = user.lang;
+
+        //emit event
         try {
-            if(!user.lang)
-            {
-                console.log("somehow user.lang is not avaiable, logging message to futher debug");
-                console.log(msg);
-                return;
-            }
-            if(chat.id == user.id) chat.lang = user.lang;
             GroupHelpBot.emit( "callback_query", cb, chat, user );
         } catch (err) {
             console.log("Error after emitting a valid GroupHelpBot \"callback_query\", i will log error then \"cb\", \"chat\", \"user\" ")
@@ -249,6 +251,9 @@ async function main(config) {
             console.log(chat);
             console.log(user);
         }
+        
+        if( cb.data == "NOT_IMPLEMENTED" )
+            GHbot.answerCallbackQuery(user.id, cb.id, {text:l[lang].NOT_IMPLEMENTED,show_alert:true});
     } catch (err) {
         console.log("Error in main.js on callback_query event, i will log the error and then the received callback");
         console.log(err);

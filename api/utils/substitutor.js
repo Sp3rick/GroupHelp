@@ -70,7 +70,6 @@ function substitute(text, user, chat, db)
 
     //set symbols to crypto
     cp.getCoinList().forEach((symbol)=>{
-        if(symbol != "BTC") return;
         while(hasSubstitution(text, symbol))
         {
             var opts = text.split("{"+symbol)[1].split("}")[0];
