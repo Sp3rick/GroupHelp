@@ -1,15 +1,13 @@
 const TelegramBot = require("node-telegram-bot-api");
 const { pushUserRequest } = require("./api/tg/SafeTelegram");
-/**
- * @typedef {import("node-telegram-bot-api")} TelegramBot
- */
 
 
 //BASIC DECLARATIONS
 /**
- * @typedef {Object} AnonTGUser - Descrizione di base dell'oggetto.
+ * @typedef {Object} AnonTGUser - Basic anonymized user object
  * @property {String|Number} id - userId
  */
+
 
 //PUNISH
 /**
@@ -23,7 +21,7 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  */
 /**
  * @typedef {Object} LGHPunish antispam.js settings Object.
- * @property {Punishment} punishment - Punishment to apply [0:off|1:warn|2:kick|3:mute|4:ban].
+ * @property {Punishment} punishment - Punishment to apply [0:off/1:warn/2:kick/3:mute/4:ban].
  * @property {Number|null} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
  * @property {boolean|null} delete - True if deletion is enabled as side effect.
  */
@@ -42,46 +40,60 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {LGHPunish} latin - Punish to apply for messages containing latin characters.
  */
 
+
 //TARGETUSER
 /**
  * @typedef {Object} TargetUser - Object that refers to a target user
  * @property {string|number} id - Telegram user Id
  * @property {string} name - Full LGH name identifier: "fullName [id]"
  * @property {LGHPerms} perms - LGHPerms with perms of target
- * @property {TelegramBot.usersDir|false} user - If avaiable, target basic user object
+ * @property {TelegramBot.User|null} user - If avaiable, target basic user object
  */
 
+
+/**
+ * @enum {number}
+ * @description Permission status
+ * - 1: allowed
+ * - 0: neutral
+ * - -1: denied
+ */
+const PermissionStatus = {
+    ALLOWED: 1,
+    NEUTRAL: 0,
+    DENIED: -1,
+};  
 
 //PERMISSIONS
 /**
  * @typedef {Object} LGHPerms - LGHPerms Object.
  * @property {Array.<string>} commands - Array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command.
- * @property {1|0|-1} immune - Active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1].
- * @property {1|0|-1} flood - Permission to flood messages [1/0/-1].
- * @property {1|0|-1} link - Permission to send links [1/0/-1].
- * @property {1|0|-1} tgLink - Permission to send telegram links/usernames [1/0/-1].
- * @property {1|0|-1} forward - Permission to forward messages from anywhere [1/0/-1].
- * @property {1|0|-1} quote - Permission to quote from anywhere [1/0/-1].
- * @property {1|0|-1} porn - Bypass porn/gore checks [1/0/-1].
- * @property {1|0|-1} night - Bypass any night mode limitation [1/0/-1].
- * @property {1|0|-1} media - Bypass any media limitation [1/0/-1].
- * @property {1|0|-1} alphabets - Bypass any alphabets characters limitations [1/0/-1].
- * @property {1|0|-1} words - Bypass banned words limitations [1/0/-1].
- * @property {1|0|-1} length - Bypass message length limitations [1/0/-1].
- * @property {1|0|-1} roles - Permission to change roles of lower level users [1/0/-1].
- * @property {1|0|-1} settings - Permission to change bot group settings [1/0/-1].
+ * @property {PermissionStatus} immune - Active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1].
+ * @property {PermissionStatus} flood - Permission to flood messages [1/0/-1].
+ * @property {PermissionStatus} link - Permission to send links [1/0/-1].
+ * @property {PermissionStatus} tgLink - Permission to send telegram links/usernames [1/0/-1].
+ * @property {PermissionStatus} forward - Permission to forward messages from anywhere [1/0/-1].
+ * @property {PermissionStatus} quote - Permission to quote from anywhere [1/0/-1].
+ * @property {PermissionStatus} porn - Bypass porn/gore checks [1/0/-1].
+ * @property {PermissionStatus} night - Bypass any night mode limitation [1/0/-1].
+ * @property {PermissionStatus} media - Bypass any media limitation [1/0/-1].
+ * @property {PermissionStatus} alphabets - Bypass any alphabets characters limitations [1/0/-1].
+ * @property {PermissionStatus} words - Bypass banned words limitations [1/0/-1].
+ * @property {PermissionStatus} length - Bypass message length limitations [1/0/-1].
+ * @property {PermissionStatus} roles - Permission to change roles of lower level users [1/0/-1].
+ * @property {PermissionStatus} settings - Permission to change bot group settings [1/0/-1].
  */
 
 
 //MESSAGEMAKER
 /**
- * @typedef {Object} simpleMedia - object with data about an user in a group
- * @property {String|false} type - Type of media (audio, photo, video, video_note, animation, sticker, document) or false
+ * @typedef {Object} simpleMedia
+ * @property {String|null} type - Type of media (audio, photo, video, video_note, animation, sticker, document) or false
  * @property {String} fileId - media fileId or false
  * @property {Object} options - additional options for TelegramBot
  */
 /**
- * @typedef {Object} customMessage - object with data about an user in a group
+ * @typedef {Object} customMessage - object of MessageMaker
  * @property {String} text - Text of messsage
  * @property {Array.<TelegramBot.MessageEntity>} entities - Telegram entities of text
  * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
@@ -91,14 +103,19 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {Array.<TelegramBot.KeyboardButton>} buttonsParsed - already parsed buttons ready to use for inline_keyboard
  */
 
+
 //CUSTOM CHAT DECLARATIONS
 /**
- * @typedef {TelegramBot.ChatAdministratorRights & {user: AnonTGUser} & {status: TelegramBot.ChatMemberStatus}} LGHAdmin
+ * @typedef {object} LGHAdminAdds
+ * @property {AnonTGUser} user - Basic anonymized user object
+ * @property {TelegramBot.ChatMemberStatus} status
+ */
+/**
+ * @typedef {TelegramBot.ChatAdministratorRights | LGHAdminAdds} LGHAdmin
  */
 /**
  * @typedef {Array<LGHAdmin>} LGHAdminList
  */
-
 /**
  * @typedef {Object} userStatus - object with data about an user in a group
  * @property {Number} firtJoin - Unix number of first user join time in seconds, false if unknown (managed by welcome.js)
@@ -106,9 +123,8 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {LGHPerms} adminPerms - LGHPerms object for user permissions if admin
  * @property {Array.<String>} roles - array user roles, string for pre-made roles, number for custom roles (user-made)
  * @property {String|undefined} title - user administrator title
- * @property {String|false} waitingReply - string with callback data hirarchy if bot is expecting a message from user on group
+ * @property {String|null} waitingReply - string with callback data hirarchy if bot is expecting a message from user on group
  */
-
 /**
  * @typedef {Object} LGHRole - if pre-made role (string key) only users object should be used
  * @property {String|null} name - role name
@@ -118,6 +134,7 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {Array.<String>} users - array of userId in this role
  */
 
+
 //PLUGINS DECLARATIONS
 //warns
 /**
@@ -125,7 +142,7 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {Object.<string, Number>} timed - ([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over
  * @property {Object.<string, Number>} count - ([userId]: number) countains count of warns for each user
  * @property {Number} limit - number of warns after wich should be applyed a punishment
- * @property {2|3|4} punishment - punishment when limit is hit [2:kick|3:mute|4:ban]
+ * @property {2|3|4} punishment - punishment when limit is hit [2:kick/3:mute/4:ban]
  * @property {Number|null} PTime - avaiable if punishment is set to warn/mute/ban, contains seconds of punishment
  */
 
@@ -155,7 +172,7 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @typedef {Object} LGHSpamTgLinksAdds - antispam.js settings Object additional items.
  * @property {Boolean} usernames - True if usernames should be considered as spam.
  * @property {Boolean} bots - True if bots should be considered as spam.
- * @property {Array<String>} exceptions - Array of Telegram exceptions, may contain "Name:Id", "Name:|hidden" (for hidden users), or t.me link, or @username, "Name"
+ * @property {Array<String>} exceptions - Array of Telegram exceptions, may contain "Name:Id", `Name:|hidden` (for hidden users), or t.me link, or @username, "Name"
  */
 /**
  * @typedef {LGHSpamTgLinksAdds & LGHPunish} LGHSpamTgLinks - antispam.js settings about Telegram Links Object.
@@ -200,7 +217,7 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {Number} time - Time limit to solve the captcha
  * @property {boolean} once - True if should be sent only at first user join (from welcome.js) (default false).
  * @property {boolean} fails - True if captcha should notify on group that someone failed the captcha (default false).
- * @property {Punishment} punishment - Punishment to apply [1:warn|2:kick|3:mute|4:ban].
+ * @property {Punishment} punishment - Punishment to apply [1:warn/2:kick/3:mute/4:ban].
  * @property {Number} PTime - Available if punishment is set to warn/mute/ban, contains seconds of punishment.
  */
 
@@ -259,8 +276,8 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {LGHAdminList|null} admins - array with known admins objects (user data anonymized)
  * @property {String|null} lang - current chat lang
  * @property {String|null} currency - currency of chat, default to USD
- * @property {string|false} link - group access link
- * @property {Boolean} isGroup - temporary item, result of (chat.type == "supergroup" || chat.type == "group")
+ * @property {string|null} link - group access link
+ * @property {Boolean} isGroup - temporary item, result of `(chat.type == "supergroup" || chat.type == "group")`
  * @property {Object.<string, userStatus>|null} users - Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)
  * @property {Object.<string, LGHRole>|null} roles - data about a specific role, full role Object if it's a custom role (key with a number)
  * @property {LGHPerms} basePerms - base permissions applyed to every user
@@ -275,7 +292,6 @@ const { pushUserRequest } = require("./api/tg/SafeTelegram");
  * @property {LGHAlphabetBasedPunish|null} alphabets - alphabets.js plugin related data
  * @property {LGHMedia|null} media - media.js plugin related data
  */
-
 /**
  * @typedef {TelegramBot.Chat & CustomChat} LGHChat - Full LGH chat object given by LGHBot events, custom items avaiable if working about a group
  */
@@ -295,7 +311,7 @@ testObject()
  * @property {LGHPerms|null} perms - temporary object with summary of user permissions
  * @property {String} lang - current user lang
  * @property {String} waitingReply - set to true if the bot is expecting a message from the user
-
+ */
 /**
  * @typedef {TelegramBot.User & CustomUser} LGHUser - Custom chat object given by LGHBot events, custom items avaiable if working about a group
  */
@@ -312,21 +328,18 @@ testObject()
  * @property {(string|boolean)} args - The arguments of the command (optional).
  * @property {(Array.<string>|boolean)} splitArgs - The split arguments of the command (optional).
  */
-
 /**
  * @typedef {Object} CustomCommand - Additional items to command for LGH
- * @property {TargetUser|false} target - Optional temporary object with data about a target LGH user in the command, false if no target found
+ * @property {TargetUser|null} target - Optional temporary object with data about a target LGH user in the command, false if no target found
  */
-
 /**
  * @typedef {Object} CustomMessage
  * @property {LGHChat} chat - Always original chat object where the message is coming from
  * @property {ParsedCommand & CustomCommand} command - result of message text parsed with parseCommand()
- * @property {TargetUser|false} target - Optional temporary object with data about a command target
- * @property {string|false} waitingReply - Optional temporary object with waitingReply data for the selected chat
- * @property {TargetUser|false} waitingReplyTarget - Optional temporary object with data about a target LGH user, false if no target found
+ * @property {TargetUser|null} target - Optional temporary object with data about a command target
+ * @property {string|null} waitingReply - Optional temporary object with waitingReply data for the selected chat
+ * @property {TargetUser|null} waitingReplyTarget - Optional temporary object with data about a target LGH user, false if no target found
  */
-
 /**
  * @typedef {TelegramBot.Message & CustomMessage} LGHMessage - Custom chat object given by LGHBot events, custom items avaiable if working about a group
  */
@@ -338,7 +351,6 @@ testObject()
  * @property {LGHChat} chat - Always original chat object where the callback is coming from
  * @property {TargetUser} target - Optional temporary object with data about a target LGH user in the command, false if no target found
  */
-
 /**
  * @typedef {TelegramBot.CallbackQuery & CustomCallback} LGHCallback - Custom callback object given by LGHBot events, custom items may be avaiable
  */
@@ -346,90 +358,22 @@ testObject()
 
 //DATABASE
 /**
- * @typedef {Function} AddChatFunction
- * @param {LGHChat} chat - The chat object to add.
- * @returns {Boolean} True if the chat was successfully added, otherwise false.
- */
-
-/**
- * @typedef {Function} DeleteChatFunction
- * @param {TelegramBot.ChatId} chatId - The ID of the chat to delete.
- * @returns {Boolean} True if the chat was successfully deleted, otherwise false.
- */
-
-/**
- * @typedef {Function} ExistChatFunction
- * @param {TelegramBot.ChatId} chatId - The ID of the chat to check.
- * @returns {Boolean} True if the chat exists in the database, otherwise false.
- */
-
-/**
- * @typedef {Function} GetChatFunction
- * @param {TelegramBot.ChatId} chatId - The ID of the chat to retrieve.
- * @returns {LGHChat|false} The retrieved chat object if found, otherwise false.
- */
-
-/**
- * @typedef {Function} UpdateChatFunction
- * @param {LGHChat} chat - The updated chat object.
- * @returns {Boolean} True if the chat was successfully updated, otherwise false.
- */
-
-/**
- * @typedef {Function} SaveChatFunction
- * @param {TelegramBot.ChatId} chatId - The ID of the chat to save.
- * @returns {Boolean} True if the chat was successfully saved, otherwise false.
- */
-
-/**
  * @typedef {Object} chatsDatabase - Object containing chat-related database functions.
- * @property {AddChatFunction} add - Function to add a new chat to the database.
- * @property {DeleteChatFunction} delete - Function to delete a chat from the database.
- * @property {ExistChatFunction} exhist - Function to check if a chat exhists in the database.
- * @property {GetChatFunction} get - Function to retrieve a chat from the database.
- * @property {UpdateChatFunction} update - Function to update a chat in the database.
- * @property {SaveChatFunction} save - Function to save a chat to the database.
+ * @property {function(TelegramBot.Chat): boolean} add - Function to add a new chat to the database. ------------------------------------ `function(TelegramBot.Chat): boolean`
+ * @property {function(TelegramBot.ChatId): boolean} delete - Function to delete a chat from the database. ------------------------------------ `function(TelegramBot.ChatId): boolean`
+ * @property {function(TelegramBot.ChatId): boolean} exhist - Function to check if a chat exhists in the database. ------------------------------------ `function(TelegramBot.ChatId): boolean`
+ * @property {function(TelegramBot.ChatId): LGHChat} get - Function to retrieve a chat from the database. ------------------------------------ `function(LGHChat): boolean`
+ * @property {function(LGHChat): boolean} update - Function to update a chat in the database. ------------------------------------ `function(LGHChat): boolean`
+ * @property {function(TelegramBot.ChatId): boolean} save - Function to save a chat to the database. ------------------------------------ `function(TelegramBot.ChatId): boolean`
  */
-
-/**
- * @typedef {Function} AddUserFunction
- * @param {LGHUser} user - The user object to add.
- * @returns {Boolean} Result of adding a user to the database.
- */
-
-/**
- * @typedef {Function} DeleteUserFunction
- * @param {TelegramBot.ChatId} userId - The ID of the user to delete.
- * @returns {Boolean} Result of deleting a user from the database.
- */
-
-/**
- * @typedef {Function} ExistUserFunction
- * @param {TelegramBot.ChatId} userId - The ID of the user to check.
- * @returns {Boolean} Indicates whether the user exists in the database.
- */
-
-/**
- * @typedef {Function} GetUserFunction
- * @param {TelegramBot.ChatId} userId - The ID of the user to retrieve.
- * @returns {LGHUser} Data retrieved for the user from the database.
- */
-
-/**
- * @typedef {Function} UpdateUserFunction
- * @param {LGHUser} user - The updated user object.
- * @returns {boolean} True if the user was successfully updated, otherwise false.
- */
-
 /**
  * @typedef {Object} usersDatabase - Object containing user-related database functions.
- * @property {Function} add - Function to add a new user to the database.
- * @property {Function} delete - Function to delete a user from the database.
- * @property {Function} exhist - Function to check if a user exhists in the database.
- * @property {Function} get - Function to retrieve a user from the database.
- * @property {Function} update - Function to update a user in the database.
+ * @property {function(TelegramBot.User): boolean} add - Function to add a new user to the database. ------------------------------------ `function(TelegramBot.User): boolean`
+ * @property {function(TelegramBot.ChatId): boolean} delete - Function to delete a user from the database. ------------------------------------ `function(TelegramBot.ChatId): boolean`
+ * @property {function(TelegramBot.ChatId): boolean} exhist - Function to check if a user exhists in the database. ------------------------------------ `function(TelegramBot.ChatId): boolean`
+ * @property {function(TelegramBot.ChatId): LGHUser} get - Function to retrieve a user from the database. ------------------------------------ `function(TelegramBot.ChatId): LGHUser`
+ * @property {function(LGHUser): boolean} update - Function to update a user in the database. ------------------------------------ `function(LGHUser): boolean`
  */
-
 /**
  * @typedef {Object} LGHDatabase - Type returned by the getDatabase function.
  * @property {string} innerDir - Location where the database folder should be placed (and/or generated).
@@ -445,9 +389,9 @@ testObject()
 //TEMPLATE DECLARATION
 /**
  * @typedef {Object} LibreGHelp
- * @property {TelegramBot} GHbot - Test
- * @property {TelegramBot} TGbot - Test
- * @property {LGHDatabase} db - Test
+ * @property {LGHInterface} GHbot - Public interface for LGH Functions
+ * @property {TelegramBot} TGbot - Raw telegram bot api
+ * @property {LGHDatabase} db - Database interface
  */
 
 /**
@@ -455,11 +399,11 @@ testObject()
  * @classdesc
  * @param {LibreGHelp} LibreGHelp - Libre Group Help telegram bot handler
  */
-class main {
+class LGHInterface {
     constructor(LibreGHelp) {
 
         /**
-        * @type {TelegramBot}
+        * @type {LGHInterface}
         */
         this.GHbot = LibreGHelp.GHbot;
 
@@ -483,7 +427,7 @@ class main {
 
     /**
      * LGHbot message event handler
-     * @param {(arg1: LGHMessage, arg2: LGHChat, arg3: LGHUser) => void} handler - handler function
+     * @param {function(LGHMessage, LGHChat, LGHUser): void} handler - handler function
      */
     onMessage(handler) {
         this.GHbot.on("message", handler);
@@ -491,7 +435,7 @@ class main {
 
     /**
      * LGHbot callback event handler
-     * @param {(arg1: LGHCallback, arg2: LGHChat, arg3: LGHUser) => void} handler - handler function
+     * @param {function(LGHCallback, LGHChat, LGHUser): void} handler - handler function
      */
     onCallback(handler) {
         this.GHbot.on("callback_query", handler);
@@ -652,4 +596,4 @@ class main {
     } )}
 }
 
-module.exports = main;
+module.exports = LGHInterface;

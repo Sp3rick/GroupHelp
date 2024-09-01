@@ -1,0 +1,80 @@
+site_name: LibreGroupHelp Wiki
+site_url: https://sp3rick.github.io/GroupHelp
+repo_url: https://github.com/Sp3rick/GroupHelp
+repo_name: Sp3rick/GroupHelp
+
+theme:
+  name: material
+  logo: assets/logo.png
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: green
+      toggle:
+        icon: material/brightness-7 
+        name: Switch to dark mode
+    - scheme: slate
+      primary: deep purple
+      accent: green
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - search.suggest
+    - search.highlight
+    - search.share
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.indexes
+    - content.code.copy
+
+nav:
+  - Home: 
+    - Home: index.md
+    - Configuration: wiki/configuration.md
+    - Commands: wiki/commands.md
+    - Roles: wiki/roles.md
+    - Permissions: wiki/perms.md
+  - Documentation:
+    - Home: documentation/index.md
+    - Plugins creation: documentation/plugins.md
+    - Database usage: documentation/database.md
+    - Expect messages/buttons: documentation/callbacks.md
+    - LGH Events: documentation/events.md
+    - Command creation: documentation/commands.md
+    - Languages: documentation/languages.md
+    - Editors: documentation/editors.md
+    - Objects: documentation/GHBot.md
+    - TODO List: documentation/TODO-List.md
+    - Known issues: documentation/known-issues.md
+  - Plugins Documentation:
+    - Home: plugins/index.md
+    - Settings: plugins/settings.md
+    - ✏️ Message maker: plugins/message-maker.md
+    - Roles manager: plugins/roles-manager.md 
+    - Promotions: plugins/promote.md
+    - Punishments: plugins/punish.md
+    - Rules: plugins/rules.md
+    - Welcome: plugins/welcome.md
+    - Anti-Flood: plugins/antiflood.md
+    - Anti-Spam: plugins/antispam.md
+    - Captcha: plugins/captcha.md
+    - Goodbye: plugins/goodbye.md
+    - Warns: plugins/warns.md
+    - Pin: plugins/pin.md
+    - ✏️ Set chat based punishment: plugins/set-chat-based-punish.md
+    - ✏️ Command permissions: plugins/command-perms.md
+    
+    
+   
+    
+    
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
