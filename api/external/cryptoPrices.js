@@ -19,8 +19,11 @@ function bodyGet(url)
         });
 
         res.on('end', () => {
-            resolve(JSON.parse(data));
-            return;
+            try {
+                resolve(JSON.parse(data))
+            } catch (error) {
+                reject(error)
+            }
         });
 
     }).on('error', err => {
@@ -58,7 +61,7 @@ async function updatePrices()
     if(!isLoaded) isLoaded = true;
 
 } catch (error) {
-    
+    console.log("An occurred on cryptoPrices.js/updatePrices()")
 }}
 
 function cutPrice(number)

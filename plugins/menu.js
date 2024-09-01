@@ -53,7 +53,6 @@ function main(args)
 
         }
 
-        //TODO: complete info button
         if( cb.data == "INFO_BUTTON" )
         {
 
@@ -64,7 +63,7 @@ function main(args)
                 parse_mode : "HTML",
                 reply_markup:{inline_keyboard :[
                         [{text: l[lang].SUPPORT_ABOUT_BUTTON, callback_data: "SUPPORT_BUTTON"}],
-                        [{text: l[lang].COMMANDS_BUTTON, callback_data: "NOT_IMPLEMENTED"}],
+                        [{text: l[lang].COMMANDS_BUTTON, url: "https://sp3rick.github.io/GroupHelp/wiki/commands/"}],
                         [{text: l[lang].BACK_BUTTON, callback_data: "MENU"}]]}
             })
             GHbot.answerCallbackQuery(user.id, cb.id);

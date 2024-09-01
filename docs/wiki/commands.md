@@ -98,51 +98,51 @@ Some commands can use the **`*`** prefix (e.g., `/*rules`, `/*perms`) to force a
 ### Role Management Commands
 
 - **/free**  
-  Assigns the free role to a user.  
+  Assigns the free [role](roles.md) to a user.  
   **Code:** `COMMAND_FREE`
 
 - **/unfree**  
-  Removes the free role from a user.  
+  Removes the free [role](roles.md) from a user.  
   **Code:** `COMMAND_UNFREE`
 
 - **/helper**  
-  Assigns the helper role to a user.  
+  Assigns the helper [role](roles.md) to a user.  
   **Code:** `COMMAND_HELPER`
 
 - **/unhelper**  
-  Removes the helper role from a user.  
+  Removes the helper [role](roles.md) from a user.  
   **Code:** `COMMAND_UNHELPER`
 
 - **/cleaner**  
-  Assigns the cleaner role to a user.  
+  Assigns the cleaner [role](roles.md) to a user.  
   **Code:** `COMMAND_CLEANER`
 
 - **/uncleaner**  
-  Removes the cleaner role from a user.  
+  Removes the cleaner [role](roles.md) from a user.  
   **Code:** `COMMAND_UNCLEANER`
 
 - **/muter**  
-  Assigns the muter role to a user.  
+  Assigns the muter [role](roles.md) to a user.  
   **Code:** `COMMAND_MUTER`
 
 - **/unmuter**  
-  Removes the muter role from a user.  
+  Removes the muter [role](roles.md) from a user.  
   **Code:** `COMMAND_UNMUTER`
 
 - **/mod**  
-  Assigns the moderator role to a user.  
+  Assigns the moderator [role](roles.md) to a user.  
   **Code:** `COMMAND_MODERATOR`
 
 - **/unmod**  
-  Removes the moderator role from a user.  
+  Removes the moderator [role](roles.md) from a user.  
   **Code:** `COMMAND_UNMODERATOR`
 
 - **/cofounder**  
-  Assigns the cofounder role to a user.  
+  Assigns the cofounder [role](roles.md) to a user.  
   **Code:** `COMMAND_COFOUNDER`
 
 - **/uncofounder**  
-  Removes the cofounder role from a user.  
+  Removes the cofounder [role](roles.md) from a user.  
   **Code:** `COMMAND_UNCOFOUNDER`
 
 ### Admin Commands

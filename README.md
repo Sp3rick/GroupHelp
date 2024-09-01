@@ -4,6 +4,8 @@ Open-Source re-creation of telegram group manager Group Help in NodeJS based on 
 
 An official instance of bot is running on [@LibreGroupHelpBot](https://t.me/LibreGroupHelpBot)
 
+[The Wiki for users and developers is avaiable Here](https://sp3rick.github.io/GroupHelp/)
+
 ## Installation:
 
 Be sure to have installed a recent version of [NodeJS](https://nodejs.org/)
@@ -86,7 +88,7 @@ To update LibreGroupHelp you need to backup ./database folder and ./config.json,
 
 ## Contribute
 
-[Documentation](../documentation/) is the section you are looking for if you want to contribute to LibreGroupHelp
+[Documentation](https://sp3rick.github.io/GroupHelp/documentation/) is the section you are looking for if you want to contribute to LibreGroupHelp
 
 ## Ask a question
 
