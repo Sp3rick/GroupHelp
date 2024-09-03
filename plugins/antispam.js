@@ -1,11 +1,11 @@
-var LGHelpTemplate = require("../GHbot.js")
+const LGHelpTemplate = require("../GHbot.js");
 const {bold, punishmentToText, punishmentToFullText, handlePunishmentCallback, genPunishButtons, originIsSpam, entitiesLinks } = require("../api/utils/utils.js");
 const ST = require("../api/editors/setTime.js");
 const SE = require("../api/editors/setExceptions.js");
 const CBP = require("../api/editors/setChatbasedPunish.js");
 const RM = require("../api/utils/rolesManager.js");
 const { applyChatBasedPunish, punishUser } = require("../api/utils/punishment.js");
-const {tgLinkValidator, isTelegramLink, linksValidator, isLinkWhitelisted} = require("../api/utils/antispam.js");
+const {tgLinkValidator, linksValidator} = require("../api/utils/antispam.js");
 
 function main(args) {
 
@@ -14,88 +14,146 @@ function main(args) {
 
     l = global.LGHLangs; //importing langs object
 
+    /**
+     * @param {LGHelpTemplate.LGHMessage} msg
+     * @param {LGHelpTemplate.LGHChat} chat
+     * @param {LGHelpTemplate.LGHUser} user
+     */
+    function handleSpamMessages(msg, chat, user)
+    {
+
+        if(!msg.chat.isGroup) return;
+
+        var TGExceptions = chat.spam.tgLinks.exceptions
+            
+        //unallowed forward detection
+        var isForwardedUser = msg.forward_origin && msg.forward_origin.type == "user" && msg.forward_origin.sender_user.id == user.id
+        if(!user.perms.forward && msg.hasOwnProperty("forward_origin") && !isForwardedUser)
+        {
+            var punishType = originIsSpam(msg.forward_origin, TGExceptions);
+            if(punishType)
+            {
+                var reason = l[chat.lang].FORWARD_PUNISHMENT;
+                applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.forward, punishType, reason, msg.message_id);
+                return;
+            }
+        }
+
+        //unallowed quote detection
+        var isQuotedChat = msg.hasOwnProperty("external_reply") && msg.external_reply.chat && msg.external_reply.chat.id == chat.id;
+        if(!user.perms.quote && msg.hasOwnProperty("external_reply") && !isQuotedChat)
+        {
+            var punishType = originIsSpam(msg.external_reply.origin, TGExceptions);
+            if(punishType)
+            {
+                var reason = l[chat.lang].QUOTE_PUNISHMENT;
+                applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.quote, punishType, reason, msg.message_id);
+                return;
+            }
+        }
+
+        var text = msg.text || msg.caption || false;
+        if(!text) return;
+        if(msg.entities)
+            text = text.split(" ").concat(entitiesLinks(msg.entities)).join(" ");
+        if(msg.caption_entities)
+            text = text.split(" ").concat(entitiesLinks(msg.caption_entities)).join(" ");
+
+        if( !(user.perms.tgLink != 1 && user.perms.link != 1) ) return;
+
+        // Usernames: https://t.me/username
+        var allUsernames = [...text.matchAll(/(?:@|(?:(?:(?:https?:\/\/)?t(?:elegram)?)\.me\/))(\w{4,})/g)]
+        .filter(match => match[1].toLowerCase() != 'joinchat')
+        .map(match => tgLinkValidator(match[1]).toLowerCase())
+
+        // 2 paths links: https://telegram.me/joinchat/AAAAAAAAAAAA
+        var joinchatLinks = [...text.matchAll(/t(?:elegram)?\.me\/[-a-zA-Z0-9.]+(\/\S*)?/g)]
+            .map(match => tgLinkValidator(match[0]))
+            .map(match => match.startsWith("@") ? match.toLowerCase() : match)
+            .filter(link => !allUsernames.includes(link))
+
+        // Private links: https://telegram.me/+ewef23423fds
+        var privateLinks = [...text.matchAll(/t(?:elegram)?\.me\/\+(\S+)/g)]
+            .map(match => tgLinkValidator(match[0]))
+
+        // Any link
+        var links = [...text.matchAll(/([\w+]+\:\/\/)?([\w\d-]+\.)*[\w-]+[\.\:]\w+([\/\?\=\&\#\.]?[\w-]+)*\/?/gm)]
+            .map(match => linksValidator(match[0]))
+            .filter(match => !!match)
+
+        if(user.perms.tgLink != 1 && chat.spam.tgLinks.punishment != 0)
+        {
+            var exceptions = chat.spam.tgLinks.exceptions.map(exc => exc.startsWith("@") ? exc.toLowerCase() : exc )
+
+            var tgSpams = chat.spam.tgLinks.usernames ?
+                allUsernames.filter(username => !username.endsWith("bot")) : []
+            var botSpams = allUsernames.filter(username => username.endsWith("bot"))
+                .filter(spam => !exceptions.includes(spam))
+
+            var tgLinks = tgSpams.concat(joinchatLinks).concat(privateLinks)
+                .filter(spam => !exceptions.includes(spam))
+
+            console.log(tgLinks)
+            
+            var tgLink = tgLinks.length > 0
+            var botLink = (chat.spam.tgLinks.bots && botSpams.length > 0)
+            if( tgLink || botLink )
+            {
+                if(chat.spam.tgLinks.delete)
+                    TGbot.deleteMessages(chat.id, [msg.message_id]);
+
+                var target = RM.userToTarget(chat, user);
+                var punishment = chat.spam.tgLinks.punishment;
+                var PTime = chat.spam.tgLinks.PTime;
+                var reason = tgLink ? l[chat.lang].TGLINK_PUNISHMENT : l[chat.lang].TGLINK_BOT_PUNISHMENT;
+                punishUser(GHbot, user.id, chat, target, punishment, PTime, reason);
+                return;
+            }
+        }
+
+        if(user.perms.link != 1 && chat.spam.links.punishment != 0)
+        {
+            var blacklist = [
+                "t.me",
+                "telegram.me",
+            ]
+
+            var exceptions = chat.spam.links.exceptions
+            var unallowedLinks = links.filter(link => {
+                var host = new URL("https://"+link).hostname
+                return !blacklist.includes(host)
+            }).filter(link => {
+                var host = new URL("https://"+link).hostname
+                return !exceptions.some(excLink => {
+                    var excHost = new URL("https://"+excLink).hostname
+                    var afterHost = excLink.split(excHost).length > 1 ? excLink.split(excHost)[1] : false;
+                    if( afterHost && (afterHost.startsWith("/") || afterHost.startsWith("#")) )
+                        return excLink == link
+                    return excHost == host
+                })
+            })
+
+            if( unallowedLinks.length > 0 )
+            {
+                if(chat.spam.links.delete)
+                    TGbot.deleteMessages(chat.id, [msg.message_id]);
+
+                var target = RM.userToTarget(chat, user);
+                var punishment = chat.spam.links.punishment;
+                var PTime = chat.spam.links.PTime;
+                var reason = l[chat.lang].LINK_PUNISHMENT;
+                punishUser(GHbot, user.id, chat, target, punishment, PTime, reason);
+                return;
+            }
+
+        }
+    }
+
     GHbot.onMessage((msg, chat, user) => {
 
-        //spam detection
-        if(msg.chat.type != "private"){(()=>{
+        handleSpamMessages(msg, chat, user);
 
-            var TGExceptions = chat.spam.tgLinks.exceptions
-            
-            //unallowed forward detection
-            var isForwardedUser = msg.forward_origin && msg.forward_origin.type == "user" && msg.forward_origin.sender_user.id == user.id
-            if(!user.perms.forward && msg.hasOwnProperty("forward_origin") && !isForwardedUser)
-            {
-                var punishType = originIsSpam(msg.forward_origin, TGExceptions);
-                if(punishType)
-                {
-                    var reason = l[chat.lang].FORWARD_PUNISHMENT;
-                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.forward, punishType, reason, msg.message_id);
-                    return;
-                }
-            }
-
-            //unallowed quote detection
-            var isQuotedChat = msg.hasOwnProperty("external_reply") && msg.external_reply.chat && msg.external_reply.chat.id == chat.id;
-            if(!user.perms.quote && msg.hasOwnProperty("external_reply") && !isQuotedChat)
-            {
-                var punishType = originIsSpam(msg.external_reply.origin, TGExceptions);
-                if(punishType)
-                {
-                    var reason = l[chat.lang].QUOTE_PUNISHMENT;
-                    applyChatBasedPunish(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.quote, punishType, reason, msg.message_id);
-                    return;
-                }
-            }
-
-            var text = msg.text || msg.caption || false;
-            if(!text) return;
-            var words = text.split(" ");
-            if(msg.entities) words = words.concat(entitiesLinks(msg.entities));
-            if(msg.caption_entities) words = words.concat(entitiesLinks(msg.caption_entities));
-
-            //search for unwanted links on text
-            for(var i = 0; i < words.length; i++)
-            {
-                var word = words[i];
-
-                //unallowed tgLink detection
-                var tgLink = isTelegramLink(word);
-                if(user.perms.tgLink && tgLink)
-                    return;
-                if(!user.perms.tgLink && tgLink)
-                {
-                    var punish = true;
-                    if(!chat.spam.tgLinks.bots && tgLink && tgLink.startsWith("@") && tgLink.endsWith("bot"))
-                        punish = false;
-                    if(!chat.spam.tgLinks.usernames && tgLink && tgLink.startsWith("@") && !tgLink.endsWith("bot"))
-                        punish = false;
-
-                    if(!punish) return;
-                    if(tgLink && chat.spam.tgLinks.exceptions.includes(tgLink)) return;
-
-                    if(chat.spam.tgLinks.delete)
-                        TGbot.deleteMessages(chat.id, [msg.message_id]);
-
-                    var reason = l[chat.lang].TGLINK_PUNISHMENT;
-                    punishUser(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.tgLinks.punishment, chat.spam.tgLinks.PTime, reason);
-                    return;
-                }
-
-                //unallowed link detection
-                var link = linksValidator(word);
-                if(!user.perms.link && link && !isLinkWhitelisted(link, chat.spam.links.exceptions))
-                {
-                    if(chat.spam.links.delete)
-                        TGbot.deleteMessages(chat.id, [msg.message_id]);
-                    
-                    var reason = l[chat.lang].LINK_PUNISHMENT;
-                    punishUser(GHbot, user.id, chat, RM.userToTarget(chat, user), chat.spam.links.punishment, chat.spam.links.PTime, reason);
-                    return;
-                }
-                
-            }
-            
-        })()}
+        //SETTINGS//
 
         //security guards
         if (!msg.waitingReply) return;
@@ -181,6 +239,7 @@ function main(args) {
 
     })
 
+    GHbot.onEditedMessageText(handleSpamMessages)
 
     GHbot.onCallback((cb, chat, user) => {
 

@@ -163,6 +163,8 @@ The down below lines are generated with [jsdoc2md](https://github.com/jsdoc2md/j
     * [.db](#LGHInterface+db) : [<code>LGHDatabase</code>](#LGHDatabase)
     * [.config](#LGHInterface+config) : <code>Object</code>
     * [.onMessage(handler)](#LGHInterface+onMessage)
+    * [.onEditedMessage(handler)](#LGHInterface+onEditedMessage)
+    * [.onEditedMessageText(handler)](#LGHInterface+onEditedMessageText)
     * [.onCallback(handler)](#LGHInterface+onCallback)
     * [.sendMessage(userId, chatId, text, options)](#LGHInterface+sendMessage) ⇒ <code>Boolean</code> \| <code>Promise.&lt;TelegramBot.Message&gt;</code>
     * [.sendPhoto(userId, chatId, photo, options, fileOptions)](#LGHInterface+sendPhoto) ⇒ <code>Boolean</code> \| <code>Promise.&lt;TelegramBot.Message&gt;</code>
@@ -208,10 +210,32 @@ LGHbot message event handler
 | --- | --- | --- |
 | handler | <code>function</code> | handler function |
 
+<a name="LGHInterface+onEditedMessage"></a>
+
+### lghInterface.onEditedMessage(handler)
+LGHbot edited_message event handler
+
+**Kind**: instance method of [<code>LGHInterface</code>](#LGHInterface)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| handler | <code>function</code> | handler function |
+
+<a name="LGHInterface+onEditedMessageText"></a>
+
+### lghInterface.onEditedMessageText(handler)
+LGHbot edited_message event handler
+
+**Kind**: instance method of [<code>LGHInterface</code>](#LGHInterface)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| handler | <code>function</code> | handler function |
+
 <a name="LGHInterface+onCallback"></a>
 
 ### lghInterface.onCallback(handler)
-LGHbot callback event handler
+LGHbot callback_query event handler
 
 **Kind**: instance method of [<code>LGHInterface</code>](#LGHInterface)  
 

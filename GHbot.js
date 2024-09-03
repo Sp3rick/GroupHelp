@@ -1,3 +1,9 @@
+/**
+ *  IMPORTANT: README
+ * If you edit this file don't forget to run `node runDocs.js` before pull request
+ * In case of errors maybe you wrong something on the JSDocs here
+ */
+
 const TelegramBot = require("node-telegram-bot-api");
 const { pushUserRequest } = require("./api/tg/SafeTelegram");
 
@@ -434,7 +440,23 @@ class LGHInterface {
     }
 
     /**
-     * LGHbot callback event handler
+     * LGHbot edited_message event handler
+     * @param {function(LGHMessage, LGHChat, LGHUser): void} handler - handler function
+     */
+    onEditedMessage(handler) {
+        this.GHbot.on("edited_message", handler);
+    }
+
+    /**
+     * LGHbot edited_message event handler
+     * @param {function(LGHMessage, LGHChat, LGHUser): void} handler - handler function
+     */
+    onEditedMessageText(handler) {
+        this.GHbot.on("edited_message_text", handler);
+    }
+
+    /**
+     * LGHbot callback_query event handler
      * @param {function(LGHCallback, LGHChat, LGHUser): void} handler - handler function
      */
     onCallback(handler) {

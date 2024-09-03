@@ -26,11 +26,14 @@ If you want an idea of what currently miss on the bot and you may want to implem
     support all group help functions and more (+anti-sheduled messages[msg.is_from_offline], )    
     allow bot clone bot when user give a token    
     add optionally an userbot (when active implement in tagResolver.js)   
+    user should have an option to delete also his warn or roles data from the entire database but accepting that he is going to be banned by any group where he got at least a warn and accepting that he is going to lose any acquired role on every group     
+    make plugins more independed    
 
 -other things:
 
-    user should have an option to delete also his warn or roles data from the entire database but accepting that he is going to be banned by any group where he got at least a warn and accepting that he is going to lose any acquired role on every group   
-    implement direct private settings with /*settings   
+    add a setting on antiflood.js to count edited messages too
+    allow a plugin to add itself a button on settings page  
+    implement direct private settings with /*settings     
     add a /commands command to help user to know bot commands, admin commands, and custom-group commands if avaiable    
     a check system to drop wrong formatted cb.data and waitingReply   
     allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)   

@@ -12,7 +12,7 @@ Be sure to have installed a recent version of [NodeJS](https://nodejs.org/)
 
 Verify NodeJS installation with `node -v`
 
-Set your bot token using configuration file, look at [config documentation](configuration.md).
+Set your bot token using configuration file, look at [config documentation](https://sp3rick.github.io/GroupHelp/wiki/configuration/).
 
 Open a terminal inside LibreGroupHelp folder and run this commands
 

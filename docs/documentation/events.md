@@ -9,11 +9,13 @@ or
 [chat](GHBot.md/#LGHChat),
 [user](GHBot.md/#LGHUser)
 
-GHBot currently has 2 events fully supported
+GHBot currently has 4 events fully supported
 
 ```javascript
 GHBot.onCallback( (cb, chat, user) => { console.log(cb) } )
 GHBot.onMessage( (msg, chat, user) => { console.log(msg) } ) 
+GHBot.onEditedMessage( (msg, chat, user) => { console.log(msg) } ) 
+GHBot.onEditedMessageText( (msg, chat, user) => { console.log(msg) } ) 
 ```
 
 ---

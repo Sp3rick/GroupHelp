@@ -1,4 +1,4 @@
-var LGHelpTemplate = require("./GHbot.js");
+const LGHelpTemplate = require("./GHbot.js");
 const {parseCommand} = require( __dirname + "/api/utils/utils.js" );
 const EventEmitter = require("node:events");
 const getDatabase = require( "./api/database.js" );
@@ -24,7 +24,7 @@ async function main(config) {
     console.log("Starting a bot...")
     
     var TGbot = new TelegramBot(config.botToken, {polling: true});
-    await TGbot.setWebHook("",{allowed_updates: JSON.stringify(["message", "edited_channel_post", "callback_query", "message_reaction", "message_reaction_count", "chat_member"])})
+    await TGbot.setWebHook("",{allowed_updates: JSON.stringify(["message", "edited_message", "edited_channel_post", "callback_query", "message_reaction", "message_reaction_count", "chat_member"])})
     const bot = await TGbot.getMe();
     TGbot.me = bot;
 
@@ -42,8 +42,21 @@ async function main(config) {
     //some simplified variables
     l = global.LGHLangs;
 
-
-    TGbot.on( "message", async (msg, metadata) => { try {
+    /**
+     * @typedef {Object} handleMessageReturn
+     * @param {LGHelpTemplate.LGHMessage} msg
+     * @param {LGHelpTemplate.LGHChat} chat
+     * @param {LGHelpTemplate.LGHUser} user
+     */
+    /**
+     * @param {TelegramBot.Message} msg 
+     * @param {TelegramBot.Metadata} metadata 
+     * @description
+     * handles telegram raw messages and return various
+     * ready to use LibreGroupHelp objects
+     * @returns {handleMessageReturn}
+     */
+    async function handleMessage(msg, metadata){ try {
 
         if(!isChatAllowed(config, msg.chat.id)) return;
         
@@ -81,7 +94,9 @@ async function main(config) {
 
             var creator = getOwner(adminList);
             var newGroupText = l[chat.lang].NEW_GROUP;
-            newGroupText = (creator && !creator.is_anonymous) ? newGroupText.replace("{owner}",tag(".",creator.user.id)) : ".";
+            newGroupText = (creator && !creator.is_anonymous) ?
+                newGroupText.replace("{owner}",tag(".",creator.user.id)) :
+                newGroupText.replace("{owner}",".");
             
             await GHbot.sendMessage(user.id, chat.id, newGroupText,{parse_mode:"HTML",
                 reply_markup :{inline_keyboard:[[{text: l[chat.lang].ADV_JOIN_CHANNEL, url: "https://t.me/LibreGroupHelp"}]]}
@@ -91,7 +106,7 @@ async function main(config) {
                             {text: l[chat.lang].LANGS_BUTTON2, callback_data: "LANGS_BUTTON:"+chat.id},
                             {text: l[chat.lang].SETTINGS_BUTTON, callback_data: "SETTINGS_SELECT:"+chat.id}]]}
             })
-     
+        
         }
         chat = Object.assign( {}, ((chat.isGroup ? db.chats.get( chat.id ) : {})), chat );
         msg.chat = chat;
@@ -154,35 +169,63 @@ async function main(config) {
         }
 
 
-        try {
-            if(!user.lang)
-            {
-                console.log("somehow user.lang is not avaiable, logging message to futher debug");
-                console.log(msg);
-                return;
-            }
-            if(msg.waitingReply && msg.waitingReply.includes(":") && !chat.isGroup)
-            {
-                console.log("invalid message waitingReply group detected, logging message to futher debug");
-                console.log(msg);
-                return;
-            }
-            if(chat.id == user.id) chat.lang = user.lang;
-            GroupHelpBot.emit( "message", msg, chat, user );
-            GHCommand.messageEvent(msg, chat, user);
-            if ( chat.type == "private" ) GroupHelpBot.emit( "private", msg, chat, user );
-        } catch (err) {
-            console.log("Error after emitting a valid GroupHelpBot \"message\", i will log error then \"msg\", \"chat\", \"user\" ")
-            console.log(err);
+        //Final checks
+        if(!user.lang)
+        {
+            console.log("somehow user.lang is not avaiable, logging message to futher debug");
             console.log(msg);
-            console.log(chat);
-            console.log(user);
+            return;
         }
+        if(msg.waitingReply && msg.waitingReply.includes(":") && !chat.isGroup)
+        {
+            console.log("invalid message waitingReply group detected, logging message to futher debug");
+            console.log(msg);
+            return;
+        }
+        if(chat.id == user.id) chat.lang = user.lang;
+        return {msg, chat, user}
     } catch (err) {
-        console.log("Error in main.js on message event, i will log the error and then the received message");
+        console.log("Error trying to handle GroupHelpBot Message, i will log error there \"msg\"");
         console.log(err);
         console.log(msg);
+    }}
+
+    TGbot.on( "message", async (msg, metadata) => { try {
+        var {msg, chat, user} = await handleMessage(msg, metadata);
+        GroupHelpBot.emit( "message", msg, chat, user );
+        GHCommand.messageEvent(msg, chat, user);
+        if ( chat.type == "private" ) GroupHelpBot.emit( "private", msg, chat, user );
+    } catch (err) {
+        console.log("Error after emitting an handled GroupHelpBot \"message\", i will log error then \"msg\", \"chat\", \"user\" ")
+        console.log(err);
+        console.log(msg);
+        console.log(chat);
+        console.log(user);
     } } );
+
+    TGbot.on( "edited_message", async (msg) => { try {
+        var {msg, chat, user} = await handleMessage(msg);
+        GroupHelpBot.emit( "edited_message", msg, chat, user );
+    } catch (err) {
+        console.log("Error after emitting an handled GroupHelpBot \"edited_message\", i will log error then \"msg\", \"chat\", \"user\" ")
+        console.log(err);
+        console.log(msg);
+        console.log(chat);
+        console.log(user);
+    } } )
+
+    TGbot.on( "edited_message_text", async (msg) => { try {
+        var {msg, chat, user} = await handleMessage(msg);
+        GroupHelpBot.emit( "edited_message_text", msg, chat, user );
+    } catch (err) {
+        console.log("Error after emitting an handled GroupHelpBot \"edited_message_text\", i will log error then \"msg\", \"chat\", \"user\" ")
+        console.log(err);
+        console.log(msg);
+        console.log(chat);
+        console.log(user);
+    } } )
+
+
 
     TGbot.on( "callback_query", async (cb) => { try {
 
@@ -260,6 +303,7 @@ async function main(config) {
         console.log(cb);
     } } )
 
+    // handleMessage is not used here because im not sure is supported by the function
     TGbot.on( "left_chat_member", (msg) => {
 
         if(!isChatAllowed(config, msg.chat.id)) return;

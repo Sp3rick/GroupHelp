@@ -47,12 +47,16 @@ function linksValidator(string)
 {
     if(string.includes("://"))
         string = string.split("://")[1];
+    
+    var host = "";
+    try {
+        host = new URL("https://"+string).hostname
+        if( !host.includes(".") )
+            return false;
+    } catch (error) {return false}
 
-    var host = string.split("/")[0].toLowerCase();
-    if( !isValidHost(host) || !host.includes(".") )
-        return false;
-
-    if(string.includes("/"))
+    var afterHost = string.split(host).length > 1 ? string.split(host)[1] : false;
+    if( afterHost && (afterHost.startsWith("/") || afterHost.startsWith("#")) )
         return string;
 
     var doms = host.split(".");
