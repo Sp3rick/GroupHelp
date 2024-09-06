@@ -1,4 +1,5 @@
 const GH = require("../../GHbot.js");
+const { checkCommandPerms } = require("../utils/rolesManager.js");
 l = global.LGHLangs;
 /**
  * @typedef {Object} resolveCommandKeyReturn
@@ -16,7 +17,8 @@ function resolveCommandKey(name)
     {
         var lang = l[langKeys[i]];
         if(lang.hasOwnProperty("/"+name))
-            return {key: lang["/"+name], lang};
+            return {key: lang["/"+name], lang:langKeys[i]};
+            
     }
     return false;
 }
@@ -64,7 +66,6 @@ function messageEvent(msg, chat, user)
 
     var command = msg.command;
     if(!command) return;
-    if(!chat.isGroup) return; //currently this is intended for groups only
 
     var forcesPrivate = command.name.startsWith("*");
     if(forcesPrivate) command.name = command.name.replace("*","");
@@ -74,29 +75,29 @@ function messageEvent(msg, chat, user)
     var key = commandInfo.key;
     var keyLang = commandInfo.lang;
 
-    var hasPermission = false;
-    var hasPrivatePermission = false;
-    if(user.perms.commands.includes(key))
-        {hasPermission = true; hasPrivatePermission = true;}
-    if(user.perms.commands.includes("@"+key))
-        hasPermission = true;
-    if(user.perms.commands.includes("*"+key))
-        hasPrivatePermission = true;
+    if(chat.isGroup){
+        var check = checkCommandPerms(user.perms.commands, key);
+        var hasGroupPermission = check.group;
+        var hasPrivatePermission = check.private;
 
-    if( runTable[key] && !forcesPrivate && hasPermission)
-        runTable[key](msg, chat, user, false, chat.lang, key, keyLang);
-    if( runTable[key] && (!hasPermission || forcesPrivate) && hasPrivatePermission )
-        runTable[key](msg, chat, user, true, user.lang, key, keyLang);
+        //run related one command
+        if( runTable[key] && !forcesPrivate && hasGroupPermission)
+            runTable[key](msg, chat, user, false, chat.lang, key, keyLang);
+        if( runTable[key] && (!hasGroupPermission || forcesPrivate) && hasPrivatePermission )
+            runTable[key](msg, chat, user, true, user.lang, key, keyLang);
 
-    if( forcesPrivate && hasPermission && !hasPrivatePermission )
-    {
-        //let know the user that he can use the command only on group chat
-        console.log("LGHCommand.js: let know the user that he can use the command only on group chat");
+        if( forcesPrivate && hasGroupPermission && !hasPrivatePermission )
+        {
+            console.log("LGHCommand.js: let know the user that he can use the command only on group chat, he used \"*\" command prefix");
+        }
+
+        if( !hasGroupPermission && !hasPrivatePermission )
+        {
+            console.log("LGHCommand.js: let know the user that he have not enough permissions to run the command");
+        }
     }
-
-    if( !hasPermission && !hasPermission )
-    {
-        //let know the user that he have not enough permissions to run the command
+    else{
+        runTable[key](msg, chat, user, true, user.lang, key, keyLang);
     }
 }
 

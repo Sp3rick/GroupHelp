@@ -14,19 +14,19 @@ function main(args)
     l = global.LGHLangs; //importing langs object
 
     //founder role is automatically set from /reload command
-    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PIN",
+    var founderCommands = ["COMMAND_SETTINGS", "COMMAND_PIN", "COMMAND_GETURL",
     "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN","COMMAND_DELETE",
     "COMMAND_UNBAN", "COMMAND_UNMUTE", "COMMAND_UNWARN",
     "COMMAND_FREE", "COMMAND_HELPER", "COMMAND_CLEANER", "COMMAND_MUTER", "COMMAND_MODERATOR", "COMMAND_COFOUNDER", "COMMAND_ADMINISTRATOR",
     "COMMAND_UNFREE", "COMMAND_UNHELPER", "COMMAND_UNCLEANER", "COMMAND_UNMUTER", "COMMAND_UNMODERATOR", "COMMAND_UNCOFOUNDER", "COMMAND_UNADMINISTRATOR",
     "COMMAND_TITLE", "COMMAND_UNTITLE", "COMMAND_FORGOT"]
     var founderPerms = RM.newPerms(founderCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-    var modCommands = ["COMMAND_RULES", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_BAN", "COMMAND_MUTE", "COMMAND_KICK", "COMMAND_WARN",
-    "COMMAND_DELETE","COMMAND_UNBAN", "COMMAND_UNMUTE", "COMMAND_UNWARN",]
+    var modCommands = ["COMMAND_RULES", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_GETURL", "COMMAND_DELETE", "COMMAND_KICK", "COMMAND_WARN", "COMMAND_UNWARN",
+    "COMMAND_MUTE", "COMMAND_UNMUTE", "COMMAND_BAN", "COMMAND_UNBAN"]
     var modPerms = RM.newPerms(modCommands, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
     var muterPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_MUTE", "COMMAND_UNMUTE"]);
     var cleanerPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_DELETE"]);
-    var helperPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_INFO"]);
+    var helperPerms = RM.newPerms(["COMMAND_RULES", "COMMAND_INFO"], "COMMAND_GETURL");
     var freePerms = RM.newPerms([], 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
 
     global.roles = {

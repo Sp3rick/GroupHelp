@@ -64,6 +64,11 @@ function main(args)
         var cb_prefix = cb.data.split("#")[0];
 
         //main menu based settings
+        if( cb.data.startsWith("S_FLOOD_M_EDITS:") )
+        {
+            chat.flood.edit = !chat.flood.edit;
+            db.chats.update(chat)
+        }
         if( cb.data.startsWith("S_FLOOD_M_P_") )
         {
             var toSetPunishment = handlePunishmentCallback(GHbot, cb, user.id, chat.flood.punishment);
@@ -97,8 +102,13 @@ function main(args)
             var text = l[lang].ANTIFLOOD+"\n"+
             l[lang].ANTIFLOOD_DESCRIPTION.replace("{messages}",chat.flood.messages).replace("{seconds}",chat.flood.time)+"\n\n"+
             bold(l[lang].PUNISHMENT+": ")+punishmentText;
+
+            var editButtonText = l[lang].ANTIFLOOD_COUNT_EDIT_BUTTON+(chat.flood.edit?" ✔️":" ✖️")
             
-            var buttons = [[{text: l[lang].MESSAGES_BUTTON, callback_data: "S_FLOOD_MESSAGES#SNUM_MENU:"+chat.id},{text: l[lang].TIME_BUTTON, callback_data: "S_FLOOD_TIME#SNUM_MENU:"+chat.id}]]
+            var buttons = [
+                [{text: l[lang].MESSAGES_BUTTON, callback_data: "S_FLOOD_MESSAGES#SNUM_MENU:"+chat.id}, {text: l[lang].TIME_BUTTON, callback_data: "S_FLOOD_TIME#SNUM_MENU:"+chat.id}],
+                [{text: editButtonText, callback_data: "S_FLOOD_M_EDITS:"+chat.id}]
+            ]
             genPunishButtons(lang, punishment, "S_FLOOD_M", chat.id, true, chat.flood.delete).forEach((line)=>buttons.push(line));
             buttons.push([{text: l[lang].BACK_BUTTON, callback_data: "SETTINGS_HERE:"+chat.id}]);
 
@@ -139,78 +149,98 @@ function main(args)
 
     })
 
+    /**
+     * @param {LGHelpTemplate.LGHMessage} msg
+     * @param {LGHelpTemplate.LGHChat} chat
+     * @param {LGHelpTemplate.LGHUser} user
+     */
+    async function handleFloodMessage(msg, chat, user)
+    {
+        if(!msg.chat.isGroup) return;
+        if(msg.chat.flood.punishment == 0 && msg.chat.flood.delete == false) return;
+        if(user.perms.flood == 1) return;
+
+        var key = msg.chat.id+"_"+user.id;
+
+        if(!global.LGHFlood.hasOwnProperty(key))
+            global.LGHFlood[key] = {lastPunishment : 0, grouped: {}, single: {}};
+        
+        var now = msg.date;
+        var mLevel = msg.chat.flood.messages;
+        var tLevel = msg.chat.flood.time;
+        var grouped = global.LGHFlood[key].grouped;
+        clearOutOfRangeMessages(key, now, tLevel);
+
+        //count this message
+        if(msg.hasOwnProperty("media_group_id") && !grouped.hasOwnProperty(msg.media_group_id))
+        {
+            global.LGHFlood[key].grouped[msg.media_group_id] = {ids:[msg.message_id], time: now}
+        }
+        else if(msg.hasOwnProperty("media_group_id") && grouped.hasOwnProperty(msg.media_group_id))
+        {
+            global.LGHFlood[key].grouped[msg.media_group_id].ids.push(msg.message_id);
+            global.LGHFlood[key].grouped[msg.media_group_id].time = now;
+        }
+        else if(!msg.hasOwnProperty("media_group_id"))
+        {
+            //add id, and re-count anyway if already exhist
+            var curKey = msg.message_id;
+            while (true) {
+                if(global.LGHFlood[key].single.hasOwnProperty(curKey))
+                    curKey = curKey+"+";
+                else
+                {
+                    global.LGHFlood[key].single[curKey] = now;
+                    break
+                }
+                    
+            }
+        }
+
+        //check if antiflood fired
+        var fire = false;
+        var messageCount = Object.keys(global.LGHFlood[key].grouped).length + Object.keys(global.LGHFlood[key].single).length;
+        if(messageCount > mLevel) fire = true;
+
+
+        //flood reaction//
+        if(fire && msg.chat.flood.delete)
+        {
+            var messagesIds = [];
+
+            Object.keys(grouped).forEach((groupId)=>{
+                grouped[groupId].ids.forEach((id)=>{messagesIds.push(id)});
+                delete global.LGHFlood[key].grouped[groupId];
+            })
+            Object.keys(global.LGHFlood[key].single).forEach((id)=>{
+                if(!id.includes("+")) //filter duplicates
+                    messagesIds.push(id);
+                delete global.LGHFlood[key].single[id];
+            })
+
+            //keep inside 100 messages telegram limit
+            chunkArray(messagesIds, 100).forEach((ids)=>{
+                TGbot.deleteMessages(msg.chat.id, ids)
+            })
+            
+        }
+
+        //punish
+        var lastPunishment = global.LGHFlood[key].lastPunishment;
+        var recentlyPunished = (now - lastPunishment) < tLevel;
+        if(fire && !recentlyPunished)
+        {
+            var PTime = (msg.chat.flood.PTime == 0) ? -1 : msg.chat.flood.PTime;
+            var reason = l[msg.chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",msg.chat.flood.messages).replaceAll("{time}",msg.chat.flood.time);
+            punishUser(GHbot, user.id,  msg.chat, RM.userToTarget(msg.chat, user), msg.chat.flood.punishment, PTime, reason)
+        }
+        if(fire) global.LGHFlood[key].lastPunishment = now;
+
+    }
+
     GHbot.onMessage( async (msg, chat, user) => {
 
-        //flood detection
-        if(msg.chat.type != "private"){(()=>{
-            if(msg.chat.flood.punishment == 0 && msg.chat.flood.delete == false) return;
-            if(user.perms.flood == 1) return;
-
-            var key = msg.chat.id+"_"+user.id;
-
-            if(!global.LGHFlood.hasOwnProperty(key))
-                global.LGHFlood[key] = {lastPunishment : 0, grouped: {}, single: {}};
-            
-            var now = msg.date;
-            var mLevel = msg.chat.flood.messages;
-            var tLevel = msg.chat.flood.time;
-            var grouped = global.LGHFlood[key].grouped;
-            clearOutOfRangeMessages(key, now, tLevel);
-
-            //count this message
-            if(msg.hasOwnProperty("media_group_id") && !grouped.hasOwnProperty(msg.media_group_id))
-            {
-                global.LGHFlood[key].grouped[msg.media_group_id] = {ids:[msg.message_id], time: now}
-            }
-            else if(msg.hasOwnProperty("media_group_id") && grouped.hasOwnProperty(msg.media_group_id))
-            {
-                global.LGHFlood[key].grouped[msg.media_group_id].ids.push(msg.message_id);
-                global.LGHFlood[key].grouped[msg.media_group_id].time = now;
-            }
-            else if(!msg.hasOwnProperty("media_group_id"))
-            {
-                global.LGHFlood[key].single[msg.message_id] = now;
-            }
-
-            //check if antiflood fired
-            var fire = false;
-            var messageCount = Object.keys(global.LGHFlood[key].grouped).length + Object.keys(global.LGHFlood[key].single).length;
-            if(messageCount > mLevel) fire = true;
-    
-
-            //flood reaction//
-            if(fire && msg.chat.flood.delete)
-            {
-                var messagesIds = [];
-
-                Object.keys(grouped).forEach((groupId)=>{
-                    grouped[groupId].ids.forEach((id)=>{messagesIds.push(id)});
-                    delete global.LGHFlood[key].grouped[groupId];
-                })
-                Object.keys(global.LGHFlood[key].single).forEach((id)=>{
-                    messagesIds.push(id);
-                    delete global.LGHFlood[key].single[id];
-                })
-
-                //keep inside 100 messages telegram limit
-                chunkArray(messagesIds, 100).forEach((ids)=>{
-                    TGbot.deleteMessages(msg.chat.id, ids)
-                })
-                
-            }
-
-            //punish
-            var lastPunishment = global.LGHFlood[key].lastPunishment;
-            var recentlyPunished = (now - lastPunishment) < tLevel;
-            if(fire && !recentlyPunished)
-            {
-                var PTime = (msg.chat.flood.PTime == 0) ? -1 : msg.chat.flood.PTime;
-                var reason = l[msg.chat.lang].ANTIFLOOD_PUNISHMENT.replaceAll("{number}",msg.chat.flood.messages).replaceAll("{time}",msg.chat.flood.time);
-                punishUser(GHbot, user.id,  msg.chat, RM.userToTarget(msg.chat, user), msg.chat.flood.punishment, PTime, reason)
-            }
-            if(fire) global.LGHFlood[key].lastPunishment = now;
-
-        })()};
+        handleFloodMessage(msg, chat, user);
 
         //security guards
         if( !(msg.waitingReply && msg.waitingReply.startsWith("S_FLOOD")) ) return;
@@ -261,7 +291,12 @@ function main(args)
             }
         }
 
-    } )
+    })
+
+    GHbot.onEditedMessage( async (msg, chat, user) => {
+        if(chat.isGroup && chat.flood.edit)
+            handleFloodMessage(msg, chat, user)
+    })
 
 
 }

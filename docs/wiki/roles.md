@@ -44,6 +44,14 @@ Currently these are the roles implemented by default from LibreGroupHelp:
   **📗 Authority:** 0       
   <br/><br/>
 
+  - **👷🏻‍♂️ Moderator**  
+  A role that helps moderating your group 
+  **Commands:** `/rules`, `/info`, `/pin`, `/geturl`, `/delete`, `/info`, `/pin`, `/kick`, `/warn`, `/unwarn`, `/mute`, `/unmute`, `/ban`, `/unban`     
+  **Promotion:** `/admin`, `/unadmin` or [Telegram settings](https://telegram.org/blog/admin-revolution#admin-rights)    
+  **🔏 Bot permissions:** `immune`, `flood`, `spam`, `nsfw`, `night`, `media`, `alphabets`, `words`, `length`      
+  **📗 Authority:** 60           
+  <br/><br/>
+
 - **🙊 Muter**  
   Staffer who can mute users  
   **Commands:** `/rules`, `/mute`, `/unmute`  
@@ -62,7 +70,7 @@ Currently these are the roles implemented by default from LibreGroupHelp:
 
 - **⛑ Helper**  
   An user that contributes to the group support  
-  **Commands:** `/rules`, `/info`   
+  **Commands:** `/rules`, `/info`, `/geturl`   
   **Promotion:** `/helper`, `/unhelper`     
   **🔏 Bot permissions:** none    
   **📗 Authority:** 10  

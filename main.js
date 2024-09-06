@@ -6,7 +6,7 @@ const RM = require("./api/utils/rolesManager.js");
 const TR = require("./api/tg/tagResolver.js");
 const TelegramBot = require('node-telegram-bot-api');
 const GHCommand = require("./api/tg/LGHCommand.js");
-const {loadChatUserId, tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime, unsetWaitReply } = require("./api/utils/utils.js");
+const {tag, getOwner, keysArrayToObj, isChatAllowed, getUnixTime, unsetWaitReply } = require("./api/utils/utils.js");
   
 
 async function main(config) {
@@ -191,10 +191,15 @@ async function main(config) {
     }}
 
     TGbot.on( "message", async (msg, metadata) => { try {
+
         var {msg, chat, user} = await handleMessage(msg, metadata);
         GroupHelpBot.emit( "message", msg, chat, user );
-        GHCommand.messageEvent(msg, chat, user);
+
+        if(msg.waitingReply == false && !(msg.reply_to_message && msg.isGroup && msg.reply_to_message.text && String(msg.reply_to_message.text).startsWith("#Support")))
+            GHCommand.messageEvent(msg, chat, user);
+
         if ( chat.type == "private" ) GroupHelpBot.emit( "private", msg, chat, user );
+
     } catch (err) {
         console.log("Error after emitting an handled GroupHelpBot \"message\", i will log error then \"msg\", \"chat\", \"user\" ")
         console.log(err);

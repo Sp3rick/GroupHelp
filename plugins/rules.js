@@ -94,7 +94,7 @@ function main(args)
         if( cb.data.startsWith("S_RULES#CMDPERMS") )
         {
             var returnButtons = [[{text: l[lang].BACK_BUTTON, callback_data: "S_RULES_BUTTON:"+chat.id}]];
-            var newChat = CMDPerms.callbackEvent(GHbot, db, chat, cb, chat, user, "S_RULES", returnButtons)
+            var newChat = CMDPerms.callbackEvent(GHbot, db, cb, chat, user, "S_RULES", returnButtons)
             if(newChat) db.chats.update(newChat);
         }
 

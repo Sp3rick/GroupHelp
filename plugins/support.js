@@ -1,4 +1,5 @@
 var LGHelpTemplate = require("../GHbot.js");
+const GHCommand = require("../api/tg/LGHCommand.js");
 const { unsetWaitReply, waitReplyForChat, waitReplyPrivate } = require("../api/utils/utils.js");
 
 function main(args)
@@ -8,6 +9,16 @@ function main(args)
     const {TGbot, db, config} = GHbot;
 
     l = global.LGHLangs; //importing langs object
+
+    GHCommand.registerCommands(["COMMAND_SUPPORT"], (msg, chat, user, private, lang, key, keyLang) => {
+        if(msg.chat.type != "private") return;
+        waitReplyPrivate(db, "SUPPORT", user);
+        var options = {
+            parse_mode: "HTML",
+            reply_markup : {inline_keyboard:[[{text: l[lang].CANCEL_BUTTON, callback_data: "MENU"}]]}
+        }
+        GHbot.sendMessage(user.id, msg.chat.id, l[lang].SUPPORT_MESSAGE, options)
+    })
 
     GHbot.onMessage( (msg, chat, user) => {
 
@@ -88,10 +99,7 @@ function main(args)
 
         if( cb.data == "SUPPORT_BUTTON" )
         {
-
-            var callback = "SUPPORT";
-            waitReplyPrivate(db, callback, user);
-
+            waitReplyPrivate(db, "SUPPORT", user);
             GHbot.editMessageText( user.id, l[lang].SUPPORT_MESSAGE, 
             {
                 message_id : msg.message_id,
@@ -100,7 +108,6 @@ function main(args)
                 reply_markup : {inline_keyboard:[[{text: l[lang].CANCEL_BUTTON, callback_data: "MENU"}]]}
             })
             GHbot.answerCallbackQuery(user.id, cb.id);
-
         }
 
     })

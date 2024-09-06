@@ -255,6 +255,40 @@ function getFullRoleName(role, lang, chat)
     return getRoleEmoji(role, chat)+" "+getRoleName(role, lang, chat);
 }
 
+
+/**
+ * @param {String} commandKey 
+ */
+function getCommandKeyPerms(commandKey)
+{
+    var private = commandKey.startsWith("*");
+    var group = commandKey.startsWith("@");
+
+    var prefix = false;
+    if(private) prefix = "*";
+    if(group) prefix = "@";
+
+    if(!prefix)
+    {
+        private = true;
+        group = true;
+    }
+
+    return {private, group, prefix};
+}
+
+/**
+ * @param {Array<string>} commands 
+ * @param {String} commandKey 
+ */
+function checkCommandPerms(commands, commandKey)
+{
+    var key = commands.find(key => key.includes(commandKey))
+    if(!key) return {private: false, group: false, prefix: false};
+    return getCommandKeyPerms(key); 
+}
+
+
 //Delete every role reference
 function deleteRole(chat, role)
 {
@@ -370,7 +404,7 @@ function adminToPerms(admin)
     if(admin.status != "administrator")return perms;
 
     if(admin.can_manage_chat)
-        perms = newPerms(["@COMMAND_ME"],1,1,1,1,1,1,1,1,1,1,1,1,0,0);
+        perms = newPerms(["@COMMAND_ME", "COMMAND_RULES", "COMMAND_INFO", "COMMAND_PIN", "COMMAND_GETURL"],1,1,1,1,1,1,1,1,1,1,1,1,0,0);
     if(admin.can_delete_messages)
         perms.commands.push("COMMAND_DELETE");
     if(admin.can_restrict_members)
@@ -545,6 +579,91 @@ function sumUserPerms(chat, userId)
 
 }
 
+////////////////////
+
+/**
+ * 
+ * @param {Array<string>} commands 
+ * @param {string} commandKey 
+ * @returns {Array<string>}
+ */
+function addPermsCommand(commands, commandKey)
+{
+    var {private, group, prefix} = getCommandKeyPerms(commandKey)
+
+    if(prefix) commandKey = commandKey.replace(prefix, "");
+    else prefix = "";
+
+    
+    var key = commands.find(key => key.includes(commandKey))
+    if(!key)
+    {
+        commands.push(prefix+commandKey)
+        return commands;
+    }
+
+    //handle already exhisting case
+    var cmdPerms = getCommandKeyPerms(key);
+    var exhistPrivate = cmdPerms.private;
+    var exhistGroup = cmdPerms.group;
+    
+    var setBoth = private && exhistGroup || group && exhistPrivate;
+    if(setBoth)
+    {
+        commands = delPermsCommand(commands, key)
+        commands.push(commandKey) //no prefix means both
+    } 
+
+    return commands;
+}
+
+/**
+ * 
+ * @param {Array<string>} commands 
+ * @param {string} commandKey 
+ * @returns {Array<string>}
+ */
+function delPermsCommand(commands, commandKey)
+{
+    var obj = getCommandKeyPerms(commandKey)
+    var delPrivate = obj.private;
+    var delGroup = obj.group;
+    var prefix = obj.prefix;
+
+    var delBoth = delPrivate && delGroup;
+
+    if(prefix) commandKey = commandKey.replace(prefix,"");
+    else prefix = "";
+
+    var exhistingKey = commands.find(key => key.includes(commandKey))
+    if(!exhistingKey) return commands;
+
+    var exhistingObj = checkCommandPerms(commands, commandKey);
+    var exhistPrivate = exhistingObj.private;
+    var exhistGroup = exhistingObj.group;
+    var exhistBoth = exhistPrivate && exhistGroup;
+
+    var change = exhistBoth && !delBoth;
+    var changeToGroup = change && prefix == "*";
+    var changeToPrivate = change && prefix == "@";
+
+    if(delBoth || change)
+        commands.splice(commands.indexOf(exhistingKey), 1)
+    else if(!changeToPrivate || !changeToGroup) 
+    {
+        //when only 1 permission (private or group) is going to be deleted, without changes (both to single)
+        var delIndex = commands.indexOf(prefix+commandKey);
+        if(delIndex != -1) commands.splice(delIndex, 1);
+    }
+
+    if(changeToPrivate)
+        commands.push("*"+commandKey);
+    else if(changeToGroup)
+        commands.push("@"+commandKey);
+    
+
+    return commands;
+}
 
 ////////////////////
 
@@ -627,9 +746,10 @@ function userIdToTarget(TGbot, chat, userId, db)
 module.exports = {
     newPerms, newRole, newUser, newPremadeRolesObject,
     getUser, getUserRoles, getRoleUsers, getUserPerms, getAdminPerms, getUserLevel, getUserWR,
-    getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName,
+    getRolePerms, getRoleName, getRoleEmoji, getRoleLevel, getPremadeRoles, getChatRoles, getFullRoleName, getCommandKeyPerms, checkCommandPerms,
     deleteRole, deleteUser, forgotUser, renameRole, changeRoleEmoji,
     setRole, unsetRole, addUser,
     adminToPerms, reloadAdmins, sumPermsPriority, orderRolesByPriority, sumUserPerms,
+    addPermsCommand, delPermsCommand,
     genStaffListMessage, userToTarget, userIdToTarget
 }

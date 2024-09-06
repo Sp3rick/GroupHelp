@@ -3,7 +3,6 @@ If you want an idea of what currently miss on the bot and you may want to implem
 -short term:
 
     allow to edit single user perms   
-    commands help panel   
 
 -medium term:
 
@@ -12,7 +11,7 @@ If you want an idea of what currently miss on the bot and you may want to implem
     allow to customize /staff allowing to set roles to hide   
     create a privacy setting where users can ask to esclude themself from tagResolver and replace his's first name in database with "Anonymous"   
     allow to disable tagResolver log on group settings    
-    allow to mute only media, or specific media type or extras    
+    allow to /mute only text, or media, or specific media type or extras      
     create a privacy option to allow a user deleting his data from the bot    
     custom roles    
     optimize database.get, .update and .save to store in temporal array most used users   
@@ -28,13 +27,11 @@ If you want an idea of what currently miss on the bot and you may want to implem
     add optionally an userbot (when active implement in tagResolver.js)   
     user should have an option to delete also his warn or roles data from the entire database but accepting that he is going to be banned by any group where he got at least a warn and accepting that he is going to lose any acquired role on every group     
     make plugins more independed    
+    allow a plugin to add itself a button on settings page (more independent)   
 
 -other things:
 
-    add a setting on antiflood.js to count edited messages too
-    allow a plugin to add itself a button on settings page  
-    implement direct private settings with /*settings     
-    add a /commands command to help user to know bot commands, admin commands, and custom-group commands if avaiable    
+    implement direct private settings with /*settings       
     a check system to drop wrong formatted cb.data and waitingReply   
     allow to see perms calculation trough user perms, then roles by priority, then base group perms, going from left to right (or opposite)   
     add something to allow a group admin to identify all users with additional bot perms    
@@ -42,8 +39,7 @@ If you want an idea of what currently miss on the bot and you may want to implem
     add photo preview-mode in MessageMaker.js   
     allow to warn only usersIds who exhist on telegram, it can be checked if applyng a restriction returns true   
     add config to allow/disallow adding bot from non-admin users    
-    ?identify reply_parameters and add everytime allow_sending_without_reply? (GHBot.js)    
-    /geturl, by replying to a message (via reply) and writing this command, you receive the link that refers directly to that message.    
+    ?identify reply_parameters and add everytime allow_sending_without_reply? (GHBot.js)        
     /inactives [days] sends in private chat the list of users who have not sent a message in the last [days], with the possibility of punish them.    
     /pin [message] - sends the message through the Bot and pins it.   
     /editpin [message] - edits the current pinned message (if sent from the Bot).   

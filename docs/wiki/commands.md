@@ -3,7 +3,8 @@
 > ### Note for devs: 
 > - **`COMMAND_`** code prefix means that the command is to be resolved on languages.
 > - **`COMMAND`** codes is also used to define permitted commands on [perms](../documentation/GHBot.md/#LGHPerms) object.
-> - **`@`** prefix on a command code/name means that user has permission to get the reply within private chat only (e.g., `@COMMAND_RULES`).
+> - **`*`** prefix on a command code/name means that user has permission to get the reply within private chat only (e.g., `*COMMAND_RULES`).
+> - **`@`** prefix same behaivor of *, but reply allowed on group chat only instead (e.g., `@COMMAND_RULES`).
 
 ---
 
@@ -44,6 +45,28 @@ Some commands can use the **`*`** prefix (e.g., `/*rules`, `/*perms`) to force a
   Pins a chat message with or without a notification.  
   **Code:** `COMMAND_PIN`  
   **Note:** **`*`** Allowed
+
+  - **/geturl**     
+  By replying to a message (via reply), you receive the link that refers directly to that message.    
+  **Code:** `COMMAND_GETURL`    
+  **Note:** **`*`** Allowed   
+
+### Help Commands
+
+- **/help**  
+  Show a link to the LibreGroupHelp Wiki.   
+  **Code:** `COMMAND_HELP`   
+  **Note:** Private only     
+
+- **/commands**   
+  Show a link with bot commands.  
+  **Code:** `COMMAND_COMMANDS`   
+  **Note:** Private only     
+
+- **/support**  
+  Contact bot support.    
+  **Code:** `COMMAND_SUPPORT`   
+  **Note:** Private only   
 
 ### Punishment Commands
 

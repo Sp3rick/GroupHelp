@@ -168,6 +168,7 @@ const PermissionStatus = {
  * @typedef {Object} LGHFloodAdds - antiflood.js settings additional Object elements.
  * @property {Number} messages - Number of messages needed to trigger the Antiflood.
  * @property {Number} time - Seconds within the specified message should be sent to trigger the Antiflood.
+ * @property {Boolean} edit - True if antiflood should count also edited messages
  */
 /**
  * @typedef {LGHFloodAdds & LGHPunish} LGHFlood - antiflood.js settings Object.
