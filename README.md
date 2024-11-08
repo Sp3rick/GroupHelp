@@ -1,3 +1,7 @@
+Project discontinued
+
+---
+
 # LibreGroupHelp
 
 Open-Source re-creation of telegram group manager Group Help in NodeJS based on [node-telegram-api](https://github.com/yagop/node-telegram-bot-api).
