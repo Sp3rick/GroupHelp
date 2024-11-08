@@ -1,0 +1,4531 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://sp3rick.github.io/GroupHelp/documentation/GHBot/">
+      
+      
+        <link rel="prev" href="../editors/">
+      
+      
+        <link rel="next" href="../TODO-List/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.5.44">
+    
+    
+      
+        <title>Objects - LibreGroupHelp Wiki</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.0253249f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="green">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#telegrambot-api" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="LibreGroupHelp Wiki" class="md-header__button md-logo" aria-label="LibreGroupHelp Wiki" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            LibreGroupHelp Wiki
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Objects
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="green"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="deep-purple" data-md-color-accent="green"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" title="Share" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91s2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/Sp3rick/GroupHelp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Sp3rick/GroupHelp
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../.." class="md-tabs__link">
+          
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
+          
+  
+    
+  
+  Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../plugins/" class="md-tabs__link">
+          
+  
+    
+  
+  Plugins Documentation
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="LibreGroupHelp Wiki" class="md-nav__button md-logo" aria-label="LibreGroupHelp Wiki" data-md-component="logo">
+      
+  <img src="../../assets/logo.png" alt="logo">
+
+    </a>
+    LibreGroupHelp Wiki
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/Sp3rick/GroupHelp" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
+  </div>
+  <div class="md-source__repository">
+    Sp3rick/GroupHelp
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../wiki/configuration/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../wiki/commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../wiki/roles/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roles
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../wiki/perms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Permissions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Documentation
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../plugins/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plugins creation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../database/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Database usage
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../callbacks/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Expect messages/buttons
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../events/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    LGH Events
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Command creation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../languages/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Languages
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../editors/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Editors
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Objects
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Objects
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#telegrambot-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      TelegramBot api
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typedefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typedefs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghinterface" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHInterface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LGHInterface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-lghinterfacelibreghelp" class="md-nav__link">
+    <span class="md-ellipsis">
+      new LGHInterface(LibreGHelp)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceghbot-lghinterface" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.GHbot : LGHInterface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacetgbot-telegrambot" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.TGbot : TelegramBot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacedb-lghdatabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.db : LGHDatabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceconfig-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.config : Object
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceonmessagehandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onMessage(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceoneditedmessagehandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onEditedMessage(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceoneditedmessagetexthandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onEditedMessageText(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceoncallbackhandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onCallback(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacesendmessageuserid-chatid-text-options-boolean-promisetelegrambotmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.sendMessage(userId, chatId, text, options) ⇒ Boolean | Promise.&lt;TelegramBot.Message&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacesendphotouserid-chatid-photo-options-fileoptions-boolean-promisetelegrambotmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.sendPhoto(userId, chatId, photo, options, fileOptions) ⇒ Boolean | Promise.&lt;TelegramBot.Message&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceeditmessagemediauserid-media-options-boolean-promisetelegrambotmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.editMessageMedia(userId, media, options) ⇒ Boolean | Promise.&lt;TelegramBot.Message&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceeditmessagetextuserid-text-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.editMessageText(userId, text, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceanswercallbackqueryuserid-callbackid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.answerCallbackQuery(userId, callbackId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacebanchatmemberuserid-chatid-targetid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.banChatMember(userId, chatId, targetId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceunbanchatmemberuserid-chatid-targetid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.unbanChatMember(userId, chatId, targetId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacerestrictchatmemberuserid-chatid-targetid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.restrictChatMember(userId, chatId, targetId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permissionstatus-enum" class="md-nav__link">
+    <span class="md-ellipsis">
+      PermissionStatus : enum
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testobject-lghchat" class="md-nav__link">
+    <span class="md-ellipsis">
+      testObject() ⇒ LGHChat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anontguser-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      AnonTGUser : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#punishment-0-1-2-3-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Punishment : 0 | 1 | 2 | 3 | 4
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghpunish-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHPunish : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghchatbasedpunish-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHChatBasedPunish : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghalphabetbasedpunish-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAlphabetBasedPunish : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#targetuser-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      TargetUser : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghperms-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHPerms : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simplemedia-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      simpleMedia : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custommessage-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      customMessage : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghadminadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAdminAdds : object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghadmin-telegrambotchatadministratorrights-lghadminadds" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAdmin : TelegramBot.ChatAdministratorRights | LGHAdminAdds
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghadminlist-arraylghadmin" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAdminList : Array.&lt;LGHAdmin&gt;
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#userstatus-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      userStatus : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghrole-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHRole : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghwarns-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHWarns : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghwelcome-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHWelcome : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghfloodadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHFloodAdds : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghflood-lghfloodadds-lghpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHFlood : LGHFloodAdds | LGHPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamtglinksadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamTgLinksAdds : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamtglinks-lghspamtglinksadds-lghpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamTgLinks : LGHSpamTgLinksAdds | LGHPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamlinksadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamLinksAdds : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamlinks-lghspamlinksadds-lghpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamLinks : LGHSpamLinksAdds | LGHPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamforward-lghchatbasedpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamForward : LGHChatBasedPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamquote-lghchatbasedpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamQuote : LGHChatBasedPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspam-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpam : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghgoodbye-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHGoodbye : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghcaptcha-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHCaptcha : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghmedia-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHMedia : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customchat-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomChat : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghchat-telegrambotchat-customchat" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHChat : TelegramBot.Chat | CustomChat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customuser-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomUser : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghuser-telegrambotuser-customuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHUser : TelegramBot.User | CustomUser
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parsedcommand-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      ParsedCommand : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customcommand-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomCommand : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custommessage-object_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomMessage : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghmessage-telegrambotmessage-custommessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHMessage : TelegramBot.Message | CustomMessage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customcallback-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomCallback : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghcallback-telegrambotcallbackquery-customcallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHCallback : TelegramBot.CallbackQuery | CustomCallback
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chatsdatabase-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      chatsDatabase : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usersdatabase-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      usersDatabase : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghdatabase-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHDatabase : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#libreghelp-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LibreGHelp : Object
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TODO-List/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TODO List
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../known-issues/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Known issues
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../plugins/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Plugins Documentation
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Plugins Documentation
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/settings/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Settings
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/message-maker/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✏️ Message maker
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/roles-manager/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Roles manager
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/promote/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Promotions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/punish/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Punishments
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/rules/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rules
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/welcome/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Welcome
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/antiflood/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Anti-Flood
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/antispam/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Anti-Spam
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/captcha/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Captcha
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/goodbye/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Goodbye
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/warns/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Warns
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/pin/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Pin
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/set-chat-based-punish/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✏️ Set chat based punishment
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../plugins/command-perms/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ✏️ Command permissions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#telegrambot-api" class="md-nav__link">
+    <span class="md-ellipsis">
+      TelegramBot api
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classes" class="md-nav__link">
+    <span class="md-ellipsis">
+      Classes
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Functions
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#typedefs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Typedefs
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghinterface" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHInterface
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="LGHInterface">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#new-lghinterfacelibreghelp" class="md-nav__link">
+    <span class="md-ellipsis">
+      new LGHInterface(LibreGHelp)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceghbot-lghinterface" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.GHbot : LGHInterface
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacetgbot-telegrambot" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.TGbot : TelegramBot
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacedb-lghdatabase" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.db : LGHDatabase
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceconfig-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.config : Object
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceonmessagehandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onMessage(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceoneditedmessagehandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onEditedMessage(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceoneditedmessagetexthandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onEditedMessageText(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceoncallbackhandler" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.onCallback(handler)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacesendmessageuserid-chatid-text-options-boolean-promisetelegrambotmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.sendMessage(userId, chatId, text, options) ⇒ Boolean | Promise.&lt;TelegramBot.Message&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacesendphotouserid-chatid-photo-options-fileoptions-boolean-promisetelegrambotmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.sendPhoto(userId, chatId, photo, options, fileOptions) ⇒ Boolean | Promise.&lt;TelegramBot.Message&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceeditmessagemediauserid-media-options-boolean-promisetelegrambotmessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.editMessageMedia(userId, media, options) ⇒ Boolean | Promise.&lt;TelegramBot.Message&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceeditmessagetextuserid-text-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.editMessageText(userId, text, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceanswercallbackqueryuserid-callbackid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.answerCallbackQuery(userId, callbackId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacebanchatmemberuserid-chatid-targetid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.banChatMember(userId, chatId, targetId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfaceunbanchatmemberuserid-chatid-targetid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.unbanChatMember(userId, chatId, targetId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lghinterfacerestrictchatmemberuserid-chatid-targetid-options-promiseboolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      lghInterface.restrictChatMember(userId, chatId, targetId, options) ⇒ Promise.&lt;Boolean&gt;
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#permissionstatus-enum" class="md-nav__link">
+    <span class="md-ellipsis">
+      PermissionStatus : enum
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testobject-lghchat" class="md-nav__link">
+    <span class="md-ellipsis">
+      testObject() ⇒ LGHChat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#anontguser-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      AnonTGUser : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#punishment-0-1-2-3-4" class="md-nav__link">
+    <span class="md-ellipsis">
+      Punishment : 0 | 1 | 2 | 3 | 4
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghpunish-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHPunish : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghchatbasedpunish-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHChatBasedPunish : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghalphabetbasedpunish-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAlphabetBasedPunish : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#targetuser-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      TargetUser : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghperms-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHPerms : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#simplemedia-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      simpleMedia : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custommessage-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      customMessage : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghadminadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAdminAdds : object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghadmin-telegrambotchatadministratorrights-lghadminadds" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAdmin : TelegramBot.ChatAdministratorRights | LGHAdminAdds
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghadminlist-arraylghadmin" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHAdminList : Array.&lt;LGHAdmin&gt;
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#userstatus-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      userStatus : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghrole-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHRole : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghwarns-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHWarns : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghwelcome-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHWelcome : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghfloodadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHFloodAdds : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghflood-lghfloodadds-lghpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHFlood : LGHFloodAdds | LGHPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamtglinksadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamTgLinksAdds : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamtglinks-lghspamtglinksadds-lghpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamTgLinks : LGHSpamTgLinksAdds | LGHPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamlinksadds-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamLinksAdds : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamlinks-lghspamlinksadds-lghpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamLinks : LGHSpamLinksAdds | LGHPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamforward-lghchatbasedpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamForward : LGHChatBasedPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspamquote-lghchatbasedpunish" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpamQuote : LGHChatBasedPunish
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghspam-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHSpam : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghgoodbye-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHGoodbye : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghcaptcha-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHCaptcha : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghmedia-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHMedia : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customchat-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomChat : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghchat-telegrambotchat-customchat" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHChat : TelegramBot.Chat | CustomChat
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customuser-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomUser : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghuser-telegrambotuser-customuser" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHUser : TelegramBot.User | CustomUser
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parsedcommand-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      ParsedCommand : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customcommand-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomCommand : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#custommessage-object_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomMessage : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghmessage-telegrambotmessage-custommessage" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHMessage : TelegramBot.Message | CustomMessage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#customcallback-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      CustomCallback : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghcallback-telegrambotcallbackquery-customcallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHCallback : TelegramBot.CallbackQuery | CustomCallback
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#chatsdatabase-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      chatsDatabase : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#usersdatabase-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      usersDatabase : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#lghdatabase-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LGHDatabase : Object
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#libreghelp-object" class="md-nav__link">
+    <span class="md-ellipsis">
+      LibreGHelp : Object
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+  <h1>Objects</h1>
+
+<h2 id="telegrambot-api">TelegramBot api</h2>
+<p>You can finnd documentation about TelegramBot Objects on <a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">telegram-bot-api</a> github</p>
+<hr />
+<p>The down below lines are generated with <a href="https://github.com/jsdoc2md/jsdoc-to-markdown">jsdoc2md</a></p>
+<h2 id="classes">Classes</h2>
+<dl>
+<dt><a href="#LGHInterface">LGHInterface</a></dt>
+<dd></dd>
+</dl>
+
+<h2 id="functions">Functions</h2>
+<dl>
+<dt><a href="#testObject">testObject()</a> ⇒ <code><a href="#LGHChat">LGHChat</a></code></dt>
+<dd></dd>
+</dl>
+
+<h2 id="typedefs">Typedefs</h2>
+<dl>
+<dt><a href="#AnonTGUser">AnonTGUser</a> : <code>Object</code></dt>
+<dd><p>Basic anonymized user object</p>
+</dd>
+<dt><a href="#Punishment">Punishment</a> : <code>0</code> | <code>1</code> | <code>2</code> | <code>3</code> | <code>4</code></dt>
+<dd><p>Punishment to apply</p>
+<ul>
+<li>0: off</li>
+<li>1: warn</li>
+<li>2: kick</li>
+<li>3: mute</li>
+<li>4: ban</li>
+</ul>
+</dd>
+<dt><a href="#LGHPunish">LGHPunish</a> : <code>Object</code></dt>
+<dd><p>antispam.js settings Object.</p>
+</dd>
+<dt><a href="#LGHChatBasedPunish">LGHChatBasedPunish</a> : <code>Object</code></dt>
+<dd><p>Object to reresent different punish settings for more chat types</p>
+</dd>
+<dt><a href="#LGHAlphabetBasedPunish">LGHAlphabetBasedPunish</a> : <code>Object</code></dt>
+<dd><p>Object to reresent different punish settings for messages containing various Alphabets</p>
+</dd>
+<dt><a href="#TargetUser">TargetUser</a> : <code>Object</code></dt>
+<dd><p>Object that refers to a target user</p>
+</dd>
+<dt><a href="#LGHPerms">LGHPerms</a> : <code>Object</code></dt>
+<dd><p>LGHPerms Object.</p>
+</dd>
+<dt><a href="#simpleMedia">simpleMedia</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#customMessage">customMessage</a> : <code>Object</code></dt>
+<dd><p>object of MessageMaker</p>
+</dd>
+<dt><a href="#LGHAdminAdds">LGHAdminAdds</a> : <code>object</code></dt>
+<dd></dd>
+<dt><a href="#LGHAdmin">LGHAdmin</a> : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>ChatAdministratorRights</code> | <code><a href="#LGHAdminAdds">LGHAdminAdds</a></code></dt>
+<dd></dd>
+<dt><a href="#LGHAdminList">LGHAdminList</a> : <code><a href="#LGHAdmin">Array.&lt;LGHAdmin&gt;</a></code></dt>
+<dd></dd>
+<dt><a href="#userStatus">userStatus</a> : <code>Object</code></dt>
+<dd><p>object with data about an user in a group</p>
+</dd>
+<dt><a href="#LGHRole">LGHRole</a> : <code>Object</code></dt>
+<dd><p>if pre-made role (string key) only users object should be used</p>
+</dd>
+<dt><a href="#LGHWarns">LGHWarns</a> : <code>Object</code></dt>
+<dd><p>warns.js plugin related data</p>
+</dd>
+<dt><a href="#LGHWelcome">LGHWelcome</a> : <code>Object</code></dt>
+<dd><p>welcome.js settings Object.</p>
+</dd>
+<dt><a href="#LGHFloodAdds">LGHFloodAdds</a> : <code>Object</code></dt>
+<dd><p>antiflood.js settings additional Object elements.</p>
+</dd>
+<dt><a href="#LGHFlood">LGHFlood</a> : <code><a href="#LGHFloodAdds">LGHFloodAdds</a></code> | <code><a href="#LGHPunish">LGHPunish</a></code></dt>
+<dd><p>antiflood.js settings Object.</p>
+</dd>
+<dt><a href="#LGHSpamTgLinksAdds">LGHSpamTgLinksAdds</a> : <code>Object</code></dt>
+<dd><p>antispam.js settings Object additional items.</p>
+</dd>
+<dt><a href="#LGHSpamTgLinks">LGHSpamTgLinks</a> : <code><a href="#LGHSpamTgLinksAdds">LGHSpamTgLinksAdds</a></code> | <code><a href="#LGHPunish">LGHPunish</a></code></dt>
+<dd><p>antispam.js settings about Telegram Links Object.</p>
+</dd>
+<dt><a href="#LGHSpamLinksAdds">LGHSpamLinksAdds</a> : <code>Object</code></dt>
+<dd><p>antispam.js spam links Object additional items.</p>
+</dd>
+<dt><a href="#LGHSpamLinks">LGHSpamLinks</a> : <code><a href="#LGHSpamLinksAdds">LGHSpamLinksAdds</a></code> | <code><a href="#LGHPunish">LGHPunish</a></code></dt>
+<dd><p>antispam.js settings about Links Object.</p>
+</dd>
+<dt><a href="#LGHSpamForward">LGHSpamForward</a> : <code><a href="#LGHChatBasedPunish">LGHChatBasedPunish</a></code></dt>
+<dd><p>antispam.js settings about foward.</p>
+</dd>
+<dt><a href="#LGHSpamQuote">LGHSpamQuote</a> : <code><a href="#LGHChatBasedPunish">LGHChatBasedPunish</a></code></dt>
+<dd><p>antispam.js settings about quote.</p>
+</dd>
+<dt><a href="#LGHSpam">LGHSpam</a> : <code>Object</code></dt>
+<dd><p>antispam.js settings Object.</p>
+</dd>
+<dt><a href="#LGHGoodbye">LGHGoodbye</a> : <code>Object</code></dt>
+<dd><p>goodbye.js settings</p>
+</dd>
+<dt><a href="#LGHCaptcha">LGHCaptcha</a> : <code>Object</code></dt>
+<dd><p>captcha.js settings</p>
+</dd>
+<dt><a href="#LGHMedia">LGHMedia</a> : <code>Object</code></dt>
+<dd><p>media.js settings, if LGHPunish is disabled the object will be deleted (undefinied)</p>
+</dd>
+<dt><a href="#CustomChat">CustomChat</a> : <code>Object</code></dt>
+<dd><p>Additional chat elements for chat object by LibreGroupHelp</p>
+</dd>
+<dt><a href="#LGHChat">LGHChat</a> : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>Chat</code> | <code><a href="#CustomChat">CustomChat</a></code></dt>
+<dd><p>Full LGH chat object given by LGHBot events, custom items avaiable if working about a group</p>
+</dd>
+<dt><a href="#CustomUser">CustomUser</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#LGHUser">LGHUser</a> : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>User</code> | <code><a href="#CustomUser">CustomUser</a></code></dt>
+<dd><p>Custom chat object given by LGHBot events, custom items avaiable if working about a group</p>
+</dd>
+<dt><a href="#ParsedCommand">ParsedCommand</a> : <code>Object</code></dt>
+<dd><p>ParsedCommand Object.</p>
+</dd>
+<dt><a href="#CustomCommand">CustomCommand</a> : <code>Object</code></dt>
+<dd><p>Additional items to command for LGH</p>
+</dd>
+<dt><a href="#CustomMessage">CustomMessage</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#LGHMessage">LGHMessage</a> : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>Message</code> | <code><a href="#CustomMessage">CustomMessage</a></code></dt>
+<dd><p>Custom chat object given by LGHBot events, custom items avaiable if working about a group</p>
+</dd>
+<dt><a href="#CustomCallback">CustomCallback</a> : <code>Object</code></dt>
+<dd></dd>
+<dt><a href="#LGHCallback">LGHCallback</a> : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>CallbackQuery</code> | <code><a href="#CustomCallback">CustomCallback</a></code></dt>
+<dd><p>Custom callback object given by LGHBot events, custom items may be avaiable</p>
+</dd>
+<dt><a href="#chatsDatabase">chatsDatabase</a> : <code>Object</code></dt>
+<dd><p>Object containing chat-related database functions.</p>
+</dd>
+<dt><a href="#usersDatabase">usersDatabase</a> : <code>Object</code></dt>
+<dd><p>Object containing user-related database functions.</p>
+</dd>
+<dt><a href="#LGHDatabase">LGHDatabase</a> : <code>Object</code></dt>
+<dd><p>Type returned by the getDatabase function.</p>
+</dd>
+<dt><a href="#LibreGHelp">LibreGHelp</a> : <code>Object</code></dt>
+<dd></dd>
+</dl>
+
+<p><a name="LGHInterface"></a></p>
+<h2 id="lghinterface">LGHInterface</h2>
+<p><strong>Kind</strong>: global class  </p>
+<ul>
+<li><a href="#LGHInterface">LGHInterface</a><ul>
+<li><a href="#new_LGHInterface_new">new LGHInterface(LibreGHelp)</a></li>
+<li><a href="#LGHInterface+GHbot">.GHbot</a> : <a href="#LGHInterface"><code>LGHInterface</code></a></li>
+<li><a href="#LGHInterface+TGbot">.TGbot</a> : <a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md"><code>TelegramBot</code></a></li>
+<li><a href="#LGHInterface+db">.db</a> : <a href="#LGHDatabase"><code>LGHDatabase</code></a></li>
+<li><a href="#LGHInterface+config">.config</a> : <code>Object</code></li>
+<li><a href="#LGHInterface+onMessage">.onMessage(handler)</a></li>
+<li><a href="#LGHInterface+onEditedMessage">.onEditedMessage(handler)</a></li>
+<li><a href="#LGHInterface+onEditedMessageText">.onEditedMessageText(handler)</a></li>
+<li><a href="#LGHInterface+onCallback">.onCallback(handler)</a></li>
+<li><a href="#LGHInterface+sendMessage">.sendMessage(userId, chatId, text, options)</a> ⇒ <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code></li>
+<li><a href="#LGHInterface+sendPhoto">.sendPhoto(userId, chatId, photo, options, fileOptions)</a> ⇒ <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code></li>
+<li><a href="#LGHInterface+editMessageMedia">.editMessageMedia(userId, media, options)</a> ⇒ <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code></li>
+<li><a href="#LGHInterface+editMessageText">.editMessageText(userId, text, options)</a> ⇒ <code>Promise.&lt;Boolean&gt;</code></li>
+<li><a href="#LGHInterface+answerCallbackQuery">.answerCallbackQuery(userId, callbackId, options)</a> ⇒ <code>Promise.&lt;Boolean&gt;</code></li>
+<li><a href="#LGHInterface+banChatMember">.banChatMember(userId, chatId, targetId, options)</a> ⇒ <code>Promise.&lt;Boolean&gt;</code></li>
+<li><a href="#LGHInterface+unbanChatMember">.unbanChatMember(userId, chatId, targetId, options)</a> ⇒ <code>Promise.&lt;Boolean&gt;</code></li>
+<li><a href="#LGHInterface+restrictChatMember">.restrictChatMember(userId, chatId, targetId, options)</a> ⇒ <code>Promise.&lt;Boolean&gt;</code></li>
+</ul>
+</li>
+</ul>
+<p><a name="new_LGHInterface_new"></a></p>
+<h3 id="new-lghinterfacelibreghelp">new LGHInterface(LibreGHelp)</h3>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LibreGHelp</td>
+<td><a href="#LibreGHelp"><code>LibreGHelp</code></a></td>
+<td>Libre Group Help telegram bot handler</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+GHbot"></a></p>
+<h3 id="lghinterfaceghbot-lghinterface">lghInterface.GHbot : <a href="#LGHInterface"><code>LGHInterface</code></a></h3>
+<p><strong>Kind</strong>: instance property of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<a name="LGHInterface+TGbot"></a></p>
+<h3 id="lghinterfacetgbot-telegrambot">lghInterface.TGbot : <a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md"><code>TelegramBot</code></a></h3>
+<p><strong>Kind</strong>: instance property of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<a name="LGHInterface+db"></a></p>
+<h3 id="lghinterfacedb-lghdatabase">lghInterface.db : <a href="#LGHDatabase"><code>LGHDatabase</code></a></h3>
+<p><strong>Kind</strong>: instance property of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<a name="LGHInterface+config"></a></p>
+<h3 id="lghinterfaceconfig-object">lghInterface.config : <code>Object</code></h3>
+<p><strong>Kind</strong>: instance property of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<a name="LGHInterface+onMessage"></a></p>
+<h3 id="lghinterfaceonmessagehandler">lghInterface.onMessage(handler)</h3>
+<p>LGHbot message event handler</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a>  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>handler</td>
+<td><code>function</code></td>
+<td>handler function</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+onEditedMessage"></a></p>
+<h3 id="lghinterfaceoneditedmessagehandler">lghInterface.onEditedMessage(handler)</h3>
+<p>LGHbot edited_message event handler</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a>  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>handler</td>
+<td><code>function</code></td>
+<td>handler function</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+onEditedMessageText"></a></p>
+<h3 id="lghinterfaceoneditedmessagetexthandler">lghInterface.onEditedMessageText(handler)</h3>
+<p>LGHbot edited_message event handler</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a>  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>handler</td>
+<td><code>function</code></td>
+<td>handler function</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+onCallback"></a></p>
+<h3 id="lghinterfaceoncallbackhandler">lghInterface.onCallback(handler)</h3>
+<p>LGHbot callback_query event handler</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a>  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>handler</td>
+<td><code>function</code></td>
+<td>handler function</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+sendMessage"></a></p>
+<h3 id="lghinterfacesendmessageuserid-chatid-text-options-boolean-promisetelegrambotmessage">lghInterface.sendMessage(userId, chatId, text, options) ⇒ <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code></h3>
+<p>LGHbot safely send message under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>chatId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>chat where message should be sent</td>
+</tr>
+<tr>
+<td>text</td>
+<td><code>String</code></td>
+<td>text of message</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>SendMessageOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+sendPhoto"></a></p>
+<h3 id="lghinterfacesendphotouserid-chatid-photo-options-fileoptions-boolean-promisetelegrambotmessage">lghInterface.sendPhoto(userId, chatId, photo, options, fileOptions) ⇒ <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code></h3>
+<p>LGHbot safely send message under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>chatId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>chat where message should be sent</td>
+</tr>
+<tr>
+<td>photo</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>InputMediaPhoto</code></td>
+<td>photo</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>SendPhotoOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+<tr>
+<td>fileOptions</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>FileOptions</code></td>
+<td>file metadata</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+editMessageMedia"></a></p>
+<h3 id="lghinterfaceeditmessagemediauserid-media-options-boolean-promisetelegrambotmessage">lghInterface.editMessageMedia(userId, media, options) ⇒ <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code></h3>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Boolean</code> | <code>Promise.&lt;TelegramBot.Message&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>media</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>InputMedia</code></td>
+<td>input media</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>EditMessageMediaOptions</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+editMessageText"></a></p>
+<h3 id="lghinterfaceeditmessagetextuserid-text-options-promiseboolean">lghInterface.editMessageText(userId, text, options) ⇒ <code>Promise.&lt;Boolean&gt;</code></h3>
+<p>LGHbot safely edit message under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Promise.&lt;Boolean&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>text</td>
+<td><code>String</code></td>
+<td>text of message</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>EditMessageTextOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+answerCallbackQuery"></a></p>
+<h3 id="lghinterfaceanswercallbackqueryuserid-callbackid-options-promiseboolean">lghInterface.answerCallbackQuery(userId, callbackId, options) ⇒ <code>Promise.&lt;Boolean&gt;</code></h3>
+<p>LGHbot safely answerCallbackQuert under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Promise.&lt;Boolean&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>callbackId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>AnswerCallbackQueryOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+banChatMember"></a></p>
+<h3 id="lghinterfacebanchatmemberuserid-chatid-targetid-options-promiseboolean">lghInterface.banChatMember(userId, chatId, targetId, options) ⇒ <code>Promise.&lt;Boolean&gt;</code></h3>
+<p>LGHbot safely answerCallbackQuert under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Promise.&lt;Boolean&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>chatId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>- chat where message should be sent</td>
+</tr>
+<tr>
+<td>targetId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that should be banned</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>BanOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+unbanChatMember"></a></p>
+<h3 id="lghinterfaceunbanchatmemberuserid-chatid-targetid-options-promiseboolean">lghInterface.unbanChatMember(userId, chatId, targetId, options) ⇒ <code>Promise.&lt;Boolean&gt;</code></h3>
+<p>LGHbot safely answerCallbackQuert under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Promise.&lt;Boolean&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>chatId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>- chat where message should be sent</td>
+</tr>
+<tr>
+<td>targetId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that should be unbanned</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>UnbanOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHInterface+restrictChatMember"></a></p>
+<h3 id="lghinterfacerestrictchatmemberuserid-chatid-targetid-options-promiseboolean">lghInterface.restrictChatMember(userId, chatId, targetId, options) ⇒ <code>Promise.&lt;Boolean&gt;</code></h3>
+<p>LGHbot safely answerCallbackQuert under user request limit</p>
+<p><strong>Kind</strong>: instance method of <a href="#LGHInterface"><code>LGHInterface</code></a><br />
+<strong>Returns</strong>: <code>Promise.&lt;Boolean&gt;</code> - - returns true on success, false if request has been dropped out  </p>
+<table>
+<thead>
+<tr>
+<th>Param</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>userId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user that's the cause of your request</td>
+</tr>
+<tr>
+<td>chatId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>- chat where message should be sent</td>
+</tr>
+<tr>
+<td>targetId</td>
+<td><code>number</code> | <code>string</code></td>
+<td>id of user to restrict</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>RestrictChatMemberOptions</code></td>
+<td>additional telegram options</td>
+</tr>
+</tbody>
+</table>
+<p><a name="PermissionStatus"></a></p>
+<h2 id="permissionstatus-enum">PermissionStatus : <code>enum</code></h2>
+<p>Permission status
+- 1: allowed
+- 0: neutral
+- -1: denied</p>
+<p><strong>Kind</strong>: global enum<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ALLOWED</td>
+<td><code>number</code></td>
+<td><code>1</code></td>
+</tr>
+<tr>
+<td>NEUTRAL</td>
+<td><code>number</code></td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td>DENIED</td>
+<td><code>number</code></td>
+<td><code>-1</code></td>
+</tr>
+</tbody>
+</table>
+<p><a name="testObject"></a></p>
+<h2 id="testobject-lghchat">testObject() ⇒ <a href="#LGHChat"><code>LGHChat</code></a></h2>
+<p><strong>Kind</strong>: global function<br />
+<strong>Returns</strong>: <a href="#LGHChat"><code>LGHChat</code></a> - testing jsdoc advices<br />
+<a name="AnonTGUser"></a></p>
+<h2 id="anontguser-object">AnonTGUser : <code>Object</code></h2>
+<p>Basic anonymized user object</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td><code>String</code> | <code>Number</code></td>
+<td>userId</td>
+</tr>
+</tbody>
+</table>
+<p><a name="Punishment"></a></p>
+<h2 id="punishment-0-1-2-3-4">Punishment : <code>0</code> | <code>1</code> | <code>2</code> | <code>3</code> | <code>4</code></h2>
+<p>Punishment to apply
+- 0: off
+- 1: warn
+- 2: kick
+- 3: mute
+- 4: ban</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHPunish"></a></p>
+<h2 id="lghpunish-object">LGHPunish : <code>Object</code></h2>
+<p>antispam.js settings Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>punishment</td>
+<td><a href="#Punishment"><code>Punishment</code></a></td>
+<td>Punishment to apply [0:off/1:warn/2:kick/3:mute/4:ban].</td>
+</tr>
+<tr>
+<td>PTime</td>
+<td><code>Number</code> | <code>null</code></td>
+<td>Available if punishment is set to warn/mute/ban, contains seconds of punishment.</td>
+</tr>
+<tr>
+<td>delete</td>
+<td><code>boolean</code> | <code>null</code></td>
+<td>True if deletion is enabled as side effect.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHChatBasedPunish"></a></p>
+<h2 id="lghchatbasedpunish-object">LGHChatBasedPunish : <code>Object</code></h2>
+<p>Object to reresent different punish settings for more chat types</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>channels</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for channels.</td>
+</tr>
+<tr>
+<td>groups</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for groups.</td>
+</tr>
+<tr>
+<td>users</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for users.</td>
+</tr>
+<tr>
+<td>bots</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for bots.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHAlphabetBasedPunish"></a></p>
+<h2 id="lghalphabetbasedpunish-object">LGHAlphabetBasedPunish : <code>Object</code></h2>
+<p>Object to reresent different punish settings for messages containing various Alphabets</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>arabic</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for messages containing arabic characters.</td>
+</tr>
+<tr>
+<td>cyrillic</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for messages containing cyrillic (russian) characters.</td>
+</tr>
+<tr>
+<td>chinese</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for messages containing chinese characters.</td>
+</tr>
+<tr>
+<td>latin</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a></td>
+<td>Punish to apply for messages containing latin characters.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="TargetUser"></a></p>
+<h2 id="targetuser-object">TargetUser : <code>Object</code></h2>
+<p>Object that refers to a target user</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>id</td>
+<td><code>string</code> | <code>number</code></td>
+<td>Telegram user Id</td>
+</tr>
+<tr>
+<td>name</td>
+<td><code>string</code></td>
+<td>Full LGH name identifier: "fullName [id]"</td>
+</tr>
+<tr>
+<td>perms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a></td>
+<td>LGHPerms with perms of target</td>
+</tr>
+<tr>
+<td>user</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>User</code> | <code>null</code></td>
+<td>If avaiable, target basic user object</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHPerms"></a></p>
+<h2 id="lghperms-object">LGHPerms : <code>Object</code></h2>
+<p>LGHPerms Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>commands</td>
+<td><code>Array.&lt;string&gt;</code></td>
+<td>Array of commands, if starts with "COMMAND_" means its to be translated, otherwise is the literal command.</td>
+</tr>
+<tr>
+<td>immune</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Active if this user can't receive any punishment (kick/warn/mute/ban) [1/0/-1].</td>
+</tr>
+<tr>
+<td>flood</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to flood messages [1/0/-1].</td>
+</tr>
+<tr>
+<td>link</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to send links [1/0/-1].</td>
+</tr>
+<tr>
+<td>tgLink</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to send telegram links/usernames [1/0/-1].</td>
+</tr>
+<tr>
+<td>forward</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to forward messages from anywhere [1/0/-1].</td>
+</tr>
+<tr>
+<td>quote</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to quote from anywhere [1/0/-1].</td>
+</tr>
+<tr>
+<td>porn</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Bypass porn/gore checks [1/0/-1].</td>
+</tr>
+<tr>
+<td>night</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Bypass any night mode limitation [1/0/-1].</td>
+</tr>
+<tr>
+<td>media</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Bypass any media limitation [1/0/-1].</td>
+</tr>
+<tr>
+<td>alphabets</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Bypass any alphabets characters limitations [1/0/-1].</td>
+</tr>
+<tr>
+<td>words</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Bypass banned words limitations [1/0/-1].</td>
+</tr>
+<tr>
+<td>length</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Bypass message length limitations [1/0/-1].</td>
+</tr>
+<tr>
+<td>roles</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to change roles of lower level users [1/0/-1].</td>
+</tr>
+<tr>
+<td>settings</td>
+<td><a href="#PermissionStatus"><code>PermissionStatus</code></a></td>
+<td>Permission to change bot group settings [1/0/-1].</td>
+</tr>
+</tbody>
+</table>
+<p><a name="simpleMedia"></a></p>
+<h2 id="simplemedia-object">simpleMedia : <code>Object</code></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>type</td>
+<td><code>String</code> | <code>null</code></td>
+<td>Type of media (audio, photo, video, video_note, animation, sticker, document) or false</td>
+</tr>
+<tr>
+<td>fileId</td>
+<td><code>String</code></td>
+<td>media fileId or false</td>
+</tr>
+<tr>
+<td>options</td>
+<td><code>Object</code></td>
+<td>additional options for TelegramBot</td>
+</tr>
+</tbody>
+</table>
+<p><a name="customMessage"></a></p>
+<h2 id="custommessage-object">customMessage : <code>Object</code></h2>
+<p>object of MessageMaker</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>text</td>
+<td><code>String</code></td>
+<td>Text of messsage</td>
+</tr>
+<tr>
+<td>entities</td>
+<td><code>Array.&lt;TelegramBot.MessageEntity&gt;</code></td>
+<td>Telegram entities of text</td>
+</tr>
+<tr>
+<td>roles</td>
+<td><code>Array.&lt;String&gt;</code></td>
+<td>array user roles, string for pre-made roles, number for custom roles (user-made)</td>
+</tr>
+<tr>
+<td>format</td>
+<td><code>Boolean</code></td>
+<td>true if message should be formatted (enabled by default), mean that entities should be passed on sendMessage function</td>
+</tr>
+<tr>
+<td>media</td>
+<td><a href="#simpleMedia"><code>simpleMedia</code></a></td>
+<td>user administrator title</td>
+</tr>
+<tr>
+<td>buttons</td>
+<td><code>String</code></td>
+<td>can be transformed in inline_keyboard with parseTextToInlineKeyboard()</td>
+</tr>
+<tr>
+<td>buttonsParsed</td>
+<td><code>Array.&lt;TelegramBot.KeyboardButton&gt;</code></td>
+<td>already parsed buttons ready to use for inline_keyboard</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHAdminAdds"></a></p>
+<h2 id="lghadminadds-object">LGHAdminAdds : <code>object</code></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>user</td>
+<td><a href="#AnonTGUser"><code>AnonTGUser</code></a></td>
+<td>Basic anonymized user object</td>
+</tr>
+<tr>
+<td>status</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>ChatMemberStatus</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHAdmin"></a></p>
+<h2 id="lghadmin-telegrambotchatadministratorrights-lghadminadds">LGHAdmin : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>ChatAdministratorRights</code> | <a href="#LGHAdminAdds"><code>LGHAdminAdds</code></a></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHAdminList"></a></p>
+<h2 id="lghadminlist-arraylghadmin">LGHAdminList : <a href="#LGHAdmin"><code>Array.&lt;LGHAdmin&gt;</code></a></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="userStatus"></a></p>
+<h2 id="userstatus-object">userStatus : <code>Object</code></h2>
+<p>object with data about an user in a group</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>firtJoin</td>
+<td><code>Number</code></td>
+<td>Unix number of first user join time in seconds, false if unknown (managed by welcome.js)</td>
+</tr>
+<tr>
+<td>perms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a></td>
+<td>LGHPerms object for all user-specific permissions</td>
+</tr>
+<tr>
+<td>adminPerms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a></td>
+<td>LGHPerms object for user permissions if admin</td>
+</tr>
+<tr>
+<td>roles</td>
+<td><code>Array.&lt;String&gt;</code></td>
+<td>array user roles, string for pre-made roles, number for custom roles (user-made)</td>
+</tr>
+<tr>
+<td>title</td>
+<td><code>String</code> | <code>undefined</code></td>
+<td>user administrator title</td>
+</tr>
+<tr>
+<td>waitingReply</td>
+<td><code>String</code> | <code>null</code></td>
+<td>string with callback data hirarchy if bot is expecting a message from user on group</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHRole"></a></p>
+<h2 id="lghrole-object">LGHRole : <code>Object</code></h2>
+<p>if pre-made role (string key) only users object should be used</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>name</td>
+<td><code>String</code> | <code>null</code></td>
+<td>role name</td>
+</tr>
+<tr>
+<td>emoji</td>
+<td><code>String</code> | <code>null</code></td>
+<td>emoji for the role</td>
+</tr>
+<tr>
+<td>level</td>
+<td><code>Number</code> | <code>null</code></td>
+<td>role level, higher level users can use commands that affect  lower level users</td>
+</tr>
+<tr>
+<td>perms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a> | <code>null</code></td>
+<td>LGHPerms object applyed at lowest priority on any user in this role</td>
+</tr>
+<tr>
+<td>users</td>
+<td><code>Array.&lt;String&gt;</code></td>
+<td>array of userId in this role</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHWarns"></a></p>
+<h2 id="lghwarns-object">LGHWarns : <code>Object</code></h2>
+<p>warns.js plugin related data</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>timed</td>
+<td><code>Object.&lt;string, Number&gt;</code></td>
+<td>([userId]: [endTime, endTime, endTime]) contains necerray data to revoke scheduled warns when  time is over</td>
+</tr>
+<tr>
+<td>count</td>
+<td><code>Object.&lt;string, Number&gt;</code></td>
+<td>([userId]: number) countains count of warns for each user</td>
+</tr>
+<tr>
+<td>limit</td>
+<td><code>Number</code></td>
+<td>number of warns after wich should be applyed a punishment</td>
+</tr>
+<tr>
+<td>punishment</td>
+<td><code>2</code> | <code>3</code> | <code>4</code></td>
+<td>punishment when limit is hit [2:kick/3:mute/4:ban]</td>
+</tr>
+<tr>
+<td>PTime</td>
+<td><code>Number</code> | <code>null</code></td>
+<td>avaiable if punishment is set to warn/mute/ban, contains seconds of punishment</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHWelcome"></a></p>
+<h2 id="lghwelcome-object">LGHWelcome : <code>Object</code></h2>
+<p>welcome.js settings Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>state</td>
+<td><code>boolean</code></td>
+<td>True if welcome is enabled (default false).</td>
+</tr>
+<tr>
+<td>once</td>
+<td><code>boolean</code></td>
+<td>True if should be sent only at first user join (default false).</td>
+</tr>
+<tr>
+<td>clean</td>
+<td><code>boolean</code></td>
+<td>True if last welcome message on the group should be (default false).</td>
+</tr>
+<tr>
+<td>joinList</td>
+<td><code>Array.&lt;(string|number)&gt;</code></td>
+<td>cronology of users that joined the group over time.</td>
+</tr>
+<tr>
+<td>lastWelcomeId</td>
+<td><code>string</code> | <code>number</code> | <code>boolean</code></td>
+<td>MessageId of last welcome message sent, useful if clean is enabled, false if never sent one before.</td>
+</tr>
+<tr>
+<td>message</td>
+<td><a href="#customMessage"><code>customMessage</code></a></td>
+<td>CustomMessage object.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHFloodAdds"></a></p>
+<h2 id="lghfloodadds-object">LGHFloodAdds : <code>Object</code></h2>
+<p>antiflood.js settings additional Object elements.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>messages</td>
+<td><code>Number</code></td>
+<td>Number of messages needed to trigger the Antiflood.</td>
+</tr>
+<tr>
+<td>time</td>
+<td><code>Number</code></td>
+<td>Seconds within the specified message should be sent to trigger the Antiflood.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHFlood"></a></p>
+<h2 id="lghflood-lghfloodadds-lghpunish">LGHFlood : <a href="#LGHFloodAdds"><code>LGHFloodAdds</code></a> | <a href="#LGHPunish"><code>LGHPunish</code></a></h2>
+<p>antiflood.js settings Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHSpamTgLinksAdds"></a></p>
+<h2 id="lghspamtglinksadds-object">LGHSpamTgLinksAdds : <code>Object</code></h2>
+<p>antispam.js settings Object additional items.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>usernames</td>
+<td><code>Boolean</code></td>
+<td>True if usernames should be considered as spam.</td>
+</tr>
+<tr>
+<td>bots</td>
+<td><code>Boolean</code></td>
+<td>True if bots should be considered as spam.</td>
+</tr>
+<tr>
+<td>exceptions</td>
+<td><code>Array.&lt;String&gt;</code></td>
+<td>Array of Telegram exceptions, may contain "Name:Id", <code>Name:|hidden</code> (for hidden users), or t.me link, or @username, "Name"</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHSpamTgLinks"></a></p>
+<h2 id="lghspamtglinks-lghspamtglinksadds-lghpunish">LGHSpamTgLinks : <a href="#LGHSpamTgLinksAdds"><code>LGHSpamTgLinksAdds</code></a> | <a href="#LGHPunish"><code>LGHPunish</code></a></h2>
+<p>antispam.js settings about Telegram Links Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHSpamLinksAdds"></a></p>
+<h2 id="lghspamlinksadds-object">LGHSpamLinksAdds : <code>Object</code></h2>
+<p>antispam.js spam links Object additional items.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>exceptions</td>
+<td><code>Array.&lt;String&gt;</code></td>
+<td>Array of strings of allowed links or hostnames.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHSpamLinks"></a></p>
+<h2 id="lghspamlinks-lghspamlinksadds-lghpunish">LGHSpamLinks : <a href="#LGHSpamLinksAdds"><code>LGHSpamLinksAdds</code></a> | <a href="#LGHPunish"><code>LGHPunish</code></a></h2>
+<p>antispam.js settings about Links Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHSpamForward"></a></p>
+<h2 id="lghspamforward-lghchatbasedpunish">LGHSpamForward : <a href="#LGHChatBasedPunish"><code>LGHChatBasedPunish</code></a></h2>
+<p>antispam.js settings about foward.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHSpamQuote"></a></p>
+<h2 id="lghspamquote-lghchatbasedpunish">LGHSpamQuote : <a href="#LGHChatBasedPunish"><code>LGHChatBasedPunish</code></a></h2>
+<p>antispam.js settings about quote.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="LGHSpam"></a></p>
+<h2 id="lghspam-object">LGHSpam : <code>Object</code></h2>
+<p>antispam.js settings Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>tgLinks</td>
+<td><a href="#LGHSpamTgLinks"><code>LGHSpamTgLinks</code></a></td>
+<td>rules and exceptions for telegram links considered as spam</td>
+</tr>
+<tr>
+<td>links</td>
+<td><a href="#LGHSpamLinks"><code>LGHSpamLinks</code></a></td>
+<td>rules and exceptions for all links considered as spam</td>
+</tr>
+<tr>
+<td>forward</td>
+<td><a href="#LGHSpamForward"><code>LGHSpamForward</code></a></td>
+<td>rules and exceptions for all forwarded messages considered as spam</td>
+</tr>
+<tr>
+<td>quote</td>
+<td><a href="#LGHSpamQuote"><code>LGHSpamQuote</code></a></td>
+<td>rules and exceptions for all quoted messages considered as spam</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHGoodbye"></a></p>
+<h2 id="lghgoodbye-object">LGHGoodbye : <code>Object</code></h2>
+<p>goodbye.js settings</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>group</td>
+<td><code>Boolean</code></td>
+<td>True if goodbye should be sent on group</td>
+</tr>
+<tr>
+<td>clear</td>
+<td><code>Boolean</code></td>
+<td>True if last goodbye message should be deleted before sending a new one</td>
+</tr>
+<tr>
+<td>lastId</td>
+<td><code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>MessageId</code></td>
+<td>messageId of last goodbye message sent on group</td>
+</tr>
+<tr>
+<td>gMsg</td>
+<td><a href="#CustomMessage"><code>CustomMessage</code></a></td>
+<td>Goodbye message to send on group</td>
+</tr>
+<tr>
+<td>private</td>
+<td><code>Boolean</code></td>
+<td>True if goodbye should be sent on private chat</td>
+</tr>
+<tr>
+<td>pMsg</td>
+<td><a href="#CustomMessage"><code>CustomMessage</code></a></td>
+<td>Goodbye message to send on private chat</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHCaptcha"></a></p>
+<h2 id="lghcaptcha-object">LGHCaptcha : <code>Object</code></h2>
+<p>captcha.js settings</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>state</td>
+<td><code>Boolean</code></td>
+<td>True if welcome is enabled (default false).</td>
+</tr>
+<tr>
+<td>mode</td>
+<td><code>string</code></td>
+<td>Type of captcha, can be "image" (default "image").</td>
+</tr>
+<tr>
+<td>time</td>
+<td><code>Number</code></td>
+<td>Time limit to solve the captcha</td>
+</tr>
+<tr>
+<td>once</td>
+<td><code>boolean</code></td>
+<td>True if should be sent only at first user join (from welcome.js) (default false).</td>
+</tr>
+<tr>
+<td>fails</td>
+<td><code>boolean</code></td>
+<td>True if captcha should notify on group that someone failed the captcha (default false).</td>
+</tr>
+<tr>
+<td>punishment</td>
+<td><a href="#Punishment"><code>Punishment</code></a></td>
+<td>Punishment to apply [1:warn/2:kick/3:mute/4:ban].</td>
+</tr>
+<tr>
+<td>PTime</td>
+<td><code>Number</code></td>
+<td>Available if punishment is set to warn/mute/ban, contains seconds of punishment.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHMedia"></a></p>
+<h2 id="lghmedia-object">LGHMedia : <code>Object</code></h2>
+<p>media.js settings, if LGHPunish is disabled the object will be deleted (undefinied)</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>photo</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>video</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>album</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>gif</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>voice</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>audio</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>sticker</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>sticker_video</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>dice</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>emoji_video</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>emoji_premium</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>video_note</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>file</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>game</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>contact</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>poll</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>location</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>capital</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>payment</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>via_bot</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>story</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>spoiler</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>spoiler_media</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>giveaway</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>mention</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>text_mention</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>hashtag</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>cashtag</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>command</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>url</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>email</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>number</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>bold</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>italic</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>underline</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>striketrough</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>quoteblock</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>closed_blockquote</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>code</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>pre_code</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>textlink</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>scheduled</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+<tr>
+<td>effect</td>
+<td><a href="#LGHPunish"><code>LGHPunish</code></a> | <code>undefined</code></td>
+</tr>
+</tbody>
+</table>
+<p><a name="CustomChat"></a></p>
+<h2 id="customchat-object">CustomChat : <code>Object</code></h2>
+<p>Additional chat elements for chat object by LibreGroupHelp</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>admins</td>
+<td><a href="#LGHAdminList"><code>LGHAdminList</code></a> | <code>null</code></td>
+<td>array with known admins objects (user data anonymized)</td>
+</tr>
+<tr>
+<td>lang</td>
+<td><code>String</code> | <code>null</code></td>
+<td>current chat lang</td>
+</tr>
+<tr>
+<td>currency</td>
+<td><code>String</code> | <code>null</code></td>
+<td>currency of chat, default to USD</td>
+</tr>
+<tr>
+<td>link</td>
+<td><code>string</code> | <code>null</code></td>
+<td>group access link</td>
+</tr>
+<tr>
+<td>isGroup</td>
+<td><code>Boolean</code></td>
+<td>temporary item, result of <code>(chat.type == "supergroup" || chat.type == "group")</code></td>
+</tr>
+<tr>
+<td>users</td>
+<td><code>Object.&lt;string, userStatus&gt;</code> | <code>null</code></td>
+<td>Object-IdName based data about every user in the group (ex. users[643547] access data of userId 643547)</td>
+</tr>
+<tr>
+<td>roles</td>
+<td><code>Object.&lt;string, LGHRole&gt;</code> | <code>null</code></td>
+<td>data about a specific role, full role Object if it's a custom role (key with a number)</td>
+</tr>
+<tr>
+<td>basePerms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a></td>
+<td>base permissions applyed to every user</td>
+</tr>
+<tr>
+<td>adminPerms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a></td>
+<td>base permissions applyed to admin</td>
+</tr>
+<tr>
+<td>warns</td>
+<td><a href="#LGHWarns"><code>LGHWarns</code></a> | <code>null</code></td>
+<td>warns.js plugin related data</td>
+</tr>
+<tr>
+<td>rules</td>
+<td><a href="#customMessage"><code>customMessage</code></a> | <code>null</code></td>
+<td>rules.js plugin related data</td>
+</tr>
+<tr>
+<td>welcome</td>
+<td><a href="#LGHWelcome"><code>LGHWelcome</code></a> | <code>null</code></td>
+<td>welcome.js plugin related data</td>
+</tr>
+<tr>
+<td>flood</td>
+<td><a href="#LGHFlood"><code>LGHFlood</code></a> | <code>null</code></td>
+<td>antiflood.js plugin related data</td>
+</tr>
+<tr>
+<td>spam</td>
+<td><a href="#LGHSpam"><code>LGHSpam</code></a> | <code>null</code></td>
+<td>antispam.js plugin related data</td>
+</tr>
+<tr>
+<td>captcha</td>
+<td><a href="#LGHCaptcha"><code>LGHCaptcha</code></a> | <code>null</code></td>
+<td>captcha.js plugin related data</td>
+</tr>
+<tr>
+<td>goodbye</td>
+<td><a href="#LGHGoodbye"><code>LGHGoodbye</code></a> | <code>null</code></td>
+<td>goodbye.js plugin related data</td>
+</tr>
+<tr>
+<td>alphabets</td>
+<td><a href="#LGHAlphabetBasedPunish"><code>LGHAlphabetBasedPunish</code></a> | <code>null</code></td>
+<td>alphabets.js plugin related data</td>
+</tr>
+<tr>
+<td>media</td>
+<td><a href="#LGHMedia"><code>LGHMedia</code></a> | <code>null</code></td>
+<td>media.js plugin related data</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHChat"></a></p>
+<h2 id="lghchat-telegrambotchat-customchat">LGHChat : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>Chat</code> | <a href="#CustomChat"><code>CustomChat</code></a></h2>
+<p>Full LGH chat object given by LGHBot events, custom items avaiable if working about a group</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="CustomUser"></a></p>
+<h2 id="customuser-object">CustomUser : <code>Object</code></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>perms</td>
+<td><a href="#LGHPerms"><code>LGHPerms</code></a> | <code>null</code></td>
+<td>temporary object with summary of user permissions</td>
+</tr>
+<tr>
+<td>lang</td>
+<td><code>String</code></td>
+<td>current user lang</td>
+</tr>
+<tr>
+<td>waitingReply</td>
+<td><code>String</code></td>
+<td>set to true if the bot is expecting a message from the user</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHUser"></a></p>
+<h2 id="lghuser-telegrambotuser-customuser">LGHUser : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>User</code> | <a href="#CustomUser"><code>CustomUser</code></a></h2>
+<p>Custom chat object given by LGHBot events, custom items avaiable if working about a group</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="ParsedCommand"></a></p>
+<h2 id="parsedcommand-object">ParsedCommand : <code>Object</code></h2>
+<p>ParsedCommand Object.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>text</td>
+<td><code>string</code></td>
+<td>The original text input.</td>
+</tr>
+<tr>
+<td>prefix</td>
+<td><code>string</code></td>
+<td>The prefix used in the command (e.g., "/", "!", ".").</td>
+</tr>
+<tr>
+<td>botCommand</td>
+<td><code>string</code></td>
+<td>The command with bot name (e.g., "start@usernamebot").</td>
+</tr>
+<tr>
+<td>name</td>
+<td><code>string</code></td>
+<td>The name of the command.</td>
+</tr>
+<tr>
+<td>bot</td>
+<td><code>string</code></td>
+<td>The bot name (if available).</td>
+</tr>
+<tr>
+<td>args</td>
+<td><code>string</code> | <code>boolean</code></td>
+<td>The arguments of the command (optional).</td>
+</tr>
+<tr>
+<td>splitArgs</td>
+<td><code>Array.&lt;string&gt;</code> | <code>boolean</code></td>
+<td>The split arguments of the command (optional).</td>
+</tr>
+</tbody>
+</table>
+<p><a name="CustomCommand"></a></p>
+<h2 id="customcommand-object">CustomCommand : <code>Object</code></h2>
+<p>Additional items to command for LGH</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>target</td>
+<td><a href="#TargetUser"><code>TargetUser</code></a> | <code>null</code></td>
+<td>Optional temporary object with data about a target LGH user in the command, false if no target found</td>
+</tr>
+</tbody>
+</table>
+<p><a name="CustomMessage"></a></p>
+<h2 id="custommessage-object_1">CustomMessage : <code>Object</code></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chat</td>
+<td><a href="#LGHChat"><code>LGHChat</code></a></td>
+<td>Always original chat object where the message is coming from</td>
+</tr>
+<tr>
+<td>command</td>
+<td><a href="#ParsedCommand"><code>ParsedCommand</code></a> | <a href="#CustomCommand"><code>CustomCommand</code></a></td>
+<td>result of message text parsed with parseCommand()</td>
+</tr>
+<tr>
+<td>target</td>
+<td><a href="#TargetUser"><code>TargetUser</code></a> | <code>null</code></td>
+<td>Optional temporary object with data about a command target</td>
+</tr>
+<tr>
+<td>waitingReply</td>
+<td><code>string</code> | <code>null</code></td>
+<td>Optional temporary object with waitingReply data for the selected chat</td>
+</tr>
+<tr>
+<td>waitingReplyTarget</td>
+<td><a href="#TargetUser"><code>TargetUser</code></a> | <code>null</code></td>
+<td>Optional temporary object with data about a target LGH user, false if no target found</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHMessage"></a></p>
+<h2 id="lghmessage-telegrambotmessage-custommessage">LGHMessage : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>Message</code> | <a href="#CustomMessage"><code>CustomMessage</code></a></h2>
+<p>Custom chat object given by LGHBot events, custom items avaiable if working about a group</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="CustomCallback"></a></p>
+<h2 id="customcallback-object">CustomCallback : <code>Object</code></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>chat</td>
+<td><a href="#LGHChat"><code>LGHChat</code></a></td>
+<td>Always original chat object where the callback is coming from</td>
+</tr>
+<tr>
+<td>target</td>
+<td><a href="#TargetUser"><code>TargetUser</code></a></td>
+<td>Optional temporary object with data about a target LGH user in the command, false if no target found</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHCallback"></a></p>
+<h2 id="lghcallback-telegrambotcallbackquery-customcallback">LGHCallback : <code><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md">TelegramBot.</a>CallbackQuery</code> | <a href="#CustomCallback"><code>CustomCallback</code></a></h2>
+<p>Custom callback object given by LGHBot events, custom items may be avaiable</p>
+<p><strong>Kind</strong>: global typedef<br />
+<a name="chatsDatabase"></a></p>
+<h2 id="chatsdatabase-object">chatsDatabase : <code>Object</code></h2>
+<p>Object containing chat-related database functions.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add</td>
+<td><code>function</code></td>
+<td>Function to add a new chat to the database. ------------------------------------ <code>function(TelegramBot.Chat): boolean</code></td>
+</tr>
+<tr>
+<td>delete</td>
+<td><code>function</code></td>
+<td>Function to delete a chat from the database. ------------------------------------ <code>function(TelegramBot.ChatId): boolean</code></td>
+</tr>
+<tr>
+<td>exhist</td>
+<td><code>function</code></td>
+<td>Function to check if a chat exhists in the database. ------------------------------------ <code>function(TelegramBot.ChatId): boolean</code></td>
+</tr>
+<tr>
+<td>get</td>
+<td><code>function</code></td>
+<td>Function to retrieve a chat from the database. ------------------------------------ <code>function(LGHChat): boolean</code></td>
+</tr>
+<tr>
+<td>update</td>
+<td><code>function</code></td>
+<td>Function to update a chat in the database. ------------------------------------ <code>function(LGHChat): boolean</code></td>
+</tr>
+<tr>
+<td>save</td>
+<td><code>function</code></td>
+<td>Function to save a chat to the database. ------------------------------------ <code>function(TelegramBot.ChatId): boolean</code></td>
+</tr>
+</tbody>
+</table>
+<p><a name="usersDatabase"></a></p>
+<h2 id="usersdatabase-object">usersDatabase : <code>Object</code></h2>
+<p>Object containing user-related database functions.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add</td>
+<td><code>function</code></td>
+<td>Function to add a new user to the database. ------------------------------------ <code>function(TelegramBot.User): boolean</code></td>
+</tr>
+<tr>
+<td>delete</td>
+<td><code>function</code></td>
+<td>Function to delete a user from the database. ------------------------------------ <code>function(TelegramBot.ChatId): boolean</code></td>
+</tr>
+<tr>
+<td>exhist</td>
+<td><code>function</code></td>
+<td>Function to check if a user exhists in the database. ------------------------------------ <code>function(TelegramBot.ChatId): boolean</code></td>
+</tr>
+<tr>
+<td>get</td>
+<td><code>function</code></td>
+<td>Function to retrieve a user from the database. ------------------------------------ <code>function(TelegramBot.ChatId): LGHUser</code></td>
+</tr>
+<tr>
+<td>update</td>
+<td><code>function</code></td>
+<td>Function to update a user in the database. ------------------------------------ <code>function(LGHUser): boolean</code></td>
+</tr>
+</tbody>
+</table>
+<p><a name="LGHDatabase"></a></p>
+<h2 id="lghdatabase-object">LGHDatabase : <code>Object</code></h2>
+<p>Type returned by the getDatabase function.</p>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>innerDir</td>
+<td><code>string</code></td>
+<td>Location where the database folder should be placed (and/or generated).</td>
+</tr>
+<tr>
+<td>dir</td>
+<td><code>string</code></td>
+<td>Full path to the database folder.</td>
+</tr>
+<tr>
+<td>chatsDir</td>
+<td><code>string</code></td>
+<td>Full path to the chats folder within the database.</td>
+</tr>
+<tr>
+<td>usersDir</td>
+<td><code>string</code></td>
+<td>Full path to the users folder within the database.</td>
+</tr>
+<tr>
+<td>chats</td>
+<td><a href="#chatsDatabase"><code>chatsDatabase</code></a></td>
+<td>Object containing chat-related database functions.</td>
+</tr>
+<tr>
+<td>users</td>
+<td><a href="#usersDatabase"><code>usersDatabase</code></a></td>
+<td>Object containing user-related database functions.</td>
+</tr>
+<tr>
+<td>unload</td>
+<td><code>function</code></td>
+<td>Function to unload chats from memory.</td>
+</tr>
+</tbody>
+</table>
+<p><a name="LibreGHelp"></a></p>
+<h2 id="libreghelp-object">LibreGHelp : <code>Object</code></h2>
+<p><strong>Kind</strong>: global typedef<br />
+<strong>Properties</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GHbot</td>
+<td><a href="#LGHInterface"><code>LGHInterface</code></a></td>
+<td>Public interface for LGH Functions</td>
+</tr>
+<tr>
+<td>TGbot</td>
+<td><a href="https://github.com/yagop/node-telegram-bot-api/blob/master/doc/api.md"><code>TelegramBot</code></a></td>
+<td>Raw telegram bot api</td>
+</tr>
+<tr>
+<td>db</td>
+<td><a href="#LGHDatabase"><code>LGHDatabase</code></a></td>
+<td>Database interface</td>
+</tr>
+</tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["search.suggest", "search.highlight", "search.share", "navigation.tabs", "navigation.tabs.sticky", "navigation.indexes", "content.code.copy"], "search": "../../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.83f73b43.min.js"></script>
+      
+    
+  </body>
+</html>
